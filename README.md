@@ -1,0 +1,2 @@
+# aihackathon
+QMUL AI Hackathon
