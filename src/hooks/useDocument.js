@@ -87,9 +87,11 @@ export function useDocument(flash) {
   }
 
   function insertAt(index, block) {
+    const created = withId(block);
     const next = blocksRef.current.slice();
-    next.splice(index, 0, withId(block));
+    next.splice(index, 0, created);
     save(next);
+    return created.id;
   }
 
   return { blocks, getBlocks, save, patch, insertAt, undo, redo };

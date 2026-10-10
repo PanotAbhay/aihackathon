@@ -1,14 +1,19 @@
 import { useState } from "react";
-import { PALETTE_GROUPS } from "../../../data/index.js";
+import { PALETTE_GROUPS, AI_FILL_TYPES } from "../../../data/index.js";
 import "./ElementsPanel.css";
 
 const HINT_SUFFIX = " — click to insert at the cursor, or drag it in";
+const AI_HINT_SUFFIX = " — drop it beside a paragraph to build it from that text";
+
+function hintFor(item) {
+  return item.hint + (AI_FILL_TYPES.includes(item.type) ? AI_HINT_SUFFIX : HINT_SUFFIX);
+}
 
 function filterGroups(query) {
   const q = query.trim().toLowerCase();
   if (!q) return PALETTE_GROUPS;
   return PALETTE_GROUPS
-    .map((g) => ({ ...g, items: g.items.filter((i) => (i.label + " " + i.hint + HINT_SUFFIX).toLowerCase().includes(q)) }))
+    .map((g) => ({ ...g, items: g.items.filter((i) => (i.label + " " + hintFor(i)).toLowerCase().includes(q)) }))
     .filter((g) => g.items.length);
 }
 
@@ -41,7 +46,7 @@ export function ElementsPanel({ open, onInsert, onDragStart, onDragEnd }) {
                     key={item.type}
                     className="elements-item"
                     draggable="true"
-                    title={item.hint + HINT_SUFFIX}
+                    title={hintFor(item)}
                     onDragStart={(e) => onDragStart(e, item.type)}
                     onDragEnd={onDragEnd}
                     onClick={() => onInsert(item)}

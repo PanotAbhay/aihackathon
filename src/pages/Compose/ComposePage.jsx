@@ -7,8 +7,7 @@ import { useSelectionBar } from "../../hooks/useSelectionBar.js";
 import { useShortcuts } from "../../hooks/useShortcuts.js";
 import { useBlockDrag } from "../../hooks/useBlockDrag.js";
 import { useImport } from "../../hooks/useImport.js";
-import { useRewrite } from "../../hooks/useRewrite.js";
-import { useSuggest } from "../../hooks/useSuggest.js";
+import { useAiFill } from "../../hooks/useAiFill.js";
 import { NEW_BLOCK } from "../../data/index.js";
 import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWords } from "../../utils/blocks.js";
 import { articleHtml } from "../../utils/exportHtml.js";
@@ -17,8 +16,6 @@ import { IconRail } from "./components/IconRail.jsx";
 import { ElementsPanel } from "./components/ElementsPanel.jsx";
 import { Canvas } from "./components/Canvas.jsx";
 import { FormatToolbar } from "./components/FormatToolbar.jsx";
-import { RewriteModal } from "./components/RewriteModal.jsx";
-import { SuggestModal } from "./components/SuggestModal.jsx";
 import { SettingsModal } from "./components/SettingsModal.jsx";
 import { ImportModal } from "./components/ImportModal.jsx";
 import "./ComposePage.css";
@@ -40,15 +37,14 @@ export function ComposePage() {
   const caretIdxRef = useRef(null);
 
   function insertBlock(index, block) {
-    doc.insertAt(index, block);
+    const id = doc.insertAt(index, block);
     drag.clearDrop();
+    return id;
   }
 
-  const drag = useBlockDrag({ getBlocks: doc.getBlocks, save: doc.save, insertBlock });
-  const ai = { busy, setBusy, flash, aiConfig, setBar };
-  const importer = useImport({ ...ai, save: doc.save, setNoteErr });
-  const rewriter = useRewrite({ ...ai, getBlocks: doc.getBlocks, save: doc.save });
-  const suggester = useSuggest({ ...ai, getBlocks: doc.getBlocks, insertBlock, sel });
+  const filler = useAiFill({ getBlocks: doc.getBlocks, save: doc.save, flash, aiConfig });
+  const drag = useBlockDrag({ getBlocks: doc.getBlocks, save: doc.save, insertBlock, onFill: filler.fillFromText });
+  const importer = useImport({ busy, setBusy, flash, aiConfig, save: doc.save, setNoteErr });
 
   function handleUndo() {
     if (doc.undo()) setSel(null);
@@ -144,7 +140,7 @@ export function ComposePage() {
         onDocTitle={setDocTitle}
         note={note}
         noteErr={noteErr}
-        busy={busy}
+        busy={busy || filler.building.length > 0}
         zoom={zoom}
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
@@ -174,6 +170,7 @@ export function ComposePage() {
           <Canvas
             blocks={doc.blocks}
             sel={sel}
+            building={filler.building}
             drop={drag.drop}
             readTime={Math.max(1, Math.round(countWords(doc.blocks) / 220))}
             onClearSel={handleClearSel}
@@ -183,7 +180,6 @@ export function ComposePage() {
             onDelete={handleDelete}
             onDeleteSection={handleDeleteSection}
             onDuplicate={handleDuplicate}
-            onSuggest={suggester.openSuggestFor}
             onCommitProse={handleCommitProse}
             onShowDrop={drag.showDrop}
             onDropAt={drag.dropAt}
@@ -193,35 +189,7 @@ export function ComposePage() {
         </div>
       </div>
 
-      {bar && (
-        <FormatToolbar
-          bar={bar}
-          zoom={zoom}
-          onRewrite={rewriter.openRewrite}
-          onSuggest={suggester.openSuggest}
-        />
-      )}
-
-      {rewriter.rewrite && (
-        <RewriteModal
-          rewrite={rewriter.rewrite}
-          busy={busy}
-          onText={rewriter.setRewriteText}
-          onRun={rewriter.runRewrite}
-          onClose={rewriter.closeRewrite}
-        />
-      )}
-
-      {suggester.suggest && (
-        <SuggestModal
-          suggest={suggester.suggest}
-          busy={busy}
-          onText={suggester.setSuggestText}
-          onToggleReplace={suggester.toggleReplace}
-          onRun={suggester.runSuggest}
-          onClose={suggester.closeSuggest}
-        />
-      )}
+      {bar && <FormatToolbar bar={bar} zoom={zoom} />}
 
       {settingsOpen && (
         <SettingsModal aiConfig={aiConfig} onSave={saveAi} onClose={() => setSettingsOpen(false)} />

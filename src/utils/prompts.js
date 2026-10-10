@@ -1,6 +1,3 @@
-const HOUSE_VOICE = "House voice: calm, plain-spoken, explanatory. Short concrete sentences. No jargon unless immediately unpacked. Sentence case. No emoji. Never clickbait.";
-const DEFAULT_REWRITE = "Tighten it and make it read more clearly, keeping the meaning intact.";
-
 export const PDF_TRANSCRIBE_PROMPT = "Transcribe every word of this document as plain text. Put a blank line between paragraphs. " +
   "Do not summarise, translate, re-order or comment. Do not add headings that are not printed in the document. Output only the transcription.";
 
@@ -45,43 +42,16 @@ export const IMPORT_PROMPT = [
   '11. The standfirst MUST NOT restate the headline. Write a genuinely different sentence that adds the stakes or the finding. If you cannot, return "" for standfirst.',
 ].join("\n");
 
-export function fragmentRewritePrompt(how) {
-  return [
-    "You are a senior copy editor at Nutshell Today, a Bangladesh news publication.",
-    HOUSE_VOICE,
-    "You are given ONE fragment taken from the middle of a paragraph, plus the paragraph around it for context.",
-    "Rewrite ONLY the fragment. It must drop back into the same slot and read naturally with the text on either side.",
-    "Keep its leading and trailing spacing behaviour: do not add or remove surrounding spaces, and keep any final punctuation the fragment ends with.",
-    "Keep every fact, figure, date, name and quotation exactly as given — never change, drop or invent one.",
-    "Return ONLY the rewritten fragment as plain text. No quotes around it, no markdown, no commentary, no preamble.",
-    "THE EDITOR ASKS: " + (how || DEFAULT_REWRITE),
-  ].join("\n");
-}
-
-export function paragraphRewritePrompt(how) {
-  return [
-    "You are a senior copy editor at Nutshell Today, a Bangladesh news publication.",
-    HOUSE_VOICE,
-    "Each input paragraph is tagged [[1]], [[2]], … Rewrite EACH ONE SEPARATELY and return it under the SAME tag.",
-    "Never move content between paragraphs, never merge them, never split one, never drop or add a paragraph. Paragraph [[2]] out must cover exactly what paragraph [[2]] in covered.",
-    "Keep every fact, figure, date, name and quotation exactly as given — you may reword around them but never change, drop or invent one.",
-    "Return plain text only: no markdown, no commentary, no preamble. Format exactly:",
-    "[[1]] rewritten text",
-    "",
-    "[[2]] rewritten text",
-    "THE EDITOR ASKS: " + (how || DEFAULT_REWRITE),
-  ].join("\n");
-}
-
-export function suggestPrompt(count, want) {
+// Build ONE element of a type the editor chose by dropping it beside the text.
+export function elementPrompt(count, type) {
   const multi = count > 1;
   return [
     multi
-      ? "You are a copy editor at Nutshell Today. The editor has SELECTED " + count + " consecutive paragraphs. Read them TOGETHER as one passage and propose ONE editorial element that captures the whole selection."
-      : "You are a copy editor at Nutshell Today. Given ONE paragraph, propose ONE editorial element drawn strictly from it.",
-    multi ? "The paragraphs may be the flattened remains of a table, list or chart whose layout was lost on import — the first line is often the caption, the second the column headings, and each later line one row. Reconstruct the original structure." : "",
+      ? "You are a copy editor at Nutshell Today. The editor has dropped a " + type + " element beside " + count + " consecutive paragraphs. Read them TOGETHER as one passage and build that element from the whole passage."
+      : "You are a copy editor at Nutshell Today. The editor has dropped a " + type + " element beside ONE paragraph. Build that element strictly from it.",
+    multi ? "The paragraphs may be the flattened remains of a table, list or chart whose layout was lost on import — the first line is often the caption, the second the column headings, and each later line one row. Reconstruct the original structure. Keep every row — do not truncate the data." : "",
     "Return RAW JSON only, no prose or fences. Never invent facts, numbers or quotes.",
-    "Pick the best fit:",
+    "Formats:",
     '{"type":"quote","text":"verbatim quoted sentence from the paragraph","cite":"Speaker, role"}',
     '{"type":"stats","title":"...","note":"source","cells":[{"value":"86.5%","label":"Felt unsafe"}]}',
     '{"type":"chart","title":"...","note":"unit","bars":[{"label":"...","value":63.6}]}',
@@ -90,23 +60,9 @@ export function suggestPrompt(count, want) {
     '{"type":"timeline","rows":[{"d":"2024","t":"What happened","x":"One sentence of detail."}]}',
     '{"type":"table","title":"Table caption","rows":[["HEADING A","HEADING B","HEADING C"],["cell","cell","cell"]]}  (row 0 is the header row; every row needs the same number of cells)',
     '{"type":"nutshell","title":"The Nutshell","items":["Key point.","Key point."]}',
-    '{"type":"bullets","items":["First point","Second point"]}  (use "numbered" instead for ordered steps)',
-    '{"type":"image","caption":"What the photograph should show"}  (also "pair" for two photos, "gallery" for three — the editor drops the files in)',
+    '{"type":"bullets","items":["First point","Second point"]}  (same shape for "numbered")',
     '{"type":"h2","text":"Sentence case sub-heading"}',
     '{"type":"h3","text":"Smaller sub-heading"}',
-    "CHOOSING, when the editor has not asked for something specific:",
-    "- real quoted speech present → quote",
-    "- 3–4 standalone headline figures → stats",
-    "- 3+ comparable numbers on one measure → chart; survey/percentage shares → poll",
-    "- a measure tracked across 3+ time points → line",
-    "- 2+ dated events → timeline",
-    "- 2+ items compared on the same attributes → table",
-    "- a passage that lists several parallel items or steps → bullets or numbered",
-    "- 4 summarisable takeaways for the whole story → nutshell",
-    "- a strongly visual scene the story turns on → image",
-    "- otherwise → h2 (or h3 if it is a sub-point under a heading)",
-    "Every field must come from the text. Do not invent a number, date or name that is not there.",
-    multi ? "Prefer table or timeline over h2 when the selection is clearly repeating records. Keep every row — do not truncate the data." : "",
-    want ? "THE EDITOR HAS ASKED FOR: " + want + "\nProduce exactly that kind of element. Build it from whatever the paragraph offers — you may draw on any date, figure, name or claim in it. Only fall back to a different type if the paragraph contains nothing at all that could fill it." : "",
+    "Produce a \"" + type + "\" element. Build it from whatever the text offers — you may draw on any date, figure, name or claim in it. Every field must come from the text. Only fall back to a different type if the text contains nothing at all that could fill it.",
   ].filter(Boolean).join("\n");
 }

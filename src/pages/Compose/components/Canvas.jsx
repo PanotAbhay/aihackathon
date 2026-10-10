@@ -31,6 +31,7 @@ function liveRange(blocks, sel) {
 export function Canvas({
   blocks,
   sel,
+  building,
   drop,
   readTime,
   onClearSel,
@@ -40,7 +41,6 @@ export function Canvas({
   onDelete,
   onDeleteSection,
   onDuplicate,
-  onSuggest,
   onCommitProse,
   onShowDrop,
   onDropAt,
@@ -79,6 +79,7 @@ export function Canvas({
               sectionSize={sectionEnd(blocks, index) - index}
               selected={sel === block.id}
               inLive={index >= liveFrom && index < liveTo}
+              building={building.includes(block.id)}
               dropActive={drop.index === index}
               readTime={readTime}
               onSelect={onSelect}
@@ -86,7 +87,6 @@ export function Canvas({
               onDelete={onDelete}
               onDeleteSection={onDeleteSection}
               onDuplicate={onDuplicate}
-              onSuggest={onSuggest}
               onShowDrop={onShowDrop}
               onDropAt={onDropAt}
               onMoveStart={onMoveStart}

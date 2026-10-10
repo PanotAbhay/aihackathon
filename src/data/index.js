@@ -11,6 +11,8 @@ export const TEXTISH_TYPES = ["h1", "standfirst", "h2", "h3", "body", "dropcap",
 export const PROSE_TYPES = ["body", "dropcap"];
 export const IMAGE_TYPES = ["image", "pair", "gallery"];
 export const HEADING_TYPES = ["h2", "h3"];
+// Dropped beside a paragraph, these are built by the AI from that text.
+export const AI_FILL_TYPES = ["h2", "h3", "quote", "bullets", "numbered", "stats", "chart", "line", "poll", "table", "timeline", "nutshell"];
 
 export const NEW_BLOCK = {
   h2: () => ({ type: "h2", html: "Sub-heading" }),
@@ -133,14 +135,6 @@ export const TEXT_TYPE_OPTIONS = [
   { value: "body", label: "Body" },
   { value: "bullets", label: "Bullet list" },
   { value: "numbered", label: "Numbered list" },
-];
-
-export const TONE_PRESETS = [
-  { key: "t1", label: "Tighten", hint: "Cut it to the essentials without losing a fact." },
-  { key: "t2", label: "Plainer", hint: "Rewrite in plain language a general reader follows on first pass. Unpack any jargon." },
-  { key: "t3", label: "More formal", hint: "Rewrite in a measured, institutional register." },
-  { key: "t4", label: "More urgent", hint: "Rewrite with sharper, more direct sentences that lead with the stakes. Stay factual, never sensational." },
-  { key: "t5", label: "Explain it", hint: "Rewrite so it explains the context a reader new to the story needs, using only what is already stated." },
 ];
 
 export const AI_MODELS = {

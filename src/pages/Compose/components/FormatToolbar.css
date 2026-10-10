@@ -23,30 +23,6 @@
   cursor: pointer;
 }
 
-.format-bar-btn--text {
-  gap: 6px;
-  font-family: var(--font-sans);
-  font-size: 12.5px;
-  padding: 8px 12px;
-}
-
-.format-bar-btn--gold {
-  color: #1A1613;
-  background: #C9A227;
-  padding: 8px 13px;
-}
-
 .format-bar-icon {
   font-size: 19px;
-}
-
-.format-bar-icon--sm {
-  font-size: 18px;
-}
-
-.format-bar-divider {
-  width: 1px;
-  align-self: stretch;
-  background: rgba(255,255,255,0.16);
-  margin: 6px 3px;
 }

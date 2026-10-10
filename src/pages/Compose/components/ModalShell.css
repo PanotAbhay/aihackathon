@@ -24,8 +24,6 @@
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.13), 0 26px 70px rgba(0,0,0,0.62);
 }
 
-.modal-card--rewrite { width: 560px; }
-
 .modal-card--import {
   width: 640px;
   display: flex;
@@ -39,28 +37,12 @@
   border-bottom: 1px solid rgba(255,255,255,0.09);
 }
 
-.modal-head--tall {
-  padding-bottom: 18px;
-}
-
 .modal-kicker {
   font-family: var(--font-mono);
   font-size: var(--mono-label);
   letter-spacing: var(--mono-label-ls);
   color: #C9A227;
   margin-bottom: 9px;
-}
-
-.modal-kicker--spaced {
-  margin-bottom: 10px;
-}
-
-.modal-scope {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.1em;
-  color: rgba(242,239,233,0.38);
-  margin-bottom: 10px;
 }
 
 .modal-quote {
@@ -77,12 +59,6 @@
   font-size: 13px;
   line-height: 1.6;
   color: rgba(242,239,233,0.6);
-}
-
-.modal-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .modal-label {
@@ -102,13 +78,6 @@
   color: #F2EFE9;
   outline: none;
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
-}
-
-.modal-hint {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  line-height: 1.6;
-  color: rgba(242,239,233,0.4);
 }
 
 .modal-footer {

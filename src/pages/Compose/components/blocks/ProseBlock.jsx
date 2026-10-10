@@ -32,7 +32,10 @@ export function ProseBlock({ members, start, end, dropY, onCaret, onCommit, onSh
   function handleDrop(e) {
     e.preventDefault();
     e.stopPropagation();
-    onDropAt(dropTarget(e, start, end).index);
+    const { index } = dropTarget(e, start, end);
+    // The paragraph just above the drop point is the source text (or the first one, when dropped on top).
+    const adjacent = members[Math.max(0, index - start - 1)] || members[members.length - 1];
+    onDropAt(index, { groupIds: ids, adjacentId: adjacent.id });
   }
 
   return (

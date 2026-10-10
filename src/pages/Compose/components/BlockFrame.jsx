@@ -64,7 +64,7 @@ function SelectionHandles() {
   );
 }
 
-function BlockToolbar({ block, isHeading, sectionSize, onPatch, onDeleteSection, onSuggest, onDuplicate }) {
+function BlockToolbar({ block, isHeading, sectionSize, onPatch, onDeleteSection, onDuplicate }) {
   return (
     <div data-chrome="" className="block-toolbar">
       {TEXTISH_TYPES.includes(block.type) && (
@@ -78,9 +78,6 @@ function BlockToolbar({ block, isHeading, sectionSize, onPatch, onDeleteSection,
           <button className="block-toolbar-btn" onClick={onDeleteSection}><span className="ms block-toolbar-icon">delete_sweep</span>Delete section</button>
         </>
       )}
-      {(block.type === "body" || block.type === "dropcap") && (
-        <button className="block-toolbar-btn block-toolbar-btn--gold" onClick={onSuggest}><span className="ms block-toolbar-icon">auto_awesome</span>Suggest</button>
-      )}
       <button className="block-toolbar-btn" onClick={onDuplicate}><span className="ms block-toolbar-icon">content_copy</span>Duplicate</button>
     </div>
   );
@@ -92,6 +89,7 @@ export function BlockFrame({
   sectionSize,
   selected,
   inLive,
+  building,
   dropActive,
   readTime,
   onSelect,
@@ -99,7 +97,6 @@ export function BlockFrame({
   onDelete,
   onDeleteSection,
   onDuplicate,
-  onSuggest,
   onShowDrop,
   onDropAt,
   onMoveStart,
@@ -133,6 +130,7 @@ export function BlockFrame({
     <div
       className="nt-blk"
       data-sel={selected ? "1" : "0"}
+      data-rw={building ? "1" : undefined}
       style={wrapStyle(selected, inLive)}
       onClick={(e) => { e.stopPropagation(); onSelect(block.id, index); }}
       onDragOver={handleDragOver}
@@ -166,7 +164,6 @@ export function BlockFrame({
           sectionSize={sectionSize}
           onPatch={onPatch}
           onDeleteSection={stop(() => onDeleteSection(block.id))}
-          onSuggest={stop(() => onSuggest(block))}
           onDuplicate={stop(() => onDuplicate(block.id))}
         />
       )}

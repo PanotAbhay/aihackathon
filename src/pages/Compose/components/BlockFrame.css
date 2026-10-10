@@ -101,15 +101,6 @@
   cursor: pointer;
 }
 
-.block-toolbar-btn--gold {
-  font-weight: 500;
-  color: #1A1613;
-  background: linear-gradient(165deg,#D9B44A,#B98F1F);
-  border: 1px solid rgba(26,22,18,0.14);
-  box-shadow: 0 2px 6px rgba(201,162,39,0.28);
-  padding: 6px 11px;
-}
-
 .block-toolbar-icon {
   font-size: 15px;
 }

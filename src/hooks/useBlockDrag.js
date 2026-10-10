@@ -1,9 +1,10 @@
 import { useState, useRef } from "react";
-import { NEW_BLOCK } from "../data/index.js";
+import { NEW_BLOCK, AI_FILL_TYPES } from "../data/index.js";
 import { moveBlock, moveSection } from "../utils/blocks.js";
+import { selectedProseIds } from "../utils/dom.js";
 
 // Drag state for palette items and block handles, plus the drop indicator position.
-export function useBlockDrag({ getBlocks, save, insertBlock }) {
+export function useBlockDrag({ getBlocks, save, insertBlock, onFill }) {
   const [drop, setDrop] = useState({ index: -1, group: null, y: 0 });
   const dragRef = useRef(null);
 
@@ -16,7 +17,8 @@ export function useBlockDrag({ getBlocks, save, insertBlock }) {
   }
 
   function startNewDrag(e, type) {
-    startDrag(e, { kind: "new", type }, type, "copy");
+    // Remember any paragraphs the editor had selected; they become the AI's source text.
+    startDrag(e, { kind: "new", type, selectedIds: selectedProseIds() }, type, "copy");
   }
 
   function startMoveDrag(e, id, run) {
@@ -32,13 +34,20 @@ export function useBlockDrag({ getBlocks, save, insertBlock }) {
     setDrop({ index: -1, group: null, y: 0 });
   }
 
-  function dropAt(index) {
+  // `prose` is set when dropping beside paragraphs: { groupIds, adjacentId }.
+  function dropAt(index, prose) {
     const d = dragRef.current;
     clearDrop();
     if (!d) return;
-    if (d.kind === "new") { insertBlock(index, NEW_BLOCK[d.type]()); return; }
-    const next = d.run ? moveSection(getBlocks(), d.id, index) : moveBlock(getBlocks(), d.id, index);
-    if (next) save(next);
+    if (d.kind === "move") {
+      const next = d.run ? moveSection(getBlocks(), d.id, index) : moveBlock(getBlocks(), d.id, index);
+      if (next) save(next);
+      return;
+    }
+    const id = insertBlock(index, NEW_BLOCK[d.type]());
+    if (!prose || !AI_FILL_TYPES.includes(d.type)) return;
+    const selected = d.selectedIds.filter((s) => prose.groupIds.includes(s));
+    onFill(id, d.type, selected.length ? selected : [prose.adjacentId]);
   }
 
   return { drop, startNewDrag, startMoveDrag, showDrop, clearDrop, dropAt };
