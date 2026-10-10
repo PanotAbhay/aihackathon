@@ -56,6 +56,8 @@ function numberBlocks(blocks) {
 
 // On paper, photos stay inside the text block, and narrow columns get compact stats and tables.
 function printTheme(theme, columns) {
+  // A template's own two-column rules come first (LaTeX moves the abstract into the first column).
+  if (columns === 2 && theme.twoColumn) theme = { ...theme, ...theme.twoColumn };
   // Templates with true print sizes (LaTeX) already set their own figure spacing and table type.
   if (theme.twoColumnScale === 1) return theme;
   const t = { ...theme, figure: { ...theme.figure, margin: "24px 0" } };
@@ -74,9 +76,9 @@ function liveRange(blocks, sel) {
   return [si, sectionEnd(blocks, si)];
 }
 
-function mastheadCount(blocks) {
+function mastheadCount(blocks, types) {
   let n = 0;
-  while (n < blocks.length && MASTHEAD_TYPES.includes(blocks[n].type)) n += 1;
+  while (n < blocks.length && types.includes(blocks[n].type)) n += 1;
   return n;
 }
 
@@ -195,7 +197,7 @@ export function Canvas({
   const indexOf = Object.fromEntries(blocks.map((b, i) => [b.id, i]));
   const paraGap = theme.paragraphIndent ? 0 : 18;
 
-  const masthead = mastheadCount(blocks);
+  const masthead = mastheadCount(blocks, theme.masthead || MASTHEAD_TYPES);
   const pages = print
     ? planPages(
       blocks.map((b) => {

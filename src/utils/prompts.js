@@ -70,6 +70,7 @@ export function elementPrompt(count, type, rules) {
     '{"type":"bullets","items":["First point","Second point"]}  (same shape for "numbered")',
     '{"type":"h2","text":"Sentence case sub-heading"}',
     '{"type":"h3","text":"Smaller sub-heading"}',
+    "A quote must be words the text itself puts in quotation marks, copied exactly. Never turn reported or paraphrased speech into a quote.",
     rules.length ? "HOUSE RULES FOR THIS PIECE: " + rules.join(" ") : "",
     "Produce a \"" + type + "\" element. Build it from whatever the text offers — you may draw on any date, figure, name or claim in it. Every field must come from the text. Only fall back to a different type if the text contains nothing at all that could fill it.",
   ].filter(Boolean).join("\n");

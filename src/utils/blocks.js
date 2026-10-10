@@ -172,9 +172,24 @@ function normalize(s) {
   return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
+// Stretches of the source inside quotation marks: "…", “…”, ‘…’ and '…'. A closing mark followed
+// by a letter is an apostrophe (don’t), and so is a straight ' after a letter (Florida's).
+const QUOTED = /["“][^"“”]+["”]|‘[^‘]+?’(?![a-z])|(?<![a-z])'[^']+?'(?![a-z])/gi;
+
+// A pull quote must be words the source itself puts in quotation marks, never a paraphrase of
+// reported speech. An ellipsis may join pieces of the same quotation.
+export function quotedInSource(quote, source) {
+  const plain = (s) => String(s || "").replace(/&[a-z]+;|&#\d+;/gi, " ");
+  const parts = plain(quote).split(/…|\.\.\./).map(normalize).filter(Boolean);
+  if (!parts.length) return false;
+  const spans = (plain(source).match(QUOTED) || []).map(normalize);
+  return spans.some((span) => parts.every((p) => span.includes(p)));
+}
+
 // Weave the model's plan of insertions around the untouched source paragraphs,
 // keeping only the block types the chosen template allows.
-export function blocksFromPlan(plan, paras, allowed) {
+// `typeOrder` is the template's starter page as block types; its header order wins.
+export function blocksFromPlan(plan, paras, allowed, typeOrder = []) {
   const headline = plan.headline || paras[0];
   const author = plan.author || "Staff Correspondent";
   let standfirst = plan.standfirst || "";
@@ -191,15 +206,18 @@ export function blocksFromPlan(plan, paras, allowed) {
     skip["byline" + k] = true;
   });
 
-  const blocks = [
-    { id: nid(), type: "h1", html: headline },
-    { id: nid(), type: "standfirst", html: standfirst },
-    { id: nid(), type: "byline", a: author, b: plan.desk || "Nutshell Today" },
-  ];
+  // Header in the template's own order (LaTeX: title, author, then abstract, as \maketitle sets it).
+  const header = {
+    h1: { id: nid(), type: "h1", html: headline },
+    standfirst: { id: nid(), type: "standfirst", html: standfirst },
+    byline: { id: nid(), type: "byline", a: author, b: plan.desk || "Nutshell Today" },
+  };
+  const blocks = [...new Set([...typeOrder, "h1", "standfirst", "byline"])].filter((t) => header[t]).map((t) => header[t]);
   const ins = Array.isArray(plan.insertions) ? plan.insertions.slice() : [];
   ins.sort((x, y) => (x.after | 0) - (y.after | 0));
 
   const counts = { h2: 0, quote: 0, img: 0, data: 0 };
+  const source = paras.join("\n");
   function emit(o) {
     if (String(o.type || "").toLowerCase() === "divider") {
       if (allowed.includes("divider")) blocks.push({ id: nid(), type: "divider" });
@@ -207,6 +225,7 @@ export function blocksFromPlan(plan, paras, allowed) {
     }
     const blk = elementToBlock(o);
     if (!blk || !allowed.includes(blk.type)) return;
+    if (blk.type === "quote" && !quotedInSource(blk.a, source)) return;
     blocks.push(withId(blk));
     if (blk.type === "h2") counts.h2++;
     else if (blk.type === "quote") counts.quote++;

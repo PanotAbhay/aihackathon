@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { callAi, aiErrorMessage } from "../utils/ai.js";
-import { parseJsonReply, elementToBlock } from "../utils/blocks.js";
+import { parseJsonReply, elementToBlock, quotedInSource } from "../utils/blocks.js";
 import { elementPrompt } from "../utils/prompts.js";
 
 function plainText(html) {
@@ -27,6 +27,11 @@ export function useAiFill({ getBlocks, save, flash, aiConfig, rules }) {
       const res = await callAi(aiConfig, elementPrompt(count, type, rules), text, count > 1 ? 4000 : 1400);
       const blk = elementToBlock(parseJsonReply(res), "% who agree");
       if (!blk) throw new Error("no element");
+      // A pull quote the model paraphrased from reported speech would put words in someone's mouth.
+      if (blk.type === "quote" && !quotedInSource(blk.a, text)) {
+        flash("NO DIRECT QUOTE IN THAT TEXT — A PULL QUOTE NEEDS WORDS IN QUOTATION MARKS.", true);
+        return;
+      }
       const cur = getBlocks();
       // The editor may have deleted the placeholder while the model was working.
       if (!cur.some((b) => b.id === blockId)) return;

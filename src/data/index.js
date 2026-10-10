@@ -387,6 +387,16 @@ export const TEMPLATES = {
       byline: { variant: "latex" },
       // abstract: \small inside a quotation-style indent
       standfirst: { ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 " + pt(25) + "px " + pt(20) + "px" },
+      // In two columns article.cls sets only \maketitle across the page; the abstract becomes an
+      // unnumbered \section*{Abstract} at normal size at the top of the first column.
+      twoColumn: {
+        masthead: ["h1", "byline"],
+        abstractAsSection: true,
+        standfirst: {
+          ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 0 " + pt(6) + "px",
+          fontFamily: "var(--body-font)", fontSize: "var(--body-size)", fontWeight: "var(--body-weight)", lineHeight: "var(--body-lh)", letterSpacing: "var(--body-ls)",
+        },
+      },
       body: { ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 0 " + pt(6) + "px" },
       list: { ...LATEX_INK, margin: pt(6) + "px 0 " + pt(8) + "px", paddingLeft: pt(25) },
       // \section: 3.5ex before, 2.3ex after; \subsection: 3.25ex / 1.5ex (at 10pt, 1ex ≈ 4.3pt)
@@ -403,10 +413,11 @@ export const TEMPLATES = {
         title: { ...LATEX_BODY, marginBottom: pt(4) },
         list: LATEX_BODY,
       },
+      // tabularx with equal X columns, \tabcolsep = 4pt and top-aligned (p-type) cells, as exported.
       table: {
-        table: { borderTop: "1.06px solid #000000", borderBottom: "1.06px solid #000000", marginTop: pt(3) },
-        head: { ...LATEX_BODY, padding: pt(3) + "px " + pt(12) + "px " + pt(2) + "px 0", textAlign: "left" },
-        cell: { ...LATEX_BODY, fontWeight: 400, padding: pt(1.5) + "px " + pt(12) + "px " + pt(1.5) + "px 0" },
+        table: { tableLayout: "fixed", borderTop: "1.06px solid #000000", borderBottom: "1.06px solid #000000", marginTop: pt(3) },
+        head: { ...LATEX_BODY, padding: pt(3) + "px " + pt(4) + "px " + pt(2) + "px", textAlign: "left", verticalAlign: "top" },
+        cell: { ...LATEX_BODY, fontWeight: 400, padding: pt(1.5) + "px " + pt(4) + "px", textAlign: "left", verticalAlign: "top" },
         zebra: false,
         bodyRules: false,
       },

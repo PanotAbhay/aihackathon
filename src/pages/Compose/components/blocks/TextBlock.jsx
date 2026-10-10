@@ -62,9 +62,11 @@ export function TextBlock({ block, theme, number, onPatch }) {
   }
 
   if (theme.abstractLabel && block.type === "standfirst") {
+    // In two columns LaTeX heads the abstract like a section (\section*), flush with the column top.
+    const label = theme.abstractAsSection ? { ...TEXT_VARIANTS.h2.style, ...theme.h2, marginTop: 0 } : ABSTRACT_LABEL;
     return (
       <div>
-        <div style={ABSTRACT_LABEL}>{theme.abstractLabel}</div>
+        <div style={label}>{theme.abstractLabel}</div>
         <EditableText as={variant.as} {...editable} style={style} />
       </div>
     );

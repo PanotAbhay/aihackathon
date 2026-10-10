@@ -136,7 +136,7 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
       const call = callAi(aiConfig, importPrompt(template), paras.map((p, i) => "[" + i + "] " + p).join("\n\n"), 4000);
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("TIMED_OUT")), IMPORT_TIMEOUT));
       const plan = parseJsonReply(await Promise.race([call, timeout]));
-      const { blocks, counts } = blocksFromPlan(plan, paras, template.blocks);
+      const { blocks, counts } = blocksFromPlan(plan, paras, template.blocks, (template.starter || []).map((b) => b.type));
       // The template stays fixed; a different suggestion is only mentioned.
       const suggested = TEMPLATES[plan.suggestedTemplate];
       const hint = suggested && suggested.key !== template.key ? " · READS LIKE " + suggested.label.toUpperCase() + " — TRY IT IN A NEW TAB" : "";
