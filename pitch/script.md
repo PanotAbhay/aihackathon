@@ -1,80 +1,60 @@
 # Compose pitch script
 
-For live judging, about 3 minutes. Four presenters, three slides each. The script is also in each slide's speaker notes.
+For live judging, about 2 minutes. Seven slides, four presenters. The script is also in each slide's speaker notes.
 
 | Presenter | Slides | Words | Speaking time |
 |---|---|---|---|
-| Person 1 | 1, 2, 3 | 84 | about 34 s |
-| Person 2 | 4, 5, 6 | 79 | about 32 s + 30 s clip |
-| Person 3 | 7, 8, 9 | 82 | about 33 s |
-| Person 4 | 10, 11, 12 | 79 | about 32 s |
+| Person 1 | 1, 2 | 59 | about 24 s |
+| Person 2 | 3, 4 | 44 | about 18 s + 30 s clip |
+| Person 3 | 5 | 33 | about 13 s |
+| Person 4 | 6, 7 | 46 | about 18 s |
 
-**Total:** 324 spoken words (about 130 s at 150 words a minute) plus the 30 s clip, about 2:40.
+**Total:** 182 spoken words (about 73 s at 150 words a minute) plus the 30 s clip, about 1:43.
 
 ## Person 1
 
-**Slide 1 · Title** (27 words)
+**Slide 1 · Title** (16 words)
 
-Hi, we're the Compose team. Compose turns any article into a finished visual feature in minutes. We built it for Nutshell Today, a real Bangladeshi news publication.
+Hi, we're the Compose team. Compose turns any draft into a finished, designed document in minutes.
 
-**Slide 2 · Problem** (25 words)
+**Slide 2 · Between Word and Canva** (43 words)
 
-Small newsrooms have great stories but no designers and no time. Every chart and pull quote gets rebuilt by hand, across three or four tools.
-
-**Slide 3 · Solution** (32 words)
-
-Compose fixes that. Import a Word doc or PDF, and AI structures it into headings, quotes, charts and tables. Then you edit it right on the page. Person 2 will show you.
+Word is easy to write in, but you get a wall of text. Canva looks great, but every chart and layout is made by hand. Compose sits in between: write like in Word, get a designed document like Canva. Over to Person 2.
 
 ## Person 2
 
-**Slide 4 · Demo clip** (16 words)
+**Slide 3 · How it works** (31 words)
 
-Here's thirty seconds of Compose in action. _(Clip plays, about 30 seconds)_ That was one article, from upload to finished feature.
+Here's how it works. Import a Word doc or PDF, and AI structures it into headings, charts, tables and code. Then you edit it right on the page. Here it is.
 
-**Slide 5 · Ease of use** (33 words)
+**Slide 4 · Demo clip** (13 words)
 
-It really is three steps. Drop in a file. Drag a chart beside any paragraph. AI reads that paragraph and builds the chart from its numbers. No prompts, no settings, no design skills.
-
-**Slide 6 · Why now** (30 words)
-
-Why now? Models got cheap and fast, newsrooms keep shrinking, and readers expect visuals. The best AI disappears into the tool, and that's what we built. Over to Person 3.
+_(Clip plays, about 30 seconds)_ That was one document, from upload to finished layout. Over to Person 3.
 
 ## Person 3
 
-**Slide 7 · Market** (27 words)
+**Slide 5 · Drag-to-fill** (33 words)
 
-Content-creation tools are a nineteen-billion-dollar market. We start with Bangladesh's four hundred plus registered news portals, and our year-one goal is twenty independent publishers like Nutshell Today.
-
-**Slide 8 · Competition** (24 words)
-
-Canva and Flourish help you design. WordPress and Docs help you write. None of them read your story. Compose does both, in one editor.
-
-**Slide 9 · Business model** (31 words)
-
-The model is simple: free to start, Pro for small publications, and custom plans for newsrooms. Users bring their own AI key, so serving them costs us almost nothing. Person 4?
+It really is three steps. Drop in a file. Drag a chart beside any paragraph. AI reads that paragraph and builds the chart from its numbers. No prompts, no settings, no design skills.
 
 ## Person 4
 
-**Slide 10 · Proof** (24 words)
+**Slide 6 · What's inside** (37 words)
 
-We built all of this in five days: thirty-six commits, five templates, nineteen element types, four AI providers, and web, print and LaTeX output.
+Everything lives in one editor: five templates, from news features to LaTeX papers and lab manuals, and web, print and LaTeX output from the same file. It reads your PDFs too, and works with any AI provider.
 
-**Slide 11 · Team** (28 words)
+**Slide 7 · Close** (9 words)
 
-We're a team of four, and one of us runs Nutshell Today. So every feature was built around a real newsroom's needs from day one, not guessed at.
-
-**Slide 12 · Next steps** (27 words)
-
-With support, we'd pilot Compose at Nutshell Today, add one-click publishing, and build Bangla templates for local newsrooms. Compose: from article to feature, in minutes. Thank you.
+Compose: from draft to design, in minutes. Thank you.
 
 ## Adding the demo clip (slide 4)
 
 To add the clip: select the dark frame, then Insert > Video > This Device and pick the clip. Drag it over the frame, then on the Playback tab set Start: Automatically. Keep the clip to about 30 seconds.
 
-If the video fails on the day, Person 2 can talk over slide 5 instead: it shows the same three steps.
+If the video fails on the day, Person 3 can talk over slide 5 instead: it shows the same three steps.
 
 ## Before you present
 
-- Swap the role lines on slide 11 (Team) for your real roles, and move the gold border to whoever runs Nutshell Today.
 - Rehearse the handoffs. Each person ends by naming the next one.
+- The deck uses the app's fonts: Baskervville, Satoshi and Roboto Mono. Install them from `pitch/fonts/` before presenting the `.pptx`, or present from `Compose-pitch.pdf`, which has them built in.
 - Keep `Compose-pitch.pdf` on a USB stick as a backup.
