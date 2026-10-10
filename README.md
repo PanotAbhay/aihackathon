@@ -87,6 +87,10 @@ PDF import reads structure from the fonts as well as the text. Typewriter-font r
 
 To add a template, add an entry to `TEMPLATES`; the picker, menu and prompts pick it up automatically.
 
+### Tests
+
+`npm test` runs the Vitest suite, with every test file in its own worker thread (`npm run test:watch` re-runs on save). It covers pagination, block transforms, import (including a PDF built in the test), the LaTeX export, chart labels, every block type in every template, the canvas and the app's first launch.
+
 ### Adding a block type
 
 1. Add a factory to `NEW_BLOCK`, an entry to `PALETTE_GROUPS`, and the type to the `blocks` list of each template that should offer it, all in `src/data/index.js`.

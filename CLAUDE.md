@@ -8,9 +8,10 @@ QMUL AI Hackathon team repo. The product is **Compose**, a visual feature builde
 npm install
 npm run dev      # Vite dev server
 npm run build    # must pass before committing
+npm test         # Vitest, every test file in parallel; must pass before committing
 ```
 
-There are no tests or linter. Verify changes with `npm run build`, and for UI changes, open the app.
+Tests sit next to the code they cover (`*.test.js` / `*.test.jsx`) and run in jsdom (setup in `src/test/setup.js`); the PDF reader test runs in Node and builds its PDF in code. Add or update tests with each change. There is no linter. For UI changes, also open the app.
 
 ## Origin and visual fidelity
 
