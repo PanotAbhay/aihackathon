@@ -221,7 +221,8 @@ export function Canvas({
   const scale = columns === 2 ? (baseTheme.twoColumnScale ?? TWO_COLUMN_SCALE) : 1;
   const margin = baseTheme.pageMargin || A4.margin;
   const pageStyle = { ...PAGE_STYLE, padding: margin };
-  const theme = print ? printTheme(baseTheme, columns) : baseTheme;
+  // Charts need the column count to rotate tick labels as the .tex export will.
+  const theme = { ...(print ? printTheme(baseTheme, columns) : baseTheme), pageColumns: columns };
   const innerRef = useRef(null);
   const [measured, setMeasured] = useState({ heights: {}, lines: {}, splits: {} });
   // Re-layout passes since the content last changed; a hard stop guards against any oscillation.

@@ -1,17 +1,13 @@
 import { EditableText } from "./EditableText.jsx";
+import { rotatedLabels, textEm } from "../../../../utils/plotLabels.js";
 
 // pgfplots' default look, for the LaTeX template: a full axis box with inward ticks, numeric
 // y ticks, Computer Modern labels and the default blue plot style. Values, tick labels and the
 // axis label stay editable in place.
 const PLOT_HEIGHT = 190;
-const LEFT = 52; // room for the y label and tick labels
 const BOTTOM = 30; // room for the x tick labels
+const SIN45 = 0.7071;
 
-// Long labels rotate like pgfplots' "x tick label style={rotate=45, anchor=east}" instead of colliding.
-export function rotatedLabels(rows) {
-  const longest = Math.max(0, ...rows.map((r) => String(r.label || "").length));
-  return longest * rows.length > 36;
-}
 const AXIS = "0.8px solid #000000";
 const BLUE = "#0000FF";
 const BLUE_FILL = "#B3B3FF"; // blue!30!white
@@ -45,30 +41,43 @@ function xAt(kind, i, n) {
   return n === 1 ? 0.5 : 0.05 + (0.9 * i) / (n - 1);
 }
 
-export function PgfPlot({ kind, block, onPatch }) {
+// `columns`: the page's column count, which sets the width the export's \linewidth will have.
+export function PgfPlot({ kind, block, columns = 1, onPatch }) {
   const rows = block.bars || [];
   const n = Math.max(1, rows.length);
   const { ticks, ymax } = niceTicks(Math.max(0, ...rows.map((r) => Number(r.value) || 0)));
   const yAt = (v) => Math.max(0, Math.min(1, (Number(v) || 0) / ymax));
   const setValue = (i) => (v) => onPatch((x) => { x.bars[i].value = parseFloat(String(v).replace(/[^\d.-]/g, "")) || 0; });
   const setLabel = (i) => (v) => onPatch((x) => { x.bars[i].label = v; });
-  const rotate = rotatedLabels(rows);
-  const bottom = rotate ? BOTTOM + 8 + Math.max(0, ...rows.map((r) => String(r.label || "").length)) * 5 : BOTTOM;
+  // Long labels rotate like pgfplots' "x tick label style={rotate=45, anchor=east}" instead of colliding.
+  const rotate = rotatedLabels(rows, { kind, columns });
+  const tickEm = Math.max(...ticks.map((t) => textEm(formatTick(t))));
+  const labelEms = rows.map((r) => textEm(r.label));
+  // A label rotated about its tick reaches 0.71·w left and 0.71·(w + 1em) down.
+  const bottom = rotate ? "calc(" + (SIN45 * (Math.max(0, ...labelEms) + 1)).toFixed(2) + "em + 12px)" : BOTTOM;
+  // Indent the plot just enough that no rotated label crosses the figure's left edge. For a tick at
+  // fraction f of the axis, a label reaching e left needs (e - f·W) / (1 - f), W the figure width.
+  const indent = rotate
+    ? "max(0px, " + labelEms.map((w, i) => {
+      const f = xAt(kind, i, n);
+      return "calc((" + (SIN45 * w).toFixed(2) + "em - " + f.toFixed(4) + " * 100%) / " + (1 - f).toFixed(4) + ")";
+    }).join(", ") + ")"
+    : 0;
 
   return (
-    <div style={{ position: "relative", height: PLOT_HEIGHT + bottom, paddingLeft: LEFT }}>
-      {/* y label, rotated like pgfplots' ylabel */}
-      <div style={{ position: "absolute", left: 0, top: 0, height: PLOT_HEIGHT, width: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ display: "flex", alignItems: "flex-start", fontSize: "var(--body-size)", paddingLeft: indent, paddingBottom: bottom }}>
+      {/* y label, rotated like pgfplots' ylabel; a long one wraps within the plot height (align=center) */}
+      <div style={{ flex: "none", height: PLOT_HEIGHT, writingMode: "vertical-rl", transform: "rotate(180deg)", textAlign: "center" }}>
         <EditableText
           as="span"
           data-ph="unit"
           value={block.b}
           onCommit={(v) => onPatch((x) => { x.b = v; })}
-          style={{ ...TEXT, display: "block", whiteSpace: "nowrap", transform: "rotate(-90deg)" }}
+          style={{ ...TEXT, lineHeight: 1.2, overflowWrap: "anywhere" }}
         />
       </div>
 
-      <div style={{ position: "relative", height: PLOT_HEIGHT, border: AXIS }}>
+      <div style={{ position: "relative", flex: 1, minWidth: 0, height: PLOT_HEIGHT, marginLeft: "calc(" + tickEm.toFixed(2) + "em + 23px)", border: AXIS }}>
         {/* y ticks: labels outside, tick marks inside on both sides */}
         {ticks.map((t) => (
           <div key={t} style={{ position: "absolute", left: 0, right: 0, bottom: yAt(t) * 100 + "%", height: 0 }}>

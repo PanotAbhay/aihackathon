@@ -1,10 +1,5 @@
 import { IMAGE_TYPES } from "../data/index.js";
-
-// Same rule as the on-screen plot (PgfPlot): long tick labels rotate.
-function rotatedLabels(rows) {
-  const longest = Math.max(0, ...rows.map((r) => String(r.label || "").length));
-  return longest * rows.length > 36;
-}
+import { rotatedLabels, labelOverhang } from "./plotLabels.js";
 
 const PREAMBLE = [
   "\\documentclass[10pt%COLUMNS%]{article}",
@@ -66,16 +61,20 @@ function list(env, html) {
   return "\\begin{" + env + "}\n" + listItems(html).map((i) => "  \\item " + i).join("\n") + "\n\\end{" + env + "}";
 }
 
-function plotFigure(block, plot) {
+function plotFigure(block, plot, kind, columns) {
   const bars = block.bars || [];
+  // pgfplots can't draw an empty plot; keep the numbered figure so references still match.
+  if (!bars.length) return ["\\begin{figure}[ht]", "  \\centering", "  \\fbox{\\parbox{0.9\\linewidth}{\\centering\\itshape No data}}", "  \\caption{" + escapeTex(block.a) + "}", "\\end{figure}"].join("\n");
   const labels = bars.map((r) => "{" + escapeTex(r.label) + "}").join(",");
   const coords = bars.map((r, i) => "(" + (i + 1) + "," + (Number(r.value) || 0) + ")").join(" ");
+  // Rotated labels that would hang past the column's left edge make the plot narrower instead.
+  const overhang = labelOverhang(bars, { kind, columns });
   return [
     "\\begin{figure}[ht]",
     "  \\centering",
     "  \\begin{tikzpicture}",
     // Same size as the editor's plot: full column width, ~5.8 cm including labels.
-    "    \\begin{axis}[" + plot.axis + ", width=\\linewidth, height=5.8cm, xtick=data, xticklabels={" + labels + "}, ylabel={" + escapeTex(block.b) + "}, x tick label style={font=\\small" + (rotatedLabels(bars) ? ", rotate=45, anchor=east" : "") + "}]",
+    "    \\begin{axis}[" + plot.axis + ", width=" + (overhang ? "\\linewidth-" + overhang + "pt" : "\\linewidth") + ", height=5.8cm, xtick=data, xticklabels={" + labels + "}, ylabel={" + escapeTex(block.b) + "}, ylabel style={align=center, text width=4.2cm}, x tick label style={font=\\small" + (rotatedLabels(bars, { kind, columns }) ? ", rotate=45, anchor=east" : "") + "}]",
     "      \\addplot" + plot.style + " coordinates {" + coords + "};",
     "    \\end{axis}",
     "  \\end{tikzpicture}",
@@ -165,8 +164,8 @@ export function blocksToLatex(blocks, { columns = 1, crops = {} } = {}) {
     else if (t === "divider") body.push("\\begin{center}\n$\\ast$\\quad$\\ast$\\quad$\\ast$\n\\end{center}");
     else if (t === "nutshell") body.push("\\begin{center}\n\\fbox{\\parbox{0.92\\linewidth}{\n\\textbf{" + escapeTex(b.a) + "}\n" + list("itemize", b.html) + "\n}}\n\\end{center}");
     else if (t === "table") body.push(table(b));
-    else if (t === "chart") { figures += 1; body.push(plotFigure(b, { axis: "ybar, ymin=0, nodes near coords, enlarge x limits=0.15", style: "[fill=blue!30!white, draw=blue]" })); }
-    else if (t === "line") { figures += 1; body.push(plotFigure(b, { axis: "ymin=0, nodes near coords, enlarge x limits=0.05", style: "[color=blue, mark=*]" })); }
+    else if (t === "chart") { figures += 1; body.push(plotFigure(b, { axis: "ybar, ymin=0, nodes near coords, enlarge x limits=0.15", style: "[fill=blue!30!white, draw=blue]" }, "bar", columns)); }
+    else if (t === "line") { figures += 1; body.push(plotFigure(b, { axis: "ymin=0, nodes near coords, enlarge x limits=0.05", style: "[color=blue, mark=*]" }, "line", columns)); }
     else if (t === "poll") body.push(table({ a: b.a, rows: [["", escapeTex(b.b) || "Share"], ...(b.bars || []).map((r) => [r.label, r.value + "%"])] }));
     else if (t === "stats") body.push(table({ a: b.a, rows: [(b.cells || []).map((c) => c.label), (b.cells || []).map((c) => c.value)] }));
     else if (t === "timeline") body.push("\\begin{description}\n" + (b.rows || []).map((r) => "  \\item[" + escapeTex(r.d) + "] \\textbf{" + escapeTex(r.t) + "} " + escapeTex(r.x)).join("\n") + "\n\\end{description}");

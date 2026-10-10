@@ -21,7 +21,7 @@ export function BarChartBlock({ block, theme, number, onPatch }) {
   if (theme.charts === "pgfplots") {
     return (
       <figure style={{ ...FIGURE, paddingTop: 18 }}>
-        <PgfPlot kind="bar" block={block} onPatch={onPatch} />
+        <PgfPlot kind="bar" block={block} columns={theme.pageColumns} onPatch={onPatch} />
         <Caption kind="Figure" number={number} placeholder="Chart title" value={block.a} onCommit={(v) => onPatch((x) => { x.a = v; })} style={{ marginTop: 10 }} />
         {controls}
       </figure>
