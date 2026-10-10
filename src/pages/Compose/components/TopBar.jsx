@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { TEMPLATES } from "../../../data/index.js";
 import "./TopBar.css";
 
 const EXPORT_ITEMS = [
@@ -60,8 +61,8 @@ function ExportMenu({ exported, exporting, onDownloadHtml, onCopy }) {
 }
 
 export function TopBar({
-  docTitle, onDocTitle, note, noteErr, busy, zoom, onZoomIn, onZoomOut,
-  exported, exporting, onExport, onDownloadHtml, onImport,
+  docTitle, onDocTitle, templateKey, onTemplate, note, noteErr, busy, zoom, onZoomIn, onZoomOut,
+  exported, exporting, onExport, onDownloadHtml, onExportTex, onImport,
 }) {
   return (
     <div className="top-bar">
@@ -80,6 +81,12 @@ export function TopBar({
         </span>
         <span className="ms top-bar-title-caret">expand_more</span>
         <span className="top-bar-status">Draft</span>
+        <label className="top-bar-template" title="Template: sets the look, the elements you can add and the AI rules. Your text is kept.">
+          <span className="ms top-bar-template-icon">{TEMPLATES[templateKey].icon}</span>
+          <select className="top-bar-template-select" value={templateKey} onChange={(e) => onTemplate(e.target.value)}>
+            {Object.values(TEMPLATES).map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+          </select>
+        </label>
       </div>
       <div className="top-bar-actions">
         {note && <span className="top-bar-note" style={{ color: noteErr ? "#E8836F" : "rgba(242,239,233,0.55)" }}>{note}</span>}
@@ -93,6 +100,11 @@ export function TopBar({
           <div className="top-bar-zoom-btn" title="Zoom in" onClick={onZoomIn}><span className="ms top-bar-icon">add</span></div>
         </div>
         <div className="top-bar-divider"></div>
+        {onExportTex && (
+          <button className="top-bar-btn" title="Download a LaTeX file — a .zip with your photos when the article has any, ready for Overleaf" onClick={onExportTex}>
+            <span className="ms top-bar-icon">download</span>Export .tex
+          </button>
+        )}
         <ExportMenu
           exported={exported}
           exporting={exporting}

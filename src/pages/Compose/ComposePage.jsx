@@ -10,8 +10,11 @@ import { useBlockDrag } from "../../hooks/useBlockDrag.js";
 import { useImport } from "../../hooks/useImport.js";
 import { useAiFill } from "../../hooks/useAiFill.js";
 import { useExport } from "../../hooks/useExport.js";
-import { NEW_BLOCK } from "../../data/index.js";
+import { useTemplate } from "../../hooks/useTemplate.js";
+import { NEW_BLOCK, TEMPLATES } from "../../data/index.js";
 import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWords } from "../../utils/blocks.js";
+import { blocksToLatex, texFileName } from "../../utils/latexExport.js";
+import { makeZip } from "../../utils/zip.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { IconRail } from "./components/IconRail.jsx";
 import { ElementsPanel } from "./components/ElementsPanel.jsx";
@@ -19,6 +22,7 @@ import { Canvas } from "./components/Canvas.jsx";
 import { FormatToolbar } from "./components/FormatToolbar.jsx";
 import { SettingsModal } from "./components/SettingsModal.jsx";
 import { ImportModal } from "./components/ImportModal.jsx";
+import { TemplatePicker } from "./components/TemplatePicker.jsx";
 import "./ComposePage.css";
 
 export function ComposePage() {
@@ -28,6 +32,8 @@ export function ComposePage() {
   const { aiConfig, saveAi } = useAiSettings();
   const fonts = useFontSettings();
   const [bar, setBar] = useSelectionBar();
+  const templates = useTemplate();
+  const { template } = templates;
 
   const [sel, setSel] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -43,9 +49,9 @@ export function ComposePage() {
     return id;
   }
 
-  const filler = useAiFill({ getBlocks: doc.getBlocks, save: doc.save, flash, aiConfig });
+  const filler = useAiFill({ getBlocks: doc.getBlocks, save: doc.save, flash, aiConfig, rules: template.aiRules });
   const drag = useBlockDrag({ getBlocks: doc.getBlocks, save: doc.save, insertBlock, onFill: filler.fillFromText });
-  const importer = useImport({ busy, setBusy, flash, aiConfig, save: doc.save, setNoteErr });
+  const importer = useImport({ busy, setBusy, flash, aiConfig, save: doc.save, setNoteErr, template, onTemplate: templates.applyTemplate });
   const exporter = useExport({ docTitle, fonts: fonts.fonts, flash });
 
   function handleUndo() {
@@ -119,8 +125,38 @@ export function ComposePage() {
     if (sel || bar) { setSel(null); setBar(null); }
   }
 
+  function handleExportTex() {
+    const blocks = doc.getBlocks();
+    const { tex, images } = blocksToLatex(blocks);
+    const name = texFileName(blocks);
+    const blob = images.length
+      ? makeZip([{ name: "main.tex", data: new TextEncoder().encode(tex) }, ...images])
+      : new Blob([tex], { type: "application/x-tex" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = name + (images.length ? ".zip" : ".tex");
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    flash(images.length
+      ? "EXPORTED " + name.toUpperCase() + ".ZIP WITH " + images.length + " PHOTO" + (images.length > 1 ? "S" : "") + " — UPLOAD TO OVERLEAF"
+      : "EXPORTED " + name.toUpperCase() + ".TEX");
+  }
+
   function handleReset() {
-    if (window.confirm("Clear the article and start over?")) doc.save(createStarterBlocks());
+    if (window.confirm("Clear the article and start over from the " + template.label + " starter page?")) doc.save(createStarterBlocks(template.key));
+  }
+
+  function handlePickTemplate(key) {
+    doc.save(createStarterBlocks(key));
+    templates.applyTemplate(key);
+    templates.closePicker();
+    setSel(null);
+    flash("STARTED A " + TEMPLATES[key].label.toUpperCase() + " PAGE — CTRL+Z FOR THE PREVIOUS ONE");
+  }
+
+  function handleSwitchTemplate(key) {
+    templates.applyTemplate(key);
+    flash("SWITCHED TO " + TEMPLATES[key].label.toUpperCase() + " — YOUR TEXT IS UNCHANGED");
   }
 
   return (
@@ -128,6 +164,8 @@ export function ComposePage() {
       <TopBar
         docTitle={docTitle}
         onDocTitle={setDocTitle}
+        templateKey={template.key}
+        onTemplate={handleSwitchTemplate}
         note={note}
         noteErr={noteErr}
         busy={busy || filler.building.length > 0}
@@ -138,6 +176,7 @@ export function ComposePage() {
         exporting={exporter.exporting}
         onExport={exporter.copyHtml}
         onDownloadHtml={exporter.downloadHtml}
+        onExportTex={template.theme.texExport ? handleExportTex : null}
         onImport={importer.openImport}
       />
 
@@ -145,6 +184,7 @@ export function ComposePage() {
         <IconRail
           panelOpen={panelOpen}
           onTogglePanel={() => setPanelOpen(!panelOpen)}
+          onTemplates={templates.openPicker}
           onImport={importer.openImport}
           onUndo={handleUndo}
           onRedo={handleRedo}
@@ -154,6 +194,7 @@ export function ComposePage() {
         />
         <ElementsPanel
           open={panelOpen}
+          allowed={template.blocks}
           onInsert={handleInsertFromPalette}
           onDragStart={drag.startNewDrag}
           onDragEnd={drag.clearDrop}
@@ -163,6 +204,9 @@ export function ComposePage() {
             blocks={doc.blocks}
             sel={sel}
             building={filler.building}
+            look={template.look}
+            theme={template.theme}
+            allowed={template.blocks}
             drop={drag.drop}
             readTime={Math.max(1, Math.round(countWords(doc.blocks) / 220))}
             onClearSel={handleClearSel}
@@ -188,6 +232,10 @@ export function ComposePage() {
       )}
 
       {importer.importOpen && <ImportModal importer={importer} busy={busy} noteErr={noteErr} />}
+
+      {templates.pickerOpen && (
+        <TemplatePicker currentKey={template.key} onPick={handlePickTemplate} onClose={templates.closePicker} />
+      )}
     </div>
   );
 }

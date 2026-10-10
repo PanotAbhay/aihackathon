@@ -14,7 +14,7 @@ function dropTarget(e, start, end) {
   return { index: end, y: Math.round(wr.height) };
 }
 
-export function ProseBlock({ members, start, end, dropY, onCaret, onCommit, onShowDrop, onDropAt }) {
+export function ProseBlock({ members, theme, start, end, dropY, onCaret, onCommit, onShowDrop, onDropAt }) {
   const ids = members.map((m) => m.id);
   const html = members.map((m) => "<p>" + (m.html || "") + "</p>").join("");
   const lede = members.some((m) => m.type === "dropcap");
@@ -51,12 +51,13 @@ export function ProseBlock({ members, start, end, dropY, onCaret, onCommit, onSh
         data-prose=""
         data-lede={lede ? "1" : "0"}
         data-ids={JSON.stringify(ids)}
+        data-indent={theme.paragraphIndent ? "" : undefined}
         contentEditable
         ref={(node) => bindContent(node, html, true)}
         onBlur={(e) => onCommit(ids, e.currentTarget)}
         onClick={handleCaret}
         onKeyUp={handleCaret}
-        style={BODY_TEXT}
+        style={{ ...BODY_TEXT, ...theme.body }}
       ></div>
     </div>
   );

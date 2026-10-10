@@ -34,17 +34,47 @@ const TEXT_VARIANTS = {
   numbered: { as: "ol", style: { ...LIST_TEXT, paddingLeft: 24, listStyle: "decimal" } },
 };
 
-export function TextBlock({ block, onPatch }) {
+// Which theme entry restyles each text type.
+const THEME_PART = { h1: "h1", standfirst: "standfirst", h2: "h2", h3: "h3", body: "body", dropcap: "body", bullets: "list", numbered: "list" };
+
+const ABSTRACT_LABEL = { textAlign: "center", fontFamily: "var(--font-serif)", fontWeight: 700, fontSize: 14.5, color: "var(--ink)", marginBottom: 6 };
+
+export function TextBlock({ block, theme, number, onPatch }) {
   const variant = TEXT_VARIANTS[block.type];
+  const style = { ...variant.style, ...theme[THEME_PART[block.type]] };
+  const editable = {
+    html: true,
+    "data-ph": variant.placeholder,
+    value: block.html,
+    onCommit: (v) => onPatch((x) => { x.html = v; }),
+  };
+
+  // LaTeX-style "2.1  Heading": the number sits outside the editable text.
+  if (theme.numbering && number && (block.type === "h2" || block.type === "h3")) {
+    const Tag = variant.as;
+    return (
+      <Tag style={style}>
+        <span style={{ marginRight: "1em" }}>{number}</span>
+        <EditableText as="span" {...editable} />
+      </Tag>
+    );
+  }
+
+  if (theme.abstractLabel && block.type === "standfirst") {
+    return (
+      <div>
+        <div style={ABSTRACT_LABEL}>{theme.abstractLabel}</div>
+        <EditableText as={variant.as} {...editable} style={style} />
+      </div>
+    );
+  }
+
   return (
     <EditableText
       as={variant.as}
-      html
+      {...editable}
       data-dropcap={variant.dropcap ? "" : undefined}
-      data-ph={variant.placeholder}
-      value={block.html}
-      onCommit={(v) => onPatch((x) => { x.html = v; })}
-      style={variant.style}
+      style={style}
     />
   );
 }

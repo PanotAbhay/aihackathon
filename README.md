@@ -60,9 +60,25 @@ src/
         └── blocks/           one component per article block type
 ```
 
+### Templates
+
+A starter window (shown on first visit, and from the rail's template button) offers **News**, **Finance**, **Research**, **LaTeX paper** and **Lab manual**. Each template, defined in `TEMPLATES` in `src/data/index.js`, sets:
+
+- **look**: CSS variable overrides applied to the canvas (accent colour, paper, rules, headline font)
+- **theme**: layout and per-element style overrides (column width, headline alignment, body font, attribution variant, quote, key-facts box, table and divider styles), merged into the blocks' inline styles so Copy HTML exports them
+- **blocks**: the element types the palette offers and the AI may use
+- **aiRules**: extra instructions for import and drag-to-fill
+- **starter**: the demo page you get when you pick it
+
+On AI import the model picks the best-fitting template, and its rules and allowed blocks shape the result. The top-bar menu switches the template of the current page without touching its text.
+
+The LaTeX paper template adds an **Export .tex** button to the top bar. It converts the article into a compilable `article`-class document: sections, abstract, booktabs tables and pgfplots charts. If the article has photos, you get a `.zip` with `main.tex` and a `figures/` folder, ready to upload to Overleaf. The converter is `src/utils/latexExport.js`.
+
+To add a template, add an entry to `TEMPLATES`; the picker, menu and prompts pick it up automatically.
+
 ### Adding a block type
 
-1. Add a factory to `NEW_BLOCK` and an entry to `PALETTE_GROUPS` in `src/data/index.js`.
+1. Add a factory to `NEW_BLOCK`, an entry to `PALETTE_GROUPS`, and the type to the `blocks` list of each template that should offer it, all in `src/data/index.js`.
 2. Create `src/pages/Compose/components/blocks/<Name>Block.jsx` taking `{ block, onPatch }`.
 3. Register it in `BLOCK_BODIES` in `BlockFrame.jsx`.
 4. If the AI should build it from text on drop, add it to `AI_FILL_TYPES`, handle it in `elementToBlock` (`src/utils/blocks.js`) and describe its JSON in `elementPrompt` (`src/utils/prompts.js`).
@@ -97,6 +113,7 @@ Bundled in `src/assets/fonts/`:
 - [Baskervville](https://fonts.google.com/specimen/Baskervville), by ANRT, headlines and titles (SIL OFL 1.1)
 - [Satoshi](https://www.fontshare.com/fonts/satoshi), by Indian Type Foundry via Fontshare, interface text (Fontshare Free License)
 - [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono), by Christian Robertson, labels and data (Apache 2.0)
+- [Computer Modern (CMU)](https://www.checkmyworking.com/cm-web-fonts/), by Donald Knuth, LaTeX paper template (SIL OFL 1.1), via the `computer-modern` npm package
 - [Material Symbols Outlined](https://fonts.google.com/icons), by Google, icons (Apache 2.0)
 
 Loaded from [Google Fonts](https://fonts.google.com) only when picked in the Fonts panel (all SIL OFL 1.1):

@@ -9,15 +9,17 @@ function hintFor(item) {
   return item.hint + (AI_FILL_TYPES.includes(item.type) ? AI_HINT_SUFFIX : HINT_SUFFIX);
 }
 
-function filterGroups(query) {
+function filterGroups(query, allowed) {
   const q = query.trim().toLowerCase();
-  if (!q) return PALETTE_GROUPS;
   return PALETTE_GROUPS
-    .map((g) => ({ ...g, items: g.items.filter((i) => (i.label + " " + hintFor(i)).toLowerCase().includes(q)) }))
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((i) => allowed.includes(i.type) && (!q || (i.label + " " + hintFor(i)).toLowerCase().includes(q))),
+    }))
     .filter((g) => g.items.length);
 }
 
-export function ElementsPanel({ open, onInsert, onDragStart, onDragEnd }) {
+export function ElementsPanel({ open, allowed, onInsert, onDragStart, onDragEnd }) {
   const [query, setQuery] = useState("");
 
   return (
@@ -37,7 +39,7 @@ export function ElementsPanel({ open, onInsert, onDragStart, onDragEnd }) {
           </div>
         </div>
         <div className="elements-panel-list">
-          {filterGroups(query).map((g) => (
+          {filterGroups(query, allowed).map((g) => (
             <div key={g.key} className="elements-group">
               <div className="elements-group-label">{g.label}</div>
               <div className="elements-group-items">

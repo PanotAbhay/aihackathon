@@ -64,12 +64,12 @@ function SelectionHandles() {
   );
 }
 
-function BlockToolbar({ block, isHeading, sectionSize, onPatch, onDeleteSection, onDuplicate }) {
+function BlockToolbar({ block, allowed, isHeading, sectionSize, onPatch, onDeleteSection, onDuplicate }) {
   return (
     <div data-chrome="" className="block-toolbar">
       {TEXTISH_TYPES.includes(block.type) && (
         <select className="block-type-select" value={block.type} onChange={(e) => { const v = e.target.value; onPatch((x) => changeType(x, v)); }}>
-          {TEXT_TYPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {TEXT_TYPE_OPTIONS.filter((o) => o.value === block.type || o.value === "h1" || o.value === "standfirst" || allowed.includes(o.value)).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       )}
       {isHeading && (
@@ -90,6 +90,9 @@ export function BlockFrame({
   selected,
   inLive,
   building,
+  allowed,
+  theme,
+  number,
   dropActive,
   readTime,
   onSelect,
@@ -161,6 +164,7 @@ export function BlockFrame({
       {selected && (
         <BlockToolbar
           block={block}
+          allowed={allowed}
           isHeading={isHeading}
           sectionSize={sectionSize}
           onPatch={onPatch}
@@ -169,7 +173,7 @@ export function BlockFrame({
         />
       )}
 
-      {Body && <Body block={block} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} />}
+      {Body && <Body block={block} theme={theme} number={number} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} />}
     </div>
   );
 }

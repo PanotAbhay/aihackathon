@@ -36,6 +36,10 @@ export function cleanArticle(node) {
   const last = c.lastElementChild;
   if (last && /drag elements here/i.test(last.textContent)) last.remove();
   c.querySelectorAll("[data-rw]").forEach((n) => n.removeAttribute("data-rw"));
+  // The indent rule lives in index.css, so bake it onto each paragraph.
+  c.querySelectorAll("[data-indent] > p").forEach((p) => {
+    p.setAttribute("style", "margin:0;text-indent:" + (p.previousElementSibling ? "1.5em" : "0") + ";");
+  });
   c.querySelectorAll(".nt-blk").forEach((n) => {
     n.removeAttribute("class");
     n.removeAttribute("data-sel");

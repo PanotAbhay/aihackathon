@@ -477,6 +477,13 @@ body {
   100% { transform: translateX(-40%); }
 }
 
+/* Computer Modern (CMU, SIL OFL) — used by the LaTeX template. */
+@font-face { font-family: 'CMU Serif'; font-style: normal; font-weight: 400; font-display: swap; src: url("./assets/fonts/cmu-serif-500-roman.woff2") format('woff2'); }
+@font-face { font-family: 'CMU Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url("./assets/fonts/cmu-serif-500-italic.woff2") format('woff2'); }
+@font-face { font-family: 'CMU Serif'; font-style: normal; font-weight: 700; font-display: swap; src: url("./assets/fonts/cmu-serif-700-roman.woff2") format('woff2'); }
+@font-face { font-family: 'CMU Serif'; font-style: italic; font-weight: 700; font-display: swap; src: url("./assets/fonts/cmu-serif-700-italic.woff2") format('woff2'); }
+@font-face { font-family: 'CMU Typewriter Text'; font-style: normal; font-weight: 400; font-display: swap; src: url("./assets/fonts/cmu-typewriter-text-500-roman.woff2") format('woff2'); }
+
 /* ─────────────────────────────────────────────
    Compose — editor globals
 ───────────────────────────────────────────── */
@@ -508,6 +515,9 @@ a:hover { color: var(--red); }
 /* Paragraphs the browser creates on Enter can't carry inline styles. */
 [data-prose] > p { margin: 0 0 18px; }
 [data-prose] > p:last-child { margin-bottom: 0; }
+/* LaTeX-style paragraphs: indented, no gap, first after a heading flush left. Inlined on export. */
+[data-prose][data-indent] > p { margin: 0; text-indent: 1.5em; }
+[data-prose][data-indent] > p:first-child { text-indent: 0; }
 [data-lede="1"] > p:first-child::first-letter {
   float: left; font-family: var(--h1-font, var(--font-serif)); font-size: 76px;
   line-height: 0.72; font-weight: 600; color: var(--ink); margin: 6px 12px 0 0;
