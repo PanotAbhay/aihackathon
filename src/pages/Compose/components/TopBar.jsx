@@ -1,7 +1,7 @@
-import { TEMPLATES } from "../../../data/index.js";
+import { TEMPLATES, LAYOUTS } from "../../../data/index.js";
 import "./TopBar.css";
 
-export function TopBar({ docTitle, onDocTitle, templateKey, note, noteErr, busy, zoom, onZoomIn, onZoomOut, exported, onExport, onExportTex, onImport }) {
+export function TopBar({ docTitle, onDocTitle, templateKey, layout, onLayout, note, noteErr, busy, zoom, onZoomIn, onZoomOut, exported, onExport, onPreview, onExportTex, onImport }) {
   return (
     <div className="top-bar">
       <div className="top-bar-brand">
@@ -26,6 +26,16 @@ export function TopBar({ docTitle, onDocTitle, templateKey, note, noteErr, busy,
             <span className="ms top-bar-template-lock">lock</span>
           </span>
         )}
+        {onLayout && (
+          <div className="top-bar-columns" title="Page layout for this document">
+            {LAYOUTS.map((l) => (
+              <button key={l.key} className={`top-bar-columns-btn${layout === l.key ? " top-bar-columns-btn--on" : ""}`} title={l.hint} onClick={() => onLayout(l.key)}>
+                <span className="ms top-bar-columns-icon">{l.icon}</span>
+                <span className="top-bar-columns-label">{l.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className="top-bar-actions">
         {note && <span className="top-bar-note" style={{ color: noteErr ? "#E8836F" : "rgba(242,239,233,0.55)" }}>{note}</span>}
@@ -44,8 +54,13 @@ export function TopBar({ docTitle, onDocTitle, templateKey, note, noteErr, busy,
             <span className="ms top-bar-icon">download</span>Export .tex
           </button>
         )}
+        {onPreview && (
+          <button className="top-bar-btn" title="Open the rendered document in a new browser tab" onClick={onPreview}>
+            <span className="ms top-bar-icon">visibility</span>Preview
+          </button>
+        )}
         <button className="top-bar-btn" onClick={onExport}>
-          <span className="ms top-bar-icon">visibility</span>{exported ? "Copied" : "Copy HTML"}
+          <span className="ms top-bar-icon">content_copy</span>{exported ? "Copied" : "Copy HTML"}
         </button>
         <button className="top-bar-btn top-bar-btn--gold" onClick={onImport}>
           <span className="ms top-bar-icon">auto_awesome</span>Import

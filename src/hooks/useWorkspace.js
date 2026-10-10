@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { STORAGE_KEYS, TEMPLATES } from "../data/index.js";
+import { STORAGE_KEYS, TEMPLATES, LAYOUT_KEYS } from "../data/index.js";
 import { presetSettings } from "../data/fontSystems.js";
 import { readStorage, readJson, writeStorage } from "../utils/storage.js";
 import { createStarterBlocks } from "../utils/blocks.js";
@@ -28,6 +28,7 @@ function makeDoc(templateKey, docs, extra = {}) {
     templateKey,
     blocks: createStarterBlocks(templateKey),
     fonts: presetSettings(template.fontPreset),
+    layout: "web",
     ...extra,
   };
 }
@@ -39,6 +40,7 @@ function sanitize(doc) {
     templateKey,
     blocks: Array.isArray(doc.blocks) ? doc.blocks : [],
     fonts: validFonts(doc.fonts) ? doc.fonts : presetSettings(TEMPLATES[templateKey].fontPreset),
+    layout: LAYOUT_KEYS.includes(doc.layout) ? doc.layout : "web",
   };
 }
 

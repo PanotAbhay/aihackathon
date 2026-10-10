@@ -141,6 +141,14 @@ export const TEXT_TYPE_OPTIONS = [
   { value: "numbered", label: "Numbered list" },
 ];
 
+// Page layouts a document can use: one continuous web page, or A4 sheets with one or two columns.
+export const LAYOUTS = [
+  { key: "web", label: "Web", icon: "web", hint: "Web — one continuous page" },
+  { key: "print-1", label: "A4", icon: "description", hint: "Print — A4 pages, single column" },
+  { key: "print-2", label: "A4 · 2 col", icon: "view_column_2", hint: "Print — A4 pages, two columns" },
+];
+export const LAYOUT_KEYS = LAYOUTS.map((l) => l.key);
+
 export const AI_MODELS = {
   builtin: "claude-sonnet-4-5",
   anthropic: "claude-sonnet-4-5",
@@ -178,6 +186,7 @@ export const TEMPLATES = {
     look: {},
     theme: {
       article: { maxWidth: 840, padding: "60px 60px 160px 84px" },
+      columns: { columnGap: 48, columnRule: "1px solid var(--rule)" },
       h1: { textAlign: "center", margin: "6px auto 18px", maxWidth: 680 },
       standfirst: { textAlign: "center", fontStyle: "italic", color: "var(--ink-secondary)", maxWidth: 600, margin: "0 auto 26px" },
       byline: { variant: "centered" },
@@ -234,6 +243,7 @@ export const TEMPLATES = {
     look: { "--red": "#0D7680", "--paper": "#FFF1E5", "--paper-faint": "#F7E3D2", "--rule": "#E6CDB8", "--rule-light": "#F0DAC8", "--ink": "#33302E", "--ink-body": "#3D3935", "--ink-secondary": "#5C5651", "--muted": "#857D76", "--placeholder": "#EBD5C3" },
     theme: {
       article: { maxWidth: 840, padding: "44px 44px 160px 80px" },
+      columns: { columnGap: 44, columnRule: "1px solid var(--rule)" },
       h1: { borderTop: "6px solid var(--ink)", paddingTop: 18, margin: "0 0 16px" },
       standfirst: { color: "var(--ink-body)" },
       byline: { variant: "inline" },
@@ -290,6 +300,7 @@ export const TEMPLATES = {
     look: { "--red": "#1F4E9C", "--paper": "#FDFDFB", "--paper-faint": "#F2F4F8", "--rule": "#D8DBE2", "--rule-light": "#E6E8ED" },
     theme: {
       article: { maxWidth: 760, padding: "64px 56px 160px 84px" },
+      columns: { columnGap: 40 },
       h1: { margin: "0 0 18px" },
       standfirst: { color: "var(--ink-body)", background: "var(--paper-faint)", borderLeft: "3px solid var(--red)", padding: "16px 20px", margin: "0 0 24px" },
       byline: { variant: "plain" },
@@ -352,6 +363,7 @@ export const TEMPLATES = {
     },
     theme: {
       article: { maxWidth: 720, padding: "72px 64px 160px 84px" },
+      columns: { columnGap: 32 },
       numbering: true,
       paragraphIndent: true,
       abstractLabel: "Abstract",
@@ -428,6 +440,7 @@ export const TEMPLATES = {
     look: { "--red": "#C26A12", "--paper": "#F7F7F5", "--paper-faint": "#EEEEEA", "--rule": "#CFCFC8", "--rule-light": "#E2E2DC", "--font-serif": "var(--font-sans)" },
     theme: {
       article: { maxWidth: 860, padding: "44px 44px 160px 80px" },
+      columns: { columnGap: 44, columnRule: "1px dashed var(--rule)" },
       h1: { margin: "0 0 16px" },
       standfirst: { color: "var(--ink)", background: "#FFFFFF", border: "1.5px solid var(--ink)", padding: "14px 18px", margin: "0 0 22px" },
       byline: { variant: "mono" },
