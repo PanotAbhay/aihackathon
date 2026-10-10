@@ -1,5 +1,6 @@
 import { pickFile } from "../../../../utils/fileReaders.js";
 import { EditableText } from "./EditableText.jsx";
+import { Caption } from "./Caption.jsx";
 import { FIGURE, MONO_OVERLINE } from "./articleStyles.js";
 
 const SLOT_HEIGHTS = { 1: 340, 2: 250 };
@@ -16,7 +17,7 @@ function slotStyle(src, height) {
   };
 }
 
-export function ImagesBlock({ block, theme, onPatch, onDragEnd }) {
+export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
   const slots = block.slots || [""];
   const n = slots.length;
   const height = SLOT_HEIGHTS[n] || 180;
@@ -53,22 +54,27 @@ export function ImagesBlock({ block, theme, onPatch, onDragEnd }) {
           </div>
         ))}
       </div>
-      <figcaption style={{ display: "flex", gap: 18, justifyContent: "space-between", alignItems: "baseline", marginTop: 10 }}>
-        <EditableText
-          as="span"
-          data-ph="Caption"
-          value={block.a}
-          onCommit={(v) => onPatch((x) => { x.a = v; })}
-          style={{ flex: 1, ...MONO_OVERLINE, color: "var(--muted)", lineHeight: 1.6 }}
-        />
-        <EditableText
-          as="span"
-          data-ph="CREDIT"
-          value={block.b}
-          onCommit={(v) => onPatch((x) => { x.b = v; })}
-          style={{ whiteSpace: "nowrap", ...MONO_OVERLINE, color: "var(--muted-light)" }}
-        />
-      </figcaption>
+      {theme.captions && (
+        <Caption kind="Figure" number={number} value={block.a} onCommit={(v) => onPatch((x) => { x.a = v; })} style={{ marginTop: 10 }} />
+      )}
+      {!theme.captions && (
+        <figcaption style={{ display: "flex", gap: 18, justifyContent: "space-between", alignItems: "baseline", marginTop: 10 }}>
+          <EditableText
+            as="span"
+            data-ph="Caption"
+            value={block.a}
+            onCommit={(v) => onPatch((x) => { x.a = v; })}
+            style={{ flex: 1, ...MONO_OVERLINE, color: "var(--muted)", lineHeight: 1.6 }}
+          />
+          <EditableText
+            as="span"
+            data-ph="CREDIT"
+            value={block.b}
+            onCommit={(v) => onPatch((x) => { x.b = v; })}
+            style={{ whiteSpace: "nowrap", ...MONO_OVERLINE, color: "var(--muted-light)" }}
+          />
+        </figcaption>
+      )}
     </figure>
   );
 }

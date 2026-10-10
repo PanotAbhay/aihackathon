@@ -81,7 +81,20 @@ function MonoByline({ block, onPatch, readTime }) {
   );
 }
 
-const VARIANTS = { centered: CenteredByline, inline: InlineByline, plain: PlainByline, mono: MonoByline };
+// LaTeX: \maketitle's centred author, affiliation and \today.
+function LatexByline({ block, onPatch }) {
+  const text = { fontFamily: "var(--font-serif)", letterSpacing: "0", color: "var(--ink)", fontWeight: 400 };
+  const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  return (
+    <div style={{ textAlign: "center", marginBottom: 30 }}>
+      <NameField block={block} onPatch={onPatch} style={{ ...text, fontSize: 17, display: "block", marginBottom: 4 }} />
+      <DeskField block={block} onPatch={onPatch} style={{ ...text, fontSize: 15, display: "block", marginBottom: 12 }} />
+      <div style={{ ...text, fontSize: 16 }}>{today}</div>
+    </div>
+  );
+}
+
+const VARIANTS = { centered: CenteredByline, inline: InlineByline, plain: PlainByline, mono: MonoByline, latex: LatexByline };
 
 export function BylineBlock({ block, theme, onPatch, readTime }) {
   const Variant = VARIANTS[theme.byline?.variant];

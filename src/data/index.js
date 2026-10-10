@@ -163,6 +163,8 @@ export const AI_PROVIDERS = [
 // the AI, and the demo page it starts from.
 const SERIF_BODY = { fontFamily: "var(--font-serif)", letterSpacing: "0", color: "#2B2B2B" };
 const NEWS_COLUMN = { maxWidth: 620, marginLeft: "auto", marginRight: "auto" };
+const CM = "'CMU Serif', 'Latin Modern Roman', serif";
+const CM_TEXT = { fontFamily: CM, letterSpacing: "0", color: "#000000", textWrap: "auto" };
 
 export const TEMPLATES = {
   news: {
@@ -329,6 +331,87 @@ export const TEMPLATES = {
       { type: "quote", a: "The point is not to replace extension officers, but to give farmers an answer on the day they notice the problem.", b: "— DR S. RAHMAN, LEAD AUTHOR" },
       { type: "body", html: "The authors note that the dataset comes from a single region and season, and that performance on other rice varieties and in other parts of the country remains to be tested." },
       { type: "divider" },
+    ],
+  },
+  latex: {
+    key: "latex",
+    label: "LaTeX paper",
+    icon: "functions",
+    description: "Typeset like a LaTeX article — Computer Modern, abstract, numbered sections, captioned figures and booktabs tables.",
+    look: {
+      "--paper": "#FFFFFF", "--paper-faint": "#FFFFFF", "--placeholder": "#EEEEEE", "--skeleton": "#EEEEEE",
+      "--ink": "#000000", "--ink-body": "#000000", "--ink-secondary": "#000000", "--ink-soft": "#000000",
+      "--muted": "#333333", "--muted-light": "#555555", "--rule": "#000000", "--rule-light": "#BBBBBB", "--red": "#2F4FA2",
+      "--font-serif": CM, "--font-sans": CM, "--font-mono": "'CMU Typewriter Text', monospace",
+      "--body-font": CM, "--h1-font": CM, "--h2-font": CM, "--h3-font": CM, "--standfirst-font": CM,
+    },
+    theme: {
+      article: { maxWidth: 720, padding: "72px 64px 160px 84px" },
+      numbering: true,
+      paragraphIndent: true,
+      abstractLabel: "Abstract",
+      captions: true,
+      texExport: true,
+      h1: { ...CM_TEXT, textAlign: "center", fontWeight: 400, fontSize: 30, lineHeight: 1.25, margin: "8px 0 16px", textWrap: "balance" },
+      byline: { variant: "latex" },
+      standfirst: { ...CM_TEXT, fontSize: 14.5, lineHeight: 1.45, textAlign: "justify", hyphens: "auto", margin: "0 44px 30px" },
+      body: { ...CM_TEXT, fontSize: 16, lineHeight: 1.5, textAlign: "justify", hyphens: "auto", margin: "0 0 10px" },
+      list: { ...CM_TEXT, fontSize: 16, lineHeight: 1.5, margin: "6px 0 12px", paddingLeft: 30 },
+      h2: { ...CM_TEXT, fontWeight: 700, fontSize: 20, lineHeight: 1.3, margin: "34px 0 12px" },
+      h3: { ...CM_TEXT, fontWeight: 700, fontSize: 17, lineHeight: 1.3, margin: "24px 0 10px" },
+      quote: {
+        wrap: { borderLeft: "none", padding: 0, margin: "14px 40px 18px" },
+        text: { ...CM_TEXT, fontSize: 16, lineHeight: 1.5 },
+        cite: { ...CM_TEXT, fontSize: 15, textAlign: "right", marginTop: 6 },
+      },
+      figure: { margin: "26px 0 22px" },
+      nutshell: {
+        box: { background: "transparent", border: "0.8px solid #000000", padding: "14px 18px", margin: "22px 0" },
+        title: { ...CM_TEXT, fontSize: 16, marginBottom: 8 },
+        list: { ...CM_TEXT, fontSize: 15.5, lineHeight: 1.5 },
+      },
+      table: {
+        table: { borderTop: "1.6px solid #000000", borderBottom: "1.6px solid #000000", marginTop: 6 },
+        head: { ...CM_TEXT, fontSize: 15, padding: "7px 14px 6px 0", textAlign: "left" },
+        cell: { ...CM_TEXT, fontSize: 15, fontWeight: 400, padding: "4px 14px 4px 0" },
+        zebra: false,
+        bodyRules: false,
+      },
+      divider: { text: "∗     ∗     ∗", style: { ...CM_TEXT, fontSize: 16, letterSpacing: "0.1em" } },
+    },
+    blocks: ["byline", "body", "h2", "h3", "quote", "bullets", "numbered", "divider", "image", "pair", "gallery", "chart", "line", "table", "nutshell"],
+    aiRules: [
+      "Structure the piece like a LaTeX article: the standfirst is the abstract (2–4 sentences); h2 for numbered sections (e.g. Introduction, Related work, Method, Results, Conclusion) using the source's own sections where it has them; h3 for subsections.",
+      "Never number headings yourself — the template numbers sections automatically.",
+      "Charts, images and tables are numbered figures and tables: give each a caption-style title that describes it in one sentence.",
+      "Prefer tables for exact results. Use bullets or numbered lists only for genuine lists (contributions, steps).",
+      "quote only for a definition or statement the text quotes verbatim. No drop caps, stat rows, polls or timelines.",
+      "nutshell only if the source lists key contributions or takeaways; title it \"Key points\".",
+    ],
+    starter: [
+      { type: "h1", html: "Estimating Rooftop Solar Potential in Dhaka from Satellite Imagery" },
+      { type: "byline", a: "Nadia Haque and Arif Hossain", b: "Department of Electrical and Electronic Engineering, BUET" },
+      { type: "standfirst", html: "Dhaka’s dense rooftops are an untapped source of renewable energy, but no city-wide estimate of their solar potential exists. We segment 41,000 rooftops from 0.5 m satellite imagery with a lightweight convolutional network and combine the result with irradiance data to estimate usable capacity. Our model reaches an intersection-over-union of 0.87 on hand-labelled tiles, and we estimate that suitable rooftops could host 1.9 GW of photovoltaic capacity — roughly a fifth of the city’s peak demand." },
+      { type: "h2", html: "Introduction" },
+      { type: "body", html: "Bangladesh generates most of its electricity from natural gas and imported fuel, leaving the grid exposed to price shocks and supply shortfalls. Rooftop solar offers a decentralised alternative that requires no new land, which is scarce in a city as dense as Dhaka." },
+      { type: "body", html: "Planning such a programme requires knowing how much roof area is usable: flat or gently sloped, unshaded and structurally sound. Field surveys at city scale are slow and expensive. In this paper we show that freely available satellite imagery, combined with a small segmentation model, can produce a reliable first estimate. Our contributions are:" },
+      { type: "bullets", html: "<li>a labelled dataset of 2,400 rooftop tiles covering six Dhaka neighbourhoods;</li><li>a segmentation model small enough to process the whole city on a single laptop;</li><li>a city-wide estimate of usable rooftop area and photovoltaic capacity.</li>" },
+      { type: "h2", html: "Related work" },
+      { type: "body", html: "Rooftop solar mapping has been studied extensively in Europe and North America, where high-resolution aerial imagery and building footprints are readily available. Comparable studies in South Asia are rare and typically limited to a single neighbourhood." },
+      { type: "quote", a: "Usable rooftop area is the dominant source of uncertainty in urban solar potential estimates, ahead of irradiance and panel efficiency.", b: "— Gagnon et al. (2016)" },
+      { type: "h2", html: "Method" },
+      { type: "h3", html: "Data" },
+      { type: "body", html: "We obtained 0.5 m resolution imagery for the Dhaka North and South City Corporation areas and split it into 256 × 256 pixel tiles. Two annotators outlined usable rooftop area on 2,400 tiles, excluding water tanks, stairwells and shaded sections." },
+      { type: "h3", html: "Model" },
+      { type: "body", html: "We trained a U-Net with a MobileNetV3 encoder on 80% of the labelled tiles, holding out the remainder for evaluation. Training used standard flips and rotations and took under two hours on a single GPU." },
+      { type: "image", slots: [""], a: "Example tile from Mirpur with the predicted usable rooftop area overlaid.", b: "" },
+      { type: "h2", html: "Results" },
+      { type: "body", html: "Table 1 compares our model with two baselines. The lightweight model matches the accuracy of the much larger ResNet-50 encoder while running five times faster, which makes city-scale inference practical." },
+      { type: "table", a: "Segmentation accuracy on the held-out tiles.", rows: [["Model", "Parameters", "IoU", "Time per tile"], ["Threshold baseline", "—", "0.61", "0.01 s"], ["U-Net, ResNet-50", "32.5 M", "0.88", "0.42 s"], ["U-Net, MobileNetV3 (ours)", "6.6 M", "0.87", "0.08 s"]] },
+      { type: "chart", a: "Estimated usable rooftop area by neighbourhood.", b: "km²", bars: [{ label: "MIRPUR", value: 4.1 }, { label: "UTTARA", value: 3.6 }, { label: "MOHAMMADPUR", value: 2.4 }, { label: "GULSHAN", value: 1.8 }, { label: "OLD DHAKA", value: 1.1 }] },
+      { type: "body", html: "Applying the model to all 41,000 tiles yields 13.4 km² of usable rooftop area. At a conservative 140 W per square metre, this corresponds to 1.9 GW of installable capacity." },
+      { type: "h2", html: "Conclusion" },
+      { type: "body", html: "Satellite imagery and a compact segmentation model are enough to produce a credible city-wide estimate of rooftop solar potential in Dhaka. Future work will validate the estimate against field surveys and account for structural load limits." },
     ],
   },
   lab: {

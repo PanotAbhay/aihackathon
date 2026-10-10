@@ -29,7 +29,7 @@ src/
 
 ### Templates
 
-A starter window (shown on first visit, and from the rail's template button) offers **News**, **Finance**, **Research** and **Lab manual**. Each template, defined in `TEMPLATES` in `src/data/index.js`, sets:
+A starter window (shown on first visit, and from the rail's template button) offers **News**, **Finance**, **Research**, **LaTeX paper** and **Lab manual**. Each template, defined in `TEMPLATES` in `src/data/index.js`, sets:
 
 - **look**: CSS variable overrides applied to the canvas (accent colour, paper, rules, headline font)
 - **theme**: layout and per-element style overrides (column width, headline alignment, body font, attribution variant, quote, key-facts box, table and divider styles), merged into the blocks' inline styles so Copy HTML exports them
@@ -38,6 +38,8 @@ A starter window (shown on first visit, and from the rail's template button) off
 - **starter**: the demo page you get when you pick it
 
 On AI import the model picks the best-fitting template, and its rules and allowed blocks shape the result. The top-bar menu switches the template of the current page without touching its text.
+
+The LaTeX paper template adds an **Export .tex** button to the top bar. It converts the article into a compilable `article`-class document: sections, abstract, booktabs tables and pgfplots charts. If the article has photos, you get a `.zip` with `main.tex` and a `figures/` folder, ready to upload to Overleaf. The converter is `src/utils/latexExport.js`.
 
 To add a template, add an entry to `TEMPLATES`; the picker, menu and prompts pick it up automatically.
 
@@ -69,6 +71,7 @@ Bundled in `src/assets/fonts/`:
 - [Baskervville](https://fonts.google.com/specimen/Baskervville), by ANRT, headlines and titles (SIL OFL 1.1)
 - [Satoshi](https://www.fontshare.com/fonts/satoshi), by Indian Type Foundry via Fontshare, interface text (Fontshare Free License)
 - [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono), by Christian Robertson, labels and data (Apache 2.0)
+- [Computer Modern (CMU)](https://www.checkmyworking.com/cm-web-fonts/), by Donald Knuth, LaTeX paper template (SIL OFL 1.1), via the `computer-modern` npm package
 - [Material Symbols Outlined](https://fonts.google.com/icons), by Google, icons (Apache 2.0)
 
 ### Sample content

@@ -1,4 +1,4 @@
-import { PROSE_TYPES, HEADING_TYPES } from "../../../data/index.js";
+import { PROSE_TYPES, HEADING_TYPES, IMAGE_TYPES } from "../../../data/index.js";
 import { sectionEnd } from "../../../utils/blocks.js";
 import { BlockFrame } from "./BlockFrame.jsx";
 import { ProseBlock } from "./blocks/ProseBlock.jsx";
@@ -19,6 +19,22 @@ function groupBlocks(blocks) {
     items.push({ kind: "prose", members: blocks.slice(start, i), start, end: i });
   }
   return items;
+}
+
+// LaTeX-style numbers for sections ("2", "2.1"), figures and tables, keyed by block id.
+function numberBlocks(blocks) {
+  const numbers = {};
+  let section = 0;
+  let subsection = 0;
+  let figure = 0;
+  let table = 0;
+  blocks.forEach((b) => {
+    if (b.type === "h2") { section += 1; subsection = 0; numbers[b.id] = String(section); }
+    else if (b.type === "h3") { subsection += 1; numbers[b.id] = section ? section + "." + subsection : String(subsection); }
+    else if (IMAGE_TYPES.includes(b.type) || b.type === "chart" || b.type === "line") { figure += 1; numbers[b.id] = String(figure); }
+    else if (b.type === "table") { table += 1; numbers[b.id] = String(table); }
+  });
+  return numbers;
 }
 
 // Selecting a heading highlights every block in its section.
@@ -51,6 +67,7 @@ export function Canvas({
   onDragEnd,
 }) {
   const [liveFrom, liveTo] = liveRange(blocks, sel);
+  const numbers = theme.numbering || theme.captions ? numberBlocks(blocks) : {};
   const tailActive = drop.index === blocks.length;
 
   return (
@@ -86,6 +103,7 @@ export function Canvas({
               building={building.includes(block.id)}
               allowed={allowed}
               theme={theme}
+              number={numbers[block.id]}
               dropActive={drop.index === index}
               readTime={readTime}
               onSelect={onSelect}

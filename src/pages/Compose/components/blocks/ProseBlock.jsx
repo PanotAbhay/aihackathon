@@ -51,6 +51,7 @@ export function ProseBlock({ members, theme, start, end, dropY, onCaret, onCommi
         data-prose=""
         data-lede={lede ? "1" : "0"}
         data-ids={JSON.stringify(ids)}
+        data-indent={theme.paragraphIndent ? "" : undefined}
         contentEditable
         ref={(node) => bindContent(node, html, true)}
         onBlur={(e) => onCommit(ids, e.currentTarget)}

@@ -92,6 +92,7 @@ export function BlockFrame({
   building,
   allowed,
   theme,
+  number,
   dropActive,
   readTime,
   onSelect,
@@ -171,7 +172,7 @@ export function BlockFrame({
         />
       )}
 
-      {Body && <Body block={block} theme={theme} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} />}
+      {Body && <Body block={block} theme={theme} number={number} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} />}
     </div>
   );
 }

@@ -13,6 +13,8 @@ import { useTemplate } from "../../hooks/useTemplate.js";
 import { NEW_BLOCK, TEMPLATES } from "../../data/index.js";
 import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWords } from "../../utils/blocks.js";
 import { articleHtml } from "../../utils/exportHtml.js";
+import { blocksToLatex, texFileName } from "../../utils/latexExport.js";
+import { makeZip } from "../../utils/zip.js";
 import { fontLinks } from "../../utils/fonts.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { IconRail } from "./components/IconRail.jsx";
@@ -136,6 +138,23 @@ export function ComposePage() {
     else done();
   }
 
+  function handleExportTex() {
+    const blocks = doc.getBlocks();
+    const { tex, images } = blocksToLatex(blocks);
+    const name = texFileName(blocks);
+    const blob = images.length
+      ? makeZip([{ name: "main.tex", data: new TextEncoder().encode(tex) }, ...images])
+      : new Blob([tex], { type: "application/x-tex" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = name + (images.length ? ".zip" : ".tex");
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    flash(images.length
+      ? "EXPORTED " + name.toUpperCase() + ".ZIP WITH " + images.length + " PHOTO" + (images.length > 1 ? "S" : "") + " — UPLOAD TO OVERLEAF"
+      : "EXPORTED " + name.toUpperCase() + ".TEX");
+  }
+
   function handleReset() {
     if (window.confirm("Clear the article and start over from the " + template.label + " starter page?")) doc.save(createStarterBlocks(template.key));
   }
@@ -168,6 +187,7 @@ export function ComposePage() {
         onZoomOut={zoomOut}
         exported={exported}
         onExport={handleExport}
+        onExportTex={template.theme.texExport ? handleExportTex : null}
         onImport={importer.openImport}
       />
 

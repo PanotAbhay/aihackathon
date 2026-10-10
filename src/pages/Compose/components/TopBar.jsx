@@ -1,7 +1,7 @@
 import { TEMPLATES } from "../../../data/index.js";
 import "./TopBar.css";
 
-export function TopBar({ docTitle, onDocTitle, templateKey, onTemplate, note, noteErr, busy, zoom, onZoomIn, onZoomOut, exported, onExport, onImport }) {
+export function TopBar({ docTitle, onDocTitle, templateKey, onTemplate, note, noteErr, busy, zoom, onZoomIn, onZoomOut, exported, onExport, onExportTex, onImport }) {
   return (
     <div className="top-bar">
       <div className="top-bar-brand">
@@ -38,6 +38,11 @@ export function TopBar({ docTitle, onDocTitle, templateKey, onTemplate, note, no
           <div className="top-bar-zoom-btn" title="Zoom in" onClick={onZoomIn}><span className="ms top-bar-icon">add</span></div>
         </div>
         <div className="top-bar-divider"></div>
+        {onExportTex && (
+          <button className="top-bar-btn" title="Download a LaTeX file — a .zip with your photos when the article has any, ready for Overleaf" onClick={onExportTex}>
+            <span className="ms top-bar-icon">download</span>Export .tex
+          </button>
+        )}
         <button className="top-bar-btn" onClick={onExport}>
           <span className="ms top-bar-icon">visibility</span>{exported ? "Copied" : "Copy HTML"}
         </button>
