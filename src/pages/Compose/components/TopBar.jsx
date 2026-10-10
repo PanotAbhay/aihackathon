@@ -1,7 +1,7 @@
 import { TEMPLATES } from "../../../data/index.js";
 import "./TopBar.css";
 
-export function TopBar({ docTitle, onDocTitle, templateKey, onTemplate, note, noteErr, busy, zoom, onZoomIn, onZoomOut, exported, onExport, onExportTex, onImport }) {
+export function TopBar({ docTitle, onDocTitle, templateKey, note, noteErr, busy, zoom, onZoomIn, onZoomOut, exported, onExport, onExportTex, onImport }) {
   return (
     <div className="top-bar">
       <div className="top-bar-brand">
@@ -19,12 +19,13 @@ export function TopBar({ docTitle, onDocTitle, templateKey, onTemplate, note, no
         </span>
         <span className="ms top-bar-title-caret">expand_more</span>
         <span className="top-bar-status">Draft</span>
-        <label className="top-bar-template" title="Template: sets the look, the elements you can add and the AI rules. Your text is kept.">
-          <span className="ms top-bar-template-icon">{TEMPLATES[templateKey].icon}</span>
-          <select className="top-bar-template-select" value={templateKey} onChange={(e) => onTemplate(e.target.value)}>
-            {Object.values(TEMPLATES).map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
-          </select>
-        </label>
+        {templateKey && (
+          <span className="top-bar-template" title="This document's template is fixed. Open a new tab to use a different one.">
+            <span className="ms top-bar-template-icon">{TEMPLATES[templateKey].icon}</span>
+            <span className="top-bar-template-label">{TEMPLATES[templateKey].label}</span>
+            <span className="ms top-bar-template-lock">lock</span>
+          </span>
+        )}
       </div>
       <div className="top-bar-actions">
         {note && <span className="top-bar-note" style={{ color: noteErr ? "#E8836F" : "rgba(242,239,233,0.55)" }}>{note}</span>}

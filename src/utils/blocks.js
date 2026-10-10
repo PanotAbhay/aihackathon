@@ -1,5 +1,4 @@
-import { NEW_BLOCK, IMAGE_TYPES, HEADING_TYPES, STORAGE_KEYS, TEMPLATES } from "../data/index.js";
-import { readJson } from "./storage.js";
+import { NEW_BLOCK, IMAGE_TYPES, HEADING_TYPES, TEMPLATES } from "../data/index.js";
 
 let uid = 0;
 
@@ -18,11 +17,6 @@ export function cloneBlock(block) {
 
 export function createStarterBlocks(templateKey = "news") {
   return TEMPLATES[templateKey].starter.map((b) => withId(cloneBlock(b)));
-}
-
-export function loadSavedBlocks() {
-  const saved = readJson(STORAGE_KEYS.doc);
-  return Array.isArray(saved) && saved.length ? saved : createStarterBlocks();
 }
 
 export function countWords(blocks) {

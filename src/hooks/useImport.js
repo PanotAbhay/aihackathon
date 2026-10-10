@@ -4,7 +4,7 @@ import { readStorage, writeStorage } from "../utils/storage.js";
 import { nid, plainParas, parseJsonReply, blocksFromPlan } from "../utils/blocks.js";
 import { readDocx, readPdf, pickFile } from "../utils/fileReaders.js";
 import { callAi, transcribePdf } from "../utils/ai.js";
-import { IMPORT_PROMPT } from "../utils/prompts.js";
+import { importPrompt } from "../utils/prompts.js";
 
 const DOC_ACCEPT = ".txt,.md,.docx,.pdf,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 const IMPORT_TIMEOUT = 180000;
@@ -18,7 +18,7 @@ function importErrorMessage(e) {
   return "COULDN’T FORMAT — TRY AGAIN.";
 }
 
-export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, template, onTemplate }) {
+export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, template }) {
   const [recovered, setRecovered] = useState(() =>
     // Any article text imported previously stays available to re-import.
     readStorage(STORAGE_KEYS.recovered) || readStorage(STORAGE_KEYS.legacyRecovered) || ""
@@ -133,20 +133,20 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
     }, 1000);
 
     try {
-      const call = callAi(aiConfig, IMPORT_PROMPT, paras.map((p, i) => "[" + i + "] " + p).join("\n\n"), 4000);
+      const call = callAi(aiConfig, importPrompt(template), paras.map((p, i) => "[" + i + "] " + p).join("\n\n"), 4000);
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("TIMED_OUT")), IMPORT_TIMEOUT));
       const plan = parseJsonReply(await Promise.race([call, timeout]));
-      // The model suggests the template; an unknown answer keeps the current one.
-      const picked = TEMPLATES[plan.template] || template;
-      const { blocks, counts } = blocksFromPlan(plan, paras, picked.blocks);
+      const { blocks, counts } = blocksFromPlan(plan, paras, template.blocks);
+      // The template stays fixed; a different suggestion is only mentioned.
+      const suggested = TEMPLATES[plan.suggestedTemplate];
+      const hint = suggested && suggested.key !== template.key ? " · READS LIKE " + suggested.label.toUpperCase() + " — TRY IT IN A NEW TAB" : "";
 
       stopTimer();
       save(blocks);
-      onTemplate(picked.key);
       setBusy(false);
       setImportOpen(false);
       setImportNote("");
-      flash("FORMATTED AS " + picked.label.toUpperCase() + " · " + counts.h2 + " SUB-HEADS · " + counts.data + " DATA ELEMENTS · " + counts.img + " IMAGES");
+      flash("FORMATTED · " + counts.h2 + " SUB-HEADS · " + counts.data + " DATA ELEMENTS · " + counts.img + " IMAGES" + hint);
     } catch (e) {
       stopTimer();
       console.error("[Compose] import failed", e);

@@ -29,7 +29,11 @@ src/
 
 ### Templates
 
-A starter window (shown on first visit, and from the rail's template button) offers **News**, **Finance**, **Research**, **LaTeX paper** and **Lab manual**. Each template, defined in `TEMPLATES` in `src/data/index.js`, sets:
+### Documents and tabs
+
+Work happens in **tabs**, and each tab is a separate document with its own template, content, font settings and undo history. **+** in the tab bar (or the rail's template button) opens the template picker; picking a template opens a new tab with that template's starter page. A document's template is **fixed** once chosen. To try the same content in another template, open another tab with that template. All tabs autosave to `localStorage` (`nt-fb-workspace`); a document saved by the earlier single-page version opens as the first tab.
+
+The picker offers **News**, **Finance**, **Research**, **LaTeX paper** and **Lab manual**. Each template, defined in `TEMPLATES` in `src/data/index.js`, sets:
 
 - **look**: CSS variable overrides applied to the canvas (accent colour, paper, rules, headline font)
 - **theme**: layout and per-element style overrides (column width, headline alignment, body font, attribution variant, quote, key-facts box, table and divider styles), merged into the blocks' inline styles so Copy HTML exports them
@@ -37,7 +41,9 @@ A starter window (shown on first visit, and from the rail's template button) off
 - **aiRules**: extra instructions for import and drag-to-fill
 - **starter**: the demo page you get when you pick it
 
-On AI import the model picks the best-fitting template, and its rules and allowed blocks shape the result. The top-bar menu switches the template of the current page without touching its text.
+Each template also has its own **font preset** (`TEMPLATE_FONT_PRESETS` in `src/data/fontSystems.js`). A new tab's font settings start from it, and Settings → Fonts adjusts that tab only. Themes control layout and colour but never hard-code type, so the font settings always take effect.
+
+AI import formats into the tab's template. If the model thinks another template fits better, the confirmation message says so.
 
 The LaTeX paper template adds an **Export .tex** button to the top bar. It converts the article into a compilable `article`-class document: sections, abstract, booktabs tables and pgfplots charts. If the article has photos, you get a `.zip` with `main.tex` and a `figures/` folder, ready to upload to Overleaf. The converter is `src/utils/latexExport.js`.
 

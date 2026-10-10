@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  FONT_OPTIONS, FONT_PRESETS, LETTER_SPACING_STEPS, LINE_HEIGHT_STEPS, SIZE_STEPS, TEXT_LEVELS, WEIGHTS,
+  FONT_OPTIONS, FONT_PRESETS, LETTER_SPACING_STEPS, LINE_HEIGHT_STEPS, SIZE_STEPS, TEXT_LEVELS, WEIGHTS, presetById,
 } from "../../../data/fontSystems.js";
 
 const fontLabel = (id) => (FONT_OPTIONS.find((f) => f.id === id) || FONT_OPTIONS[0]).label;
@@ -45,22 +45,24 @@ function LevelSection({ level, label, choice, open, onToggle, setLevel }) {
   );
 }
 
-export function FontsPanel({ fonts, setLevel, applyPreset, reset }) {
+export function FontsPanel({ fonts, setLevel, applyPreset, reset, templatePreset }) {
   const [open, setOpen] = useState(null);
+  // The tab's template typography comes first, then the general font systems.
+  const presets = [presetById(templatePreset), ...FONT_PRESETS];
 
   return (
     <>
       <div className="modal-head">
         <div className="modal-kicker">TYPOGRAPHY</div>
-        <div className="modal-desc">How headings and body text look across the whole article.</div>
+        <div className="modal-desc">How headings and body text look in this document. Other tabs keep their own settings.</div>
       </div>
       <div className="settings-body">
         <div className="settings-field">
           <label className="modal-label">PRESET FONT SYSTEM</label>
           <div className="fonts-presets">
-            {FONT_PRESETS.map((p) => (
+            {presets.map((p) => (
               <button key={p.id} className={"fonts-chip" + (fonts.preset === p.id ? " fonts-chip--on" : "")} onClick={() => applyPreset(p.id)}>
-                <span className="fonts-chip-name">{p.label}</span>
+                <span className="fonts-chip-name">{p.id === templatePreset ? p.label + " (template)" : p.label}</span>
                 <span className="fonts-chip-note">{p.note}</span>
               </button>
             ))}
@@ -80,7 +82,7 @@ export function FontsPanel({ fonts, setLevel, applyPreset, reset }) {
           ))}
         </div>
         <div className="modal-quote">Sizes and spacing are relative to the preset: M and Normal are the preset as designed. Picking a preset resets them.</div>
-        <button className="modal-btn fonts-reset" onClick={reset}>Reset to default</button>
+        <button className="modal-btn fonts-reset" onClick={reset}>Reset to template fonts</button>
       </div>
     </>
   );

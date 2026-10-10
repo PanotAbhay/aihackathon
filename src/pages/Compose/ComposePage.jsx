@@ -3,19 +3,19 @@ import { useFlash } from "../../hooks/useFlash.js";
 import { useDocument } from "../../hooks/useDocument.js";
 import { useZoom } from "../../hooks/useZoom.js";
 import { useAiSettings } from "../../hooks/useAiSettings.js";
-import { useFontSettings } from "../../hooks/useFontSettings.js";
+import { useWorkspace } from "../../hooks/useWorkspace.js";
 import { useSelectionBar } from "../../hooks/useSelectionBar.js";
 import { useShortcuts } from "../../hooks/useShortcuts.js";
 import { useBlockDrag } from "../../hooks/useBlockDrag.js";
 import { useImport } from "../../hooks/useImport.js";
 import { useAiFill } from "../../hooks/useAiFill.js";
-import { useTemplate } from "../../hooks/useTemplate.js";
 import { NEW_BLOCK, TEMPLATES } from "../../data/index.js";
 import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWords } from "../../utils/blocks.js";
 import { articleHtml } from "../../utils/exportHtml.js";
 import { blocksToLatex, texFileName } from "../../utils/latexExport.js";
 import { makeZip } from "../../utils/zip.js";
-import { fontLinks } from "../../utils/fonts.js";
+import { fontLinks, fontVars } from "../../utils/fonts.js";
+import { presetSettings } from "../../data/fontSystems.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { IconRail } from "./components/IconRail.jsx";
 import { ElementsPanel } from "./components/ElementsPanel.jsx";
@@ -24,23 +24,25 @@ import { FormatToolbar } from "./components/FormatToolbar.jsx";
 import { SettingsModal } from "./components/SettingsModal.jsx";
 import { ImportModal } from "./components/ImportModal.jsx";
 import { TemplatePicker } from "./components/TemplatePicker.jsx";
+import { DocTabs } from "./components/DocTabs.jsx";
 import "./ComposePage.css";
 
 export function ComposePage() {
   const { note, noteErr, setNoteErr, flash } = useFlash();
-  const doc = useDocument(flash);
+  const workspace = useWorkspace(flash);
+  const { active } = workspace;
+  const doc = useDocument({ doc: active, updateDoc: workspace.updateDoc, flash });
   const { zoom, zoomIn, zoomOut } = useZoom();
   const { aiConfig, saveAi } = useAiSettings();
-  const fonts = useFontSettings();
   const [bar, setBar] = useSelectionBar();
-  const templates = useTemplate();
-  const { template } = templates;
+  // Everything below follows the active tab; its template never changes.
+  const template = TEMPLATES[active ? active.templateKey : "news"];
 
   const [sel, setSel] = useState(null);
   const [busy, setBusy] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [docTitle, setDocTitle] = useState("Feature Story");
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [exported, setExported] = useState(false);
   // Where palette clicks insert; tracked without re-rendering on every caret move.
   const caretIdxRef = useRef(null);
@@ -53,7 +55,7 @@ export function ComposePage() {
 
   const filler = useAiFill({ getBlocks: doc.getBlocks, save: doc.save, flash, aiConfig, rules: template.aiRules });
   const drag = useBlockDrag({ getBlocks: doc.getBlocks, save: doc.save, insertBlock, onFill: filler.fillFromText });
-  const importer = useImport({ busy, setBusy, flash, aiConfig, save: doc.save, setNoteErr, template, onTemplate: templates.applyTemplate });
+  const importer = useImport({ busy, setBusy, flash, aiConfig, save: doc.save, setNoteErr, template });
 
   function handleUndo() {
     if (doc.undo()) setSel(null);
@@ -129,7 +131,7 @@ export function ComposePage() {
   function handleExport() {
     const node = document.querySelector("[data-article]");
     if (!node) return;
-    const html = articleHtml(node, fontLinks(fonts.fonts));
+    const html = articleHtml(node, fontLinks(active.fonts));
     function done() {
       setExported(true);
       setTimeout(() => setExported(false), 1600);
@@ -159,26 +161,48 @@ export function ComposePage() {
     if (window.confirm("Clear the article and start over from the " + template.label + " starter page?")) doc.save(createStarterBlocks(template.key));
   }
 
-  function handlePickTemplate(key) {
-    doc.save(createStarterBlocks(key));
-    templates.applyTemplate(key);
-    templates.closePicker();
+  function resetEditing() {
     setSel(null);
-    flash("STARTED A " + TEMPLATES[key].label.toUpperCase() + " PAGE — CTRL+Z FOR THE PREVIOUS ONE");
+    setBar(null);
+    caretIdxRef.current = null;
   }
 
-  function handleSwitchTemplate(key) {
-    templates.applyTemplate(key);
-    flash("SWITCHED TO " + TEMPLATES[key].label.toUpperCase() + " — YOUR TEXT IS UNCHANGED");
+  function handlePickTemplate(key) {
+    workspace.createDoc(key);
+    setPickerOpen(false);
+    resetEditing();
+    flash("OPENED A NEW " + TEMPLATES[key].label.toUpperCase() + " DOCUMENT");
   }
+
+  function handleSelectDoc(id) {
+    if (id === active?.id) return;
+    document.activeElement?.blur?.();
+    workspace.selectDoc(id);
+    resetEditing();
+  }
+
+  function handleCloseDoc(d) {
+    if (!window.confirm("Close “" + d.title + "”? Its content will be deleted.")) return;
+    workspace.closeDoc(d.id);
+    doc.forget(d.id);
+    resetEditing();
+  }
+
+  // Font settings belong to the active tab and start from its template's typography.
+  const fonts = active && {
+    fonts: active.fonts,
+    templatePreset: template.fontPreset,
+    setLevel: (level, patch) => workspace.updateDoc(active.id, (d) => ({ fonts: { ...d.fonts, [level]: { ...d.fonts[level], ...patch } } })),
+    applyPreset: (id) => workspace.updateDoc(active.id, { fonts: presetSettings(id) }),
+    reset: () => workspace.updateDoc(active.id, { fonts: presetSettings(template.fontPreset) }),
+  };
 
   return (
     <div data-shell="" className="compose-shell" style={{ zoom, height: `calc(100vh / ${zoom})` }}>
       <TopBar
-        docTitle={docTitle}
-        onDocTitle={setDocTitle}
-        templateKey={template.key}
-        onTemplate={handleSwitchTemplate}
+        docTitle={active ? active.title : ""}
+        onDocTitle={(title) => active && workspace.updateDoc(active.id, { title: title.trim() || template.label })}
+        templateKey={active ? template.key : null}
         note={note}
         noteErr={noteErr}
         busy={busy || filler.building.length > 0}
@@ -187,7 +211,7 @@ export function ComposePage() {
         onZoomOut={zoomOut}
         exported={exported}
         onExport={handleExport}
-        onExportTex={template.theme.texExport ? handleExportTex : null}
+        onExportTex={active && template.theme.texExport ? handleExportTex : null}
         onImport={importer.openImport}
       />
 
@@ -195,7 +219,7 @@ export function ComposePage() {
         <IconRail
           panelOpen={panelOpen}
           onTogglePanel={() => setPanelOpen(!panelOpen)}
-          onTemplates={templates.openPicker}
+          onTemplates={() => setPickerOpen(true)}
           onImport={importer.openImport}
           onUndo={handleUndo}
           onRedo={handleRedo}
@@ -211,41 +235,51 @@ export function ComposePage() {
           onDragEnd={drag.clearDrop}
         />
         <div className="compose-workspace">
-          <Canvas
-            blocks={doc.blocks}
-            sel={sel}
-            building={filler.building}
-            look={template.look}
-            theme={template.theme}
-            allowed={template.blocks}
-            drop={drag.drop}
-            readTime={Math.max(1, Math.round(countWords(doc.blocks) / 220))}
-            onClearSel={handleClearSel}
-            onSelect={handleSelect}
-            onCaret={(index) => { caretIdxRef.current = index; }}
-            onPatch={doc.patch}
-            onDelete={handleDelete}
-            onDeleteSection={handleDeleteSection}
-            onDuplicate={handleDuplicate}
-            onCommitProse={handleCommitProse}
-            onShowDrop={drag.showDrop}
-            onDropAt={drag.dropAt}
-            onMoveStart={drag.startMoveDrag}
-            onDragEnd={drag.clearDrop}
+          <DocTabs
+            docs={workspace.docs}
+            activeId={active ? active.id : null}
+            onSelect={handleSelectDoc}
+            onClose={handleCloseDoc}
+            onNew={() => setPickerOpen(true)}
           />
+          {active && (
+            <Canvas
+              key={active.id}
+              blocks={doc.blocks}
+              sel={sel}
+              building={filler.building}
+              look={{ ...template.look, ...fontVars(active.fonts) }}
+              theme={template.theme}
+              allowed={template.blocks}
+              drop={drag.drop}
+              readTime={Math.max(1, Math.round(countWords(doc.blocks) / 220))}
+              onClearSel={handleClearSel}
+              onSelect={handleSelect}
+              onCaret={(index) => { caretIdxRef.current = index; }}
+              onPatch={doc.patch}
+              onDelete={handleDelete}
+              onDeleteSection={handleDeleteSection}
+              onDuplicate={handleDuplicate}
+              onCommitProse={handleCommitProse}
+              onShowDrop={drag.showDrop}
+              onDropAt={drag.dropAt}
+              onMoveStart={drag.startMoveDrag}
+              onDragEnd={drag.clearDrop}
+            />
+          )}
         </div>
       </div>
 
       {bar && <FormatToolbar bar={bar} zoom={zoom} />}
 
-      {settingsOpen && (
+      {settingsOpen && fonts && (
         <SettingsModal aiConfig={aiConfig} onSave={saveAi} fonts={fonts} onClose={() => setSettingsOpen(false)} />
       )}
 
       {importer.importOpen && <ImportModal importer={importer} busy={busy} noteErr={noteErr} />}
 
-      {templates.pickerOpen && (
-        <TemplatePicker currentKey={template.key} onPick={handlePickTemplate} onClose={templates.closePicker} />
+      {(pickerOpen || !active) && (
+        <TemplatePicker canClose={!!active} onPick={handlePickTemplate} onClose={() => setPickerOpen(false)} />
       )}
     </div>
   );

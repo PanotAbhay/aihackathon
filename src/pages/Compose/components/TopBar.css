@@ -157,11 +157,11 @@
   align-items: center;
   gap: 6px;
   margin-left: 8px;
-  padding: 4px 6px 4px 9px;
+  padding: 4px 9px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
-  cursor: pointer;
+  cursor: default;
 }
 
 .top-bar-template-icon {
@@ -169,17 +169,13 @@
   color: #C9A227;
 }
 
-.top-bar-template-select {
+.top-bar-template-label {
   font-family: var(--font-sans);
   font-size: 12.5px;
   color: rgba(242,239,233,0.8);
-  background: transparent;
-  border: none;
-  outline: none;
-  padding-right: 4px;
-  cursor: pointer;
 }
 
-.top-bar-template-select option {
-  color: #1A1613;
+.top-bar-template-lock {
+  font-size: 13px;
+  color: rgba(242,239,233,0.35);
 }

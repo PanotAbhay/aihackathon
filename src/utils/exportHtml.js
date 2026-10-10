@@ -1,9 +1,6 @@
-// Variables written by the font settings (see utils/fonts.js).
-const TYPE_VAR = /^--(h1|h2|h3|standfirst|body)-/;
-
-// Swap font-setting var() references for their current values so the pasted article
-// keeps the chosen typography; other variables stay as house tokens.
-function bakeTypeVars(css, computed) {
+// Swap var() references for their current values, so the pasted article keeps the tab's
+// typography and its template's colours without the app's stylesheet.
+function bakeVars(css, computed) {
   let out = "";
   let i = 0;
   for (;;) {
@@ -16,7 +13,7 @@ function bakeTypeVars(css, computed) {
     }
     const inner = css.slice(at + 4, end);
     const name = inner.split(",")[0].trim();
-    const value = TYPE_VAR.test(name) ? computed.getPropertyValue(name).trim() : "";
+    const value = name.startsWith("--") ? computed.getPropertyValue(name).trim() : "";
     out += css.slice(i, at) + (value || css.slice(at, end + 1));
     i = end + 1;
   }
@@ -26,8 +23,9 @@ function bakeTypeVars(css, computed) {
 // `fontLinks` are stylesheet URLs for web fonts the article uses.
 export function articleHtml(node, fontLinks = []) {
   const c = node.cloneNode(true);
-  const computed = getComputedStyle(document.documentElement);
-  c.querySelectorAll("[style]").forEach((n) => n.setAttribute("style", bakeTypeVars(n.getAttribute("style"), computed)));
+  // Read the variables where they are set: font settings and template colours live on the tab's canvas.
+  const computed = getComputedStyle(node);
+  c.querySelectorAll("[style]").forEach((n) => n.setAttribute("style", bakeVars(n.getAttribute("style"), computed)));
   c.querySelectorAll("[data-chrome]").forEach((n) => n.remove());
   c.querySelectorAll("[contenteditable]").forEach((n) => {
     n.removeAttribute("contenteditable");
