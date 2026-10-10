@@ -1,5 +1,11 @@
 import { IMAGE_TYPES } from "../data/index.js";
 
+// Same rule as the on-screen plot (PgfPlot): long tick labels rotate.
+function rotatedLabels(rows) {
+  const longest = Math.max(0, ...rows.map((r) => String(r.label || "").length));
+  return longest * rows.length > 36;
+}
+
 const PREAMBLE = [
   "\\documentclass[11pt%COLUMNS%]{article}",
   "\\usepackage[T1]{fontenc}",
@@ -63,7 +69,7 @@ function plotFigure(block, plot) {
     "\\begin{figure}[ht]",
     "  \\centering",
     "  \\begin{tikzpicture}",
-    "    \\begin{axis}[" + plot.axis + ", width=0.85\\linewidth, height=6cm, xtick=data, xticklabels={" + labels + "}, ylabel={" + escapeTex(block.b) + "}, x tick label style={font=\\small}]",
+    "    \\begin{axis}[" + plot.axis + ", width=0.85\\linewidth, height=6cm, xtick=data, xticklabels={" + labels + "}, ylabel={" + escapeTex(block.b) + "}, x tick label style={font=\\small" + (rotatedLabels(bars) ? ", rotate=45, anchor=east" : "") + "}]",
     "      \\addplot" + plot.style + " coordinates {" + coords + "};",
     "    \\end{axis}",
     "  \\end{tikzpicture}",
@@ -145,8 +151,8 @@ export function blocksToLatex(blocks, { columns = 2 } = {}) {
     else if (t === "divider") body.push("\\begin{center}\n$\\ast$\\quad$\\ast$\\quad$\\ast$\n\\end{center}");
     else if (t === "nutshell") body.push("\\begin{center}\n\\fbox{\\parbox{0.92\\linewidth}{\n\\textbf{" + escapeTex(b.a) + "}\n" + list("itemize", b.html) + "\n}}\n\\end{center}");
     else if (t === "table") body.push(table(b, columns === 2));
-    else if (t === "chart") { figures += 1; body.push(plotFigure(b, { axis: "ybar, ymin=0, nodes near coords, enlarge x limits=0.15", style: "[fill=blue!40, draw=blue!70!black]" })); }
-    else if (t === "line") { figures += 1; body.push(plotFigure(b, { axis: "ymin=0", style: "[mark=*, smooth, thick, blue!70!black]" })); }
+    else if (t === "chart") { figures += 1; body.push(plotFigure(b, { axis: "ybar, ymin=0, nodes near coords, enlarge x limits=0.15", style: "[fill=blue!30!white, draw=blue]" })); }
+    else if (t === "line") { figures += 1; body.push(plotFigure(b, { axis: "ymin=0, nodes near coords, enlarge x limits=0.05", style: "[color=blue, mark=*]" })); }
     else if (t === "poll") body.push(table({ a: b.a, rows: [["", escapeTex(b.b) || "Share"], ...(b.bars || []).map((r) => [r.label, r.value + "%"])] }));
     else if (t === "stats") body.push(table({ a: b.a, rows: [(b.cells || []).map((c) => c.label), (b.cells || []).map((c) => c.value)] }, columns === 2));
     else if (t === "timeline") body.push("\\begin{description}\n" + (b.rows || []).map((r) => "  \\item[" + escapeTex(r.d) + "] \\textbf{" + escapeTex(r.t) + "} " + escapeTex(r.x)).join("\n") + "\n\\end{description}");
