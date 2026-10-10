@@ -1,0 +1,18 @@
+.stat-cell-controls {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.stat-cell-btn {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  line-height: 1;
+  color: #6B635A;
+  background: #FFFDF9;
+  border: 1px solid rgba(26,22,18,0.13);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(26,22,18,0.07);
+  padding: 3px 6px;
+  cursor: pointer;
+}

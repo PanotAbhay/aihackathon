@@ -1,0 +1,53 @@
+.image-slot-tools {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: rgba(26,22,19,0.84);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 9px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  cursor: default;
+}
+
+.image-slot--filled:hover .image-slot-tools,
+.image-slot-tools:focus-within {
+  opacity: 1;
+}
+
+.image-slot-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: #F2EFE9;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.image-slot-icon {
+  font-size: 17px;
+}
+
+.image-slot-range {
+  width: 96px;
+  accent-color: #C9A227;
+  cursor: pointer;
+}
+
+.image-slot-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 3px 2px;
+  background: rgba(255,255,255,0.18);
+}

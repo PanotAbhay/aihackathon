@@ -1,0 +1,55 @@
+.canvas {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--paper);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow: 0 22px 60px rgba(0,0,0,0.5);
+}
+
+.canvas-tail {
+  margin-top: 20px;
+  height: 70px;
+  border-radius: 10px;
+  border: 1.5px dashed rgba(26,22,18,0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  background: transparent;
+}
+
+.canvas-tail--active {
+  border-color: rgba(201,162,39,0.75);
+  background: rgba(201,162,39,0.07);
+}
+
+.canvas-tail-label {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: #8A8177;
+}
+
+.canvas-inner {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Print layouts: A4 sheets on a dark desk, like a print preview. */
+.canvas--print {
+  background: #34302B;
+}
+
+.print-desk {
+  padding: 36px 0 8px;
+}
+
+.canvas-tail--print {
+  width: 794px;
+  margin: 0 auto 60px;
+  border-color: rgba(255,255,255,0.22);
+}
+
+.canvas-tail--print .canvas-tail-label {
+  color: rgba(242,239,233,0.55);
+}
