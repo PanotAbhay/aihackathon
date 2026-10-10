@@ -225,9 +225,11 @@ export function promptPara(para) {
   return m ? "```" + m[1] + " (" + m[2].split("\n").length + " lines of code)```" : para;
 }
 
-// Pick the document title out of the first paragraphs: the first "# " heading that isn't a chapter.
+// Pick the document title out of the first paragraphs: the first "# " heading that isn't a chapter,
+// else the first paragraph — unless that is structure (a chapter, code, a picture), which stays put.
 export function splitHeadline(paras) {
   const k = paras.slice(0, 6).findIndex((p) => /^#\s/.test(p) && !CHAPTER_MARK.test(p));
+  if (k < 0 && paras.length && isMarked(paras[0])) return { headline: "", rest: paras.slice() };
   const at = k < 0 ? 0 : k;
   return { headline: String(paras[at] || "").replace(/^#+\s+/, ""), rest: paras.filter((_, i) => i !== at) };
 }
