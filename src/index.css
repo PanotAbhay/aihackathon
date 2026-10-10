@@ -520,7 +520,10 @@ a:hover { color: var(--red); }
 [data-prose][data-indent] > p:first-child { text-indent: 0; }
 /* A run of paragraphs continued on a new page or column starts with a new, indented paragraph. */
 [data-prose][data-indent][data-continued] > p:first-child { text-indent: 1.5em; }
-[data-lede="1"] > p:first-child::first-letter {
+/* Drop caps. In Safari the caret is drawn in the wrong place beside them, so there a paragraph
+   being edited ([data-editing], ProseBlock) shows its first letter at normal size (main.jsx). */
+:root:not([data-webkit-dropcap]) [data-lede="1"] > p:first-child::first-letter,
+:root[data-webkit-dropcap] [data-lede="1"]:not([data-editing]) > p:first-child::first-letter {
   float: left; font-family: var(--h1-font, var(--font-serif)); font-size: 76px;
   line-height: 0.72; font-weight: 600; color: var(--ink); margin: 6px 12px 0 0;
 }

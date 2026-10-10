@@ -1,3 +1,8 @@
+// Safari's engine (WebKit without Chromium) draws the caret a few letters off beside a floated
+// ::first-letter drop cap, so Backspace seems to delete the wrong letters. Chrome is fine.
+export const WEBKIT_DROP_CAP_BUG = typeof navigator !== "undefined"
+  && /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|CriOS|Edg|OPR/.test(navigator.userAgent);
+
 // Write a value into a contentEditable node without stealing the caret.
 export function bindContent(node, value, asHtml) {
   if (!node) return;
