@@ -76,13 +76,34 @@ describe("useImport", () => {
     delete window.claude;
   });
 
-  it("explains a cut-off AI reply", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
-    const { hook, save } = setup("lab", '{"headline": "Lab", "insertions": [');
+  it("explains a reply that isn't a plan, and logs it", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const { hook, save } = setup("lab", "Sorry, I can't format that.");
     act(() => hook.result.current.setRaw(MANUAL));
     await act(async () => { await hook.result.current.importAi(); });
     expect(save).not.toHaveBeenCalled();
-    expect(hook.result.current.importNote).toMatch(/CUT OFF OR MALFORMED/);
+    expect(hook.result.current.importNote).toMatch(/WASN’T A LAYOUT PLAN/);
+    expect(error.mock.calls.some((c) => String(c[1]).includes("Sorry"))).toBe(true);
+    delete window.claude;
+  });
+
+  it("explains an empty reply", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { hook, save } = setup("lab", "");
+    act(() => hook.result.current.setRaw(MANUAL));
+    await act(async () => { await hook.result.current.importAi(); });
+    expect(save).not.toHaveBeenCalled();
+    expect(hook.result.current.importNote).toMatch(/SENT BACK NOTHING/);
+    delete window.claude;
+  });
+
+  it("builds the page from a plan cut off part-way", async () => {
+    const { hook, save } = setup("lab", '{"headline":"Database Lab Manual","insertions":[{"after":4,"type":"nutshell","title":"Safety","items":["Back up first."]},{"after":6,"type":"h2","text":"Cut of');
+    act(() => hook.result.current.setRaw(MANUAL));
+    await act(async () => { await hook.result.current.importAi(); });
+    const blocks = save.mock.calls[0][0];
+    expect(blocks.map((b) => b.type)).toContain("nutshell");
+    expect(blocks.map((b) => b.type)).toContain("chapter");
     delete window.claude;
   });
 });

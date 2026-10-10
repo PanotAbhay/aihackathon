@@ -35,7 +35,7 @@ Tests sit next to the code they cover (`*.test.js` / `*.test.jsx`) and run in js
 - **Photos:** uploads go through `prepareImage` (resized to ≤2000px; Chrome ignores CSS `url()` values over ~2 MB). Each slot is an `ImageSlot` (drag to pan, toolbar/pinch to zoom); framing lives in `block.frames[i] = { x, y, zoom }` beside `block.slots[i]` and renders as `object-position` + `transform: scale()` on an inline-styled `<img>`, so exports keep the crop. The .tex export bakes each slot's framing into the exported photo (`framedImages` in `utils/imageCrop.js`).
 - **contentEditable pattern:** `EditableText` / `bindContent` write content via callback refs only when the node isn't focused, and commit on blur. Don't render editable text as React children.
 - **Inline styles inside article blocks are intentional.** "Copy HTML" exports the article DOM as-is, so that markup must carry its own styles. Everything outside the article (chrome, modals, toolbars) uses co-located CSS files.
-- AI calls go straight from the browser to Anthropic, OpenAI, Gemini or Ollama, with the key stored in localStorage (Settings modal). There is no backend.
+- AI calls go straight from the browser to Anthropic, OpenAI, Gemini or Ollama, with the key stored in localStorage (Settings modal). There is no backend. Calls that expect JSON pass `{ json: true }` to `callAi` (OpenAI `response_format`, Gemini `responseMimeType`, Ollama `format`); an empty reply throws `EMPTY_REPLY`, and `parseJsonReply` keeps the complete part of a reply cut off at the token limit.
 
 ## Coding style (follow it)
 

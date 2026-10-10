@@ -264,6 +264,29 @@ describe("misc", () => {
   it("parses JSON replies wrapped in fences or prose", () => {
     expect(parseJsonReply('```json\n{"a":1}\n```')).toEqual({ a: 1 });
     expect(parseJsonReply('Sure! {"a":2} Done.')).toEqual({ a: 2 });
+    expect(parseJsonReply('Here is the plan:\n```json\n{"a":3}\n```\nHope that helps.')).toEqual({ a: 3 });
+  });
+
+  it("tolerates trailing commas", () => {
+    expect(parseJsonReply('{"insertions":[{"after":1,"type":"h2","text":"A"},],}')).toEqual({ insertions: [{ after: 1, type: "h2", text: "A" }] });
+  });
+
+  it("keeps the complete part of a plan cut off at the token limit", () => {
+    const cut = '{"headline":"H","insertions":[{"after":1,"type":"h2","text":"A"},{"after":3,"type":"table","rows":[["x","y"],["1","2"]]},{"after":5,"type":"quote","text":"half a sente';
+    const plan = parseJsonReply(cut);
+    expect(plan.headline).toBe("H");
+    expect(plan.insertions.map((o) => o.type)).toEqual(["h2", "table"]);
+    expect(plan.insertions[1].rows).toEqual([["x", "y"], ["1", "2"]]);
+  });
+
+  it("isn't fooled by brackets and quotes inside strings", () => {
+    const cut = '{"insertions":[{"after":1,"type":"h2","text":"a } ] \\" b"},{"after":2';
+    expect(parseJsonReply(cut).insertions).toEqual([{ after: 1, type: "h2", text: 'a } ] " b' }]);
+  });
+
+  it("throws for replies with no JSON at all", () => {
+    expect(() => parseJsonReply("")).toThrow(SyntaxError);
+    expect(() => parseJsonReply("Sorry, I can't help with that.")).toThrow(SyntaxError);
     expect(() => parseJsonReply('{"a":')).toThrow(SyntaxError);
   });
 

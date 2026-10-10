@@ -24,7 +24,7 @@ export function useAiFill({ getBlocks, save, flash, aiConfig, rules }) {
     flash("BUILDING " + type.toUpperCase() + " FROM " + (count > 1 ? count + " PARAGRAPHS" : "THE PARAGRAPH") + "…");
 
     try {
-      const res = await callAi(aiConfig, elementPrompt(count, type, rules), text, count > 1 ? 4000 : 1400);
+      const res = await callAi(aiConfig, elementPrompt(count, type, rules), text, count > 1 ? 4000 : 1400, { json: true });
       const blk = elementToBlock(parseJsonReply(res), "% who agree");
       if (!blk) throw new Error("no element");
       // A pull quote the model paraphrased from reported speech would put words in someone's mouth.

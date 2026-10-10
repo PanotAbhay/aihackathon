@@ -37,18 +37,32 @@ async function readError(label, r, length) {
   return new Error(label + " " + r.status + " " + (await r.text()).slice(0, length));
 }
 
-// One call site for every model provider.
-export async function callAi(config, system, user, maxTokens) {
+// Gemini 1.x and 2.0 models can't write more than 8,192 tokens and reject larger requests.
+function geminiMaxTokens(model, maxTokens) {
+  return /gemini-(1\.|2\.0)/.test(model) ? Math.min(maxTokens, 8192) : maxTokens;
+}
+
+// A reply with no text (a reasoning model can spend its whole budget thinking) can't be parsed;
+// say so rather than report malformed JSON.
+function replyText(text, label, stop) {
+  const s = String(text || "");
+  if (!s.trim()) throw new Error("EMPTY_REPLY " + label + (stop ? " (" + stop + ")" : ""));
+  if (/length|max_tokens|MAX_TOKENS/.test(String(stop || ""))) console.warn("[Compose] " + label + " reply was cut off at the token limit; salvaging what arrived.");
+  return s;
+}
+
+// One call site for every model provider. `json` asks providers that support it for JSON output.
+export async function callAi(config, system, user, maxTokens, { json = false } = {}) {
   if (config.provider === "builtin") {
     if (!hasBuiltinModel()) {
       throw new Error("The built-in model is only available inside the design tool. Open Settings and choose a provider.");
     }
-    return String(await window.claude.complete({
+    return replyText(await window.claude.complete({
       model: config.model,
       max_tokens: maxTokens,
       system,
       messages: [{ role: "user", content: user }],
-    }) || "");
+    }), "Built-in model");
   }
 
   if (config.provider === "ollama") {
@@ -58,12 +72,13 @@ export async function callAi(config, system, user, maxTokens) {
       body: JSON.stringify({
         model: config.model,
         stream: false,
+        ...(json && { format: "json" }),
         messages: [{ role: "system", content: system }, { role: "user", content: user }],
       }),
     });
     if (!r.ok) throw new Error("Ollama " + r.status);
     const d = await r.json();
-    return String((d.message && d.message.content) || "");
+    return replyText(d.message && d.message.content, "Ollama", d.done_reason);
   }
 
   if (!config.key) throw new Error("No API key set. Open Settings to add one.");
@@ -76,11 +91,13 @@ export async function callAi(config, system, user, maxTokens) {
     });
     if (!r.ok) throw await readError("Anthropic", r, 120);
     const d = await r.json();
-    return String((d.content && d.content[0] && d.content[0].text) || "");
+    const text = (d.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
+    return replyText(text, "Anthropic", d.stop_reason);
   }
 
   if (config.provider === "openai") {
     const body = { model: config.model, messages: [{ role: "system", content: system }, { role: "user", content: user }] };
+    if (json) body.response_format = { type: "json_object" };
     if (/^(gpt-5|o\d)/.test(config.model)) body.max_completion_tokens = maxTokens;
     else body.max_tokens = maxTokens;
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -90,7 +107,8 @@ export async function callAi(config, system, user, maxTokens) {
     });
     if (!r.ok) throw await readError("OpenAI", r, 120);
     const d = await r.json();
-    return String((d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || "");
+    const choice = (d.choices && d.choices[0]) || {};
+    return replyText(choice.message && choice.message.content, "OpenAI", choice.finish_reason);
   }
 
   if (config.provider === "gemini") {
@@ -100,11 +118,12 @@ export async function callAi(config, system, user, maxTokens) {
       body: JSON.stringify({
         system_instruction: { parts: [{ text: system }] },
         contents: [{ parts: [{ text: user }] }],
-        generationConfig: { maxOutputTokens: maxTokens },
+        generationConfig: { maxOutputTokens: geminiMaxTokens(config.model, maxTokens), ...(json && { responseMimeType: "application/json" }) },
       }),
     });
     if (!r.ok) throw await readError("Gemini", r, 120);
-    return geminiText(await r.json());
+    const d = await r.json();
+    return replyText(geminiText(d), "Gemini", d.candidates && d.candidates[0] && d.candidates[0].finishReason);
   }
 
   throw new Error("Unknown provider");

@@ -121,12 +121,48 @@ export function stripFences(reply) {
   return String(reply || "").trim().replace(/^```[a-z]*\s*/i, "").replace(/```\s*$/, "").trim();
 }
 
+// A reply cut off mid-JSON (the model hit its token limit): keep everything up to the last
+// complete object or array and close the brackets still open, so the plan so far survives.
+function closeTruncated(s) {
+  const open = [];
+  let inString = false;
+  let escaped = false;
+  let cut = -1;
+  let closers = "";
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === '"') inString = false;
+    } else if (c === '"') inString = true;
+    else if (c === "{" || c === "[") open.push(c === "{" ? "}" : "]");
+    else if (c === "}" || c === "]") {
+      open.pop();
+      cut = i + 1;
+      closers = open.slice().reverse().join("");
+    }
+  }
+  return cut < 0 ? null : s.slice(0, cut).replace(/,\s*$/, "") + closers;
+}
+
+// The JSON object in a model's reply, tolerating code fences, text around it, trailing commas
+// and a reply cut off part-way.
 export function parseJsonReply(reply) {
-  let s = stripFences(reply);
+  const s = stripFences(reply);
   const a = s.indexOf("{");
-  const b = s.lastIndexOf("}");
-  if (a > 0 || b < s.length - 1) s = s.slice(a, b + 1);
-  return JSON.parse(s);
+  if (a < 0) throw new SyntaxError("No JSON object in the reply");
+  const from = s.slice(a);
+  const b = from.lastIndexOf("}");
+  try {
+    return JSON.parse(from.slice(0, b + 1));
+  } catch (e) {
+    const fixed = closeTruncated(from.replace(/,(\s*[}\]])/g, "$1"));
+    if (fixed) {
+      try { return JSON.parse(fixed); } catch { /* fall through to the original error */ }
+    }
+    throw e;
+  }
 }
 
 function toBars(bars) {
