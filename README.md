@@ -67,8 +67,9 @@ The document, AI settings and zoom persist in `localStorage` (keys in `STORAGE_K
 - [React](https://react.dev) and React DOM (MIT)
 - [React Router](https://reactrouter.com) (MIT)
 - [Vite](https://vitejs.dev) and [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react) (MIT)
+- [PDF.js](https://mozilla.github.io/pdf.js/) (`pdfjs-dist`), by Mozilla, PDF import (Apache 2.0)
 
-`.docx` and PDF import use only browser built-ins (`DecompressionStream`); no parsing library is bundled.
+`.docx` import uses only browser built-ins (`DecompressionStream`). PDF import uses PDF.js, loaded only when a PDF is imported, so pages come out in order with their fonts' characters (ligatures included) and figures are never read as text.
 
 ### Fonts
 
