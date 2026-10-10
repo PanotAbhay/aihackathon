@@ -196,6 +196,7 @@ export function ComposePage() {
             sel={sel}
             building={filler.building}
             look={template.look}
+            theme={template.theme}
             allowed={template.blocks}
             drop={drag.drop}
             readTime={Math.max(1, Math.round(countWords(doc.blocks) / 220))}

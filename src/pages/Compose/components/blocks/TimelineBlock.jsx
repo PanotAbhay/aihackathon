@@ -14,8 +14,9 @@ function dotStyle(last) {
   };
 }
 
-export function TimelineBlock({ block, onPatch }) {
+export function TimelineBlock({ block, theme, onPatch }) {
   const rows = block.rows || [];
+  const t = theme.timeline || {};
 
   function field(i, key) {
     return {
@@ -26,7 +27,7 @@ export function TimelineBlock({ block, onPatch }) {
 
   return (
     <>
-      <div style={{ margin: "32px 0", borderLeft: "1px solid var(--rule)", paddingLeft: 26, display: "flex", flexDirection: "column", gap: 26 }}>
+      <div style={{ margin: "32px 0", borderLeft: "1px solid var(--rule)", paddingLeft: 26, display: "flex", flexDirection: "column", gap: 26, ...t.wrap }}>
         {rows.map((r, i) => (
           <div key={block.id + "e" + i} style={{ position: "relative" }}>
             <span style={dotStyle(i === rows.length - 1)}></span>

@@ -1,11 +1,15 @@
 import { TEMPLATES } from "../../../data/index.js";
 import "./TemplatePicker.css";
 
+function previewHeadline(h1) {
+  return { textAlign: h1.textAlign, fontFamily: h1.fontFamily, fontWeight: h1.fontWeight, borderTop: h1.borderTop && "3px solid var(--ink)", paddingTop: h1.borderTop && 6 };
+}
+
 // A miniature page drawn with the template's own CSS variables, so the card shows its real look.
 function TemplatePreview({ template }) {
   return (
     <div className="template-preview" style={template.look}>
-      <div className="template-preview-headline">{template.starter[0].html}</div>
+      <div className="template-preview-headline" style={previewHeadline(template.theme.h1)}>{template.starter[0].html}</div>
       <div className="template-preview-line template-preview-line--short"></div>
       <div className="template-preview-accent"></div>
       <div className="template-preview-line"></div>

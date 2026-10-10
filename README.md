@@ -32,6 +32,7 @@ src/
 A starter window (shown on first visit, and from the rail's template button) offers **News**, **Finance**, **Research** and **Lab manual**. Each template, defined in `TEMPLATES` in `src/data/index.js`, sets:
 
 - **look**: CSS variable overrides applied to the canvas (accent colour, paper, rules, headline font)
+- **theme**: layout and per-element style overrides (column width, headline alignment, body font, attribution variant, quote, key-facts box, table and divider styles), merged into the blocks' inline styles so Copy HTML exports them
 - **blocks**: the element types the palette offers and the AI may use
 - **aiRules**: extra instructions for import and drag-to-fill
 - **starter**: the demo page you get when you pick it

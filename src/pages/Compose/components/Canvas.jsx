@@ -33,6 +33,7 @@ export function Canvas({
   sel,
   building,
   look,
+  theme,
   allowed,
   drop,
   readTime,
@@ -54,7 +55,7 @@ export function Canvas({
 
   return (
     <div className="canvas" style={look} onMouseDown={onClearSel}>
-      <div data-article="" style={{ maxWidth: 796, margin: "0 auto", padding: "44px 36px 160px 72px" }}>
+      <div data-article="" style={{ maxWidth: 796, margin: "0 auto", padding: "44px 36px 160px 72px", ...theme.article }}>
         {groupBlocks(blocks).map((item) => {
           if (item.kind === "prose") {
             const id = "prose" + item.members[0].id;
@@ -62,6 +63,7 @@ export function Canvas({
               <ProseBlock
                 key={id}
                 members={item.members}
+                theme={theme}
                 start={item.start}
                 end={item.end}
                 dropY={drop.group === id ? drop.y : null}
@@ -83,6 +85,7 @@ export function Canvas({
               inLive={index >= liveFrom && index < liveTo}
               building={building.includes(block.id)}
               allowed={allowed}
+              theme={theme}
               dropActive={drop.index === index}
               readTime={readTime}
               onSelect={onSelect}

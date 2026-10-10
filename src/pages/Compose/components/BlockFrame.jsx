@@ -91,6 +91,7 @@ export function BlockFrame({
   inLive,
   building,
   allowed,
+  theme,
   dropActive,
   readTime,
   onSelect,
@@ -170,7 +171,7 @@ export function BlockFrame({
         />
       )}
 
-      {Body && <Body block={block} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} />}
+      {Body && <Body block={block} theme={theme} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} />}
     </div>
   );
 }

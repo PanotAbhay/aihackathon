@@ -34,7 +34,10 @@ const TEXT_VARIANTS = {
   numbered: { as: "ol", style: { ...LIST_TEXT, paddingLeft: 24, listStyle: "decimal" } },
 };
 
-export function TextBlock({ block, onPatch }) {
+// Which theme entry restyles each text type.
+const THEME_PART = { h1: "h1", standfirst: "standfirst", h2: "h2", h3: "h3", body: "body", dropcap: "body", bullets: "list", numbered: "list" };
+
+export function TextBlock({ block, theme, onPatch }) {
   const variant = TEXT_VARIANTS[block.type];
   return (
     <EditableText
@@ -44,7 +47,7 @@ export function TextBlock({ block, onPatch }) {
       data-ph={variant.placeholder}
       value={block.html}
       onCommit={(v) => onPatch((x) => { x.html = v; })}
-      style={variant.style}
+      style={{ ...variant.style, ...theme[THEME_PART[block.type]] }}
     />
   );
 }

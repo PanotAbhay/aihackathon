@@ -7,8 +7,9 @@ import "./StatsBlock.css";
 const MAX_STATS = 5;
 const NEW_STAT = { value: "00", label: "LABEL" };
 
-export function StatsBlock({ block, onPatch }) {
+export function StatsBlock({ block, theme, onPatch }) {
   const cells = block.cells || [];
+  const t = theme.stats || {};
 
   function addAt(index) {
     onPatch((x) => { if (x.cells.length < MAX_STATS) x.cells.splice(index, 0, { ...NEW_STAT }); });
@@ -21,7 +22,7 @@ export function StatsBlock({ block, onPatch }) {
   return (
     <figure style={FIGURE}>
       <FigureHeader block={block} onPatch={onPatch} titlePlaceholder="Title" notePlaceholder="Source" marginBottom={20} />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(" + Math.max(1, cells.length) + ",1fr)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(" + Math.max(1, cells.length) + ",1fr)", ...t.grid }}>
         {cells.map((c, i) => (
           <div key={block.id + "c" + i} style={i === 0 ? { padding: "4px 14px 4px 0" } : { padding: "4px 14px", borderLeft: "1px solid var(--rule)" }}>
             <div data-chrome="" className="stat-cell-controls">
@@ -32,7 +33,7 @@ export function StatsBlock({ block, onPatch }) {
               data-ph="00%"
               value={c.value}
               onCommit={(v) => onPatch((x) => { x.cells[i].value = v; })}
-              style={{ fontFamily: "var(--font-sans)", fontSize: 34, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.03em", color: i === cells.length - 1 ? "var(--red)" : "var(--ink)", fontVariantNumeric: "lining-nums" }}
+              style={{ fontFamily: "var(--font-sans)", fontSize: 34, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.03em", color: i === cells.length - 1 ? "var(--red)" : "var(--ink)", fontVariantNumeric: "lining-nums", ...t.value }}
             />
             <EditableText
               data-ph="LABEL"

@@ -16,7 +16,7 @@ function slotStyle(src, height) {
   };
 }
 
-export function ImagesBlock({ block, onPatch, onDragEnd }) {
+export function ImagesBlock({ block, theme, onPatch, onDragEnd }) {
   const slots = block.slots || [""];
   const n = slots.length;
   const height = SLOT_HEIGHTS[n] || 180;
@@ -36,7 +36,7 @@ export function ImagesBlock({ block, onPatch, onDragEnd }) {
   }
 
   return (
-    <figure style={FIGURE}>
+    <figure style={{ ...FIGURE, ...theme.figure }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(" + n + ",1fr)", gap: n > 2 ? 12 : 16 }}>
         {slots.map((src, i) => (
           <div
