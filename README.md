@@ -16,6 +16,7 @@ npm run dev
 The **Export** menu in the top bar has two options:
 
 - **Download HTML**: saves one `.html` file with the fonts and colours embedded. It opens offline.
+- **Export PDF** (A4 layouts only): opens the A4 pages and the print dialog; choose **Save as PDF**.
 - **Copy HTML**: copies the article markup to the clipboard.
 
 ### Sharing publicly
@@ -78,7 +79,7 @@ Each template also has its own **font preset** (`TEMPLATE_FONT_PRESETS` in `src/
 
 AI import formats into the tab's template. If the model thinks another template fits better, the confirmation message says so.
 
-The LaTeX paper template adds an **Export .tex** button to the top bar. It converts the article into a compilable `article`-class document: sections, abstract, booktabs tables and pgfplots charts. If the article has photos, you get a `.zip` with `main.tex` and a `figures/` folder, ready to upload to Overleaf. The converter is `src/utils/latexExport.js`.
+The LaTeX paper template adds an **Export .tex** button to the top bar. It converts the article into a compilable `article`-class document: sections, abstract, booktabs tables and pgfplots charts. If the article has photos, you get a `.zip` with `main.tex` and a `figures/` folder (each photo cropped as framed on the page), ready to upload to Overleaf. Figures, tables and charts keep the editor's size, placement and placeholder text, so the compiled PDF matches the page. The converter is `src/utils/latexExport.js`.
 
 To add a template, add an entry to `TEMPLATES`; the picker, menu and prompts pick it up automatically.
 

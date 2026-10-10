@@ -96,11 +96,13 @@ function escapeHtml(s) {
 
 // A standalone page for Preview: the exported article with the app's fonts. Print layouts show
 // the A4 sheets and print one sheet per page.
-export function previewDocument(html, { title, print }) {
+export function previewDocument(html, { title, print, autoPrint = false }) {
   const pageCss = print
-    ? "body{background:#E7E4DE;padding:32px 0;} @page{size:A4;margin:0;} @media print{body{background:none;padding:0;} [data-page]{box-shadow:none!important;margin:0!important;}}"
+    ? "body{background:#E7E4DE;padding:32px 0;} @page{size:A4;margin:0;} @media print{html,body{background:none;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;} [data-page]{box-shadow:none!important;margin:0!important;}}"
     : "body{background:#FFFFFF;padding:48px 16px;}";
+  // Export PDF: open the print dialog once fonts are ready, so "Save as PDF" gets the real typefaces.
+  const printScript = autoPrint ? "<script>document.fonts.ready.then(function(){setTimeout(function(){window.print();},250);});</script>" : "";
   return "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>" + escapeHtml(title) + "</title>"
     + "<style>" + fontFaceCss() + "*,*::before,*::after{box-sizing:border-box;} body{margin:0;-webkit-font-smoothing:antialiased;} img{display:block;} " + pageCss + "</style>"
-    + "</head><body>" + html + "</body></html>";
+    + "</head><body>" + html + printScript + "</body></html>";
 }

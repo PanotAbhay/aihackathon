@@ -13,14 +13,18 @@ const PREAMBLE = [
   "\\usepackage[a4paper,margin=1in]{geometry}",
   "\\usepackage{graphicx}",
   "\\usepackage{booktabs}",
+  "\\usepackage{array}",
+  "\\usepackage{tabularx}",
   "\\usepackage{subcaption}",
   "\\usepackage{pgfplots}",
   "\\pgfplotsset{compat=1.18}",
   "\\usepackage{hyperref}",
 ].join("\n");
 
-// Characters TeX treats specially, plus the Unicode the editor's fonts allow but pdfLaTeX rejects.
+// Characters TeX treats specially, plus Unicode written the LaTeX way so the file compiles the same
+// under pdfLaTeX, XeLaTeX and LuaLaTeX (Overleaf's engines all accept these forms).
 const TEX_ESCAPES = {
+  "—": "---", "–": "--", "’": "'", "‘": "`", "“": "``", "”": "''", "…": "\\ldots{}", "\u00a0": "~",
   "\\": "\\textbackslash{}", "{": "\\{", "}": "\\}", "$": "\\$", "&": "\\&", "#": "\\#",
   "%": "\\%", "_": "\\_", "^": "\\textasciicircum{}", "~": "\\textasciitilde{}",
   "৳": "Tk ", "×": "$\\times$", "−": "$-$", "∗": "$\\ast$", "°": "\\textdegree{}", "²": "\\textsuperscript{2}",
@@ -28,13 +32,13 @@ const TEX_ESCAPES = {
 };
 
 export function escapeTex(text) {
-  return String(text == null ? "" : text).replace(/[\\{}$&#%_^~৳×−∗°²³±≈≤≥µ]/g, (ch) => TEX_ESCAPES[ch]);
+  return String(text == null ? "" : text).replace(/[\\{}$&#%_^~৳×−∗°²³±≈≤≥µ—–’‘“”…\u00a0]/g, (ch) => TEX_ESCAPES[ch]);
 }
 
 // Inline editor HTML (bold, italic, links) → LaTeX. Uses the browser's parser.
 function inlineNodes(nodes) {
   return Array.from(nodes).map((n) => {
-    if (n.nodeType === 3) return escapeTex(n.nodeValue.replace(/\u00a0/g, " "));
+    if (n.nodeType === 3) return escapeTex(n.nodeValue);
     if (n.nodeType !== 1) return "";
     const inner = inlineNodes(n.childNodes);
     const tag = n.tagName.toLowerCase();
@@ -69,7 +73,8 @@ function plotFigure(block, plot) {
     "\\begin{figure}[ht]",
     "  \\centering",
     "  \\begin{tikzpicture}",
-    "    \\begin{axis}[" + plot.axis + ", width=0.85\\linewidth, height=6cm, xtick=data, xticklabels={" + labels + "}, ylabel={" + escapeTex(block.b) + "}, x tick label style={font=\\small" + (rotatedLabels(bars) ? ", rotate=45, anchor=east" : "") + "}]",
+    // Same size as the editor's plot: full column width, ~5.8 cm including labels.
+    "    \\begin{axis}[" + plot.axis + ", width=\\linewidth, height=5.8cm, xtick=data, xticklabels={" + labels + "}, ylabel={" + escapeTex(block.b) + "}, x tick label style={font=\\small" + (rotatedLabels(bars) ? ", rotate=45, anchor=east" : "") + "}]",
     "      \\addplot" + plot.style + " coordinates {" + coords + "};",
     "    \\end{axis}",
     "  \\end{tikzpicture}",
@@ -87,13 +92,20 @@ function dataUrlBytes(url) {
   return { bytes, ext };
 }
 
-function imageFigure(block, figureIndex, images, wide) {
+// Height ÷ width of a photo slot, as drawn in the editor (see theme.imageSlot.aspect).
+export const SLOT_ASPECT = { 1: 2 / 3, 2: 3 / 4, 3: 1 };
+
+function imageFigure(block, figureIndex, images, crops) {
   const slots = block.slots || [""];
   const width = slots.length === 1 ? "\\linewidth" : slots.length === 2 ? "0.48\\linewidth" : "0.31\\linewidth";
+  const ratio = (SLOT_ASPECT[slots.length] || 1).toFixed(3);
   const graphics = slots.map((src, k) => {
     if (!src || !src.startsWith("data:")) {
-      return "\\fbox{\\parbox[c][4cm][c]{0.95\\linewidth}{\\centering Image placeholder}}";
+      // The same framed box, at the same proportions, as the empty slot in the editor.
+      return "\\fbox{\\parbox[c][" + ratio + "\\linewidth][c]{\\dimexpr\\linewidth-2\\fboxsep-2\\fboxrule}{\\centering\\itshape Image placeholder}}";
     }
+    // Photos are exported as framed in the editor (crop, pan and zoom baked in).
+    src = (crops && crops[k]) || src;
     const { bytes, ext } = dataUrlBytes(src);
     const name = "figures/figure" + figureIndex + (slots.length > 1 ? "-" + (k + 1) : "") + "." + ext;
     images.push({ name, data: bytes });
@@ -103,33 +115,34 @@ function imageFigure(block, figureIndex, images, wide) {
   const body = slots.length === 1
     ? "  " + graphics[0]
     : graphics.map((g) => "  \\begin{subfigure}{" + width + "}\n    \\centering\n    " + g + "\n  \\end{subfigure}").join("\\hfill\n");
-  // In two columns, pairs and galleries span the page (figure*), like they do on screen.
-  const env = wide ? "figure*" : "figure";
-  return ["\\begin{" + env + "}[ht]", "  \\centering", body, "  \\caption{" + escapeTex(block.a) + "}", "\\end{" + env + "}"].join("\n");
+  return ["\\begin{figure}[ht]", "  \\centering", body, "  \\caption{" + escapeTex(block.a) + "}", "\\end{figure}"].join("\n");
 }
 
-function table(block, wide) {
+// Full-width table whose columns wrap, like the editor's (plain l columns would overflow a column).
+function table(block) {
   const rows = block.rows || [];
   if (!rows.length) return "";
   const cols = Math.max(...rows.map((r) => r.length));
   const line = (r) => "    " + Array.from({ length: cols }, (_, i) => escapeTex(r[i] || "")).join(" & ") + " \\\\";
   return [
-    "\\begin{" + (wide ? "table*" : "table") + "}[ht]",
+    "\\begin{table}[ht]",
     "  \\centering",
     block.a ? "  \\caption{" + escapeTex(block.a) + "}" : "",
-    "  \\begin{tabular}{" + "l".repeat(cols) + "}",
+    // Tighter cell padding so long headers fit a single column of a two-column page.
+    "  \\setlength{\\tabcolsep}{4pt}",
+    "  \\begin{tabularx}{\\linewidth}{" + ">{\\raggedright\\arraybackslash\\hspace{0pt}}X".repeat(cols) + "}",
     "    \\toprule",
     line(rows[0]),
     "    \\midrule",
     ...rows.slice(1).map(line),
     "    \\bottomrule",
-    "  \\end{tabular}",
-    "\\end{" + (wide ? "table*" : "table") + "}",
+    "  \\end{tabularx}",
+    "\\end{table}",
   ].filter(Boolean).join("\n");
 }
 
 // Turn the document into a compilable article. Returns the .tex source and any embedded photos as files.
-export function blocksToLatex(blocks, { columns = 2 } = {}) {
+export function blocksToLatex(blocks, { columns = 1, crops = {} } = {}) {
   const images = [];
   const front = { title: "", author: "", affiliation: "" };
   const body = [];
@@ -150,13 +163,13 @@ export function blocksToLatex(blocks, { columns = 2 } = {}) {
     else if (t === "byline") body.push("\\noindent\\textit{" + escapeTex([b.a, b.b].filter(Boolean).join(", ")) + "}");
     else if (t === "divider") body.push("\\begin{center}\n$\\ast$\\quad$\\ast$\\quad$\\ast$\n\\end{center}");
     else if (t === "nutshell") body.push("\\begin{center}\n\\fbox{\\parbox{0.92\\linewidth}{\n\\textbf{" + escapeTex(b.a) + "}\n" + list("itemize", b.html) + "\n}}\n\\end{center}");
-    else if (t === "table") body.push(table(b, columns === 2));
+    else if (t === "table") body.push(table(b));
     else if (t === "chart") { figures += 1; body.push(plotFigure(b, { axis: "ybar, ymin=0, nodes near coords, enlarge x limits=0.15", style: "[fill=blue!30!white, draw=blue]" })); }
     else if (t === "line") { figures += 1; body.push(plotFigure(b, { axis: "ymin=0, nodes near coords, enlarge x limits=0.05", style: "[color=blue, mark=*]" })); }
     else if (t === "poll") body.push(table({ a: b.a, rows: [["", escapeTex(b.b) || "Share"], ...(b.bars || []).map((r) => [r.label, r.value + "%"])] }));
-    else if (t === "stats") body.push(table({ a: b.a, rows: [(b.cells || []).map((c) => c.label), (b.cells || []).map((c) => c.value)] }, columns === 2));
+    else if (t === "stats") body.push(table({ a: b.a, rows: [(b.cells || []).map((c) => c.label), (b.cells || []).map((c) => c.value)] }));
     else if (t === "timeline") body.push("\\begin{description}\n" + (b.rows || []).map((r) => "  \\item[" + escapeTex(r.d) + "] \\textbf{" + escapeTex(r.t) + "} " + escapeTex(r.x)).join("\n") + "\n\\end{description}");
-    else if (IMAGE_TYPES.includes(t)) { figures += 1; body.push(imageFigure(b, figures, images, columns === 2 && t !== "image")); }
+    else if (IMAGE_TYPES.includes(t)) { figures += 1; body.push(imageFigure(b, figures, images, crops[b.id])); }
   });
 
   const author = front.author ? front.author + (front.affiliation ? " \\\\ \\small " + front.affiliation : "") : "";

@@ -2,6 +2,7 @@ import { pickFile, prepareImage } from "../../../../utils/fileReaders.js";
 import { EditableText } from "./EditableText.jsx";
 import { Caption } from "./Caption.jsx";
 import { ImageSlot } from "./ImageSlot.jsx";
+import { SLOT_ASPECT } from "../../../../utils/latexExport.js";
 import { FIGURE, MONO_OVERLINE } from "./articleStyles.js";
 
 const SLOT_HEIGHTS = { 1: 340, 2: 250 };
@@ -48,6 +49,7 @@ export function ImagesBlock({ block, theme, number, onPatch, onDragEnd, onNotice
             src={src}
             frame={block.frames && block.frames[i]}
             height={height}
+            aspect={theme.imageSlot && theme.imageSlot.aspect ? SLOT_ASPECT[n] : null}
             emptyStyle={theme.imageSlot && theme.imageSlot.empty}
             onPick={() => pickFile("image/*", (f) => readImage(i, f))}
             onDropFile={(f) => handleDropFile(i, f)}
@@ -56,7 +58,7 @@ export function ImagesBlock({ block, theme, number, onPatch, onDragEnd, onNotice
             {!theme.imageSlot && (
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", color: "var(--muted)", textAlign: "center", padding: "0 12px" }}>DROP PHOTO<br />OR CLICK</span>
             )}
-            {theme.imageSlot && <span style={theme.imageSlot.text}>Image — click or drop a file</span>}
+            {theme.imageSlot && <span style={theme.imageSlot.text}>{theme.imageSlot.label}</span>}
           </ImageSlot>
         ))}
       </div>

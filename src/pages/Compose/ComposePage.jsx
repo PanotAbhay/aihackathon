@@ -15,6 +15,7 @@ import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWord
 import { articleHtml, previewDocument } from "../../utils/exportHtml.js";
 import { blocksToLatex, texFileName } from "../../utils/latexExport.js";
 import { makeZip } from "../../utils/zip.js";
+import { framedImages } from "../../utils/imageCrop.js";
 import { fontLinks, fontVars } from "../../utils/fonts.js";
 import { presetSettings } from "../../data/fontSystems.js";
 import { TopBar } from "./components/TopBar.jsx";
@@ -129,19 +130,30 @@ export function ComposePage() {
     if (sel || bar) { setSel(null); setBar(null); }
   }
 
-  function handlePreview() {
+  function openRendered(autoPrint) {
     const node = document.querySelector("[data-article]");
     if (!node) return;
     const html = articleHtml(node, fontLinks(active.fonts));
     const win = window.open("", "_blank");
-    if (!win) { flash("ALLOW POP-UPS TO OPEN THE PREVIEW", true); return; }
-    win.document.write(previewDocument(html, { title: active.title, print: active.layout !== "web" }));
+    if (!win) { flash("ALLOW POP-UPS TO OPEN THE " + (autoPrint ? "PDF EXPORT" : "PREVIEW"), true); return; }
+    win.document.write(previewDocument(html, { title: active.title, print: active.layout !== "web", autoPrint }));
     win.document.close();
   }
 
-  function handleExportTex() {
+  function handlePreview() {
+    openRendered(false);
+  }
+
+  // The browser's print engine turns the A4 pages into a vector PDF: choose "Save as PDF".
+  function handleExportPdf() {
+    openRendered(true);
+    flash("CHOOSE “SAVE AS PDF” IN THE PRINT DIALOG");
+  }
+
+  async function handleExportTex() {
     const blocks = doc.getBlocks();
-    const { tex, images } = blocksToLatex(blocks, { columns: active.layout === "print-2" ? 2 : 1 });
+    const crops = await framedImages(blocks);
+    const { tex, images } = blocksToLatex(blocks, { columns: active.layout === "print-2" ? 2 : 1, crops });
     const name = texFileName(blocks);
     const blob = images.length
       ? makeZip([{ name: "main.tex", data: new TextEncoder().encode(tex) }, ...images])
@@ -205,6 +217,7 @@ export function ComposePage() {
         layout={active ? active.layout : "web"}
         onLayout={active ? (layout) => workspace.updateDoc(active.id, { layout }) : null}
         onPreview={active ? handlePreview : null}
+        onExportPdf={active && active.layout !== "web" ? handleExportPdf : null}
         note={note}
         noteErr={noteErr}
         busy={busy || filler.building.length > 0}

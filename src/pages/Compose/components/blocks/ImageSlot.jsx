@@ -27,7 +27,7 @@ function imageStyle(frame) {
 
 // One photo slot: click or drop to add a photo, drag to pan it, zoom from the toolbar or with
 // pinch / ⌘-scroll. A whole drag or zoom gesture saves once (one undo step).
-export function ImageSlot({ src, frame, height, emptyStyle, children, onPick, onDropFile, onFrame }) {
+export function ImageSlot({ src, frame, height, aspect, emptyStyle, children, onPick, onDropFile, onFrame }) {
   const saved = { ...DEFAULT_FRAME, ...frame };
   const [live, setLive] = useState(null);
   const shown = live || saved;
@@ -115,7 +115,8 @@ export function ImageSlot({ src, frame, height, emptyStyle, children, onPick, on
       style={{
         position: "relative",
         overflow: "hidden",
-        height,
+        // A fixed proportion (height ÷ width) when the template prints photos at set shapes.
+        ...(aspect ? { aspectRatio: String(1 / aspect) } : { height }),
         background: "var(--placeholder)",
         display: "flex",
         alignItems: "center",
