@@ -8,6 +8,8 @@ import { DropLine } from "./DropLine.jsx";
 import "./Canvas.css";
 
 const MASTHEAD_TYPES = ["h1", "standfirst", "byline"];
+// Two-column pages set everything smaller, as a typesetter would for narrow columns.
+const TWO_COLUMN_SCALE = 0.8;
 // Blocks that may float past following paragraphs when they don't fit (see planPages).
 const FLOAT_TYPES = ["image", "pair", "gallery", "chart", "line", "poll", "table", "stats", "timeline", "nutshell"];
 
@@ -175,6 +177,7 @@ export function Canvas({
 }) {
   const print = layout === "print-1" || layout === "print-2";
   const columns = layout === "print-2" ? 2 : 1;
+  const scale = columns === 2 ? TWO_COLUMN_SCALE : 1;
   const theme = print ? printTheme(baseTheme, columns) : baseTheme;
   const innerRef = useRef(null);
   const [measured, setMeasured] = useState({ heights: {}, lines: {} });
@@ -196,7 +199,7 @@ export function Canvas({
         if (PROSE_TYPES.includes(b.type) && lines[b.id]) Object.assign(unit, { lineHeight: lines[b.id], textHeight: height - paraGap, lede: b.type === "dropcap" });
         return unit;
       }),
-      { columns, mastheadCount: masthead },
+      { columns, mastheadCount: masthead, scale },
     )
     : null;
 
@@ -322,18 +325,21 @@ export function Canvas({
             <div data-article="" data-layout={layout} className="print-desk">
               {pages.map((page, pi) => (
                 <section key={pi} data-page="" style={PAGE_STYLE}>
-                  {page.masthead.length > 0 && <div data-page-masthead="">{renderUnits(page.masthead, { span: columns === 2 })}</div>}
-                  {/* Both columns must be exactly the same width: a paragraph split across them has to wrap identically. */}
-                  <div
-                    data-page-body=""
-                    style={{ position: "relative", display: "grid", gridTemplateColumns: columns === 2 ? "minmax(0, 1fr) minmax(0, 1fr)" : "minmax(0, 1fr)", columnGap: gap, alignItems: "start" }}
-                  >
-                    {columns === 2 && rule && <div style={{ position: "absolute", top: 0, bottom: 0, left: "50%", borderLeft: rule }}></div>}
-                    {page.columns.map((ids, ci) => (
-                      <div key={ci} data-page-column="">
-                        {renderUnits(ids, { side: ci > 0 ? "right" : "left" })}
-                      </div>
-                    ))}
+                  {/* Scaled content keeps the sheet exactly A4: it is laid out wider and zoomed down to fit. */}
+                  <div data-page-content="" style={scale !== 1 ? { zoom: scale, width: (A4.width - A4.margin * 2) / scale } : undefined}>
+                    {page.masthead.length > 0 && <div data-page-masthead="">{renderUnits(page.masthead, { span: columns === 2 })}</div>}
+                    {/* Both columns must be exactly the same width: a paragraph split across them has to wrap identically. */}
+                    <div
+                      data-page-body=""
+                      style={{ position: "relative", display: "grid", gridTemplateColumns: columns === 2 ? "minmax(0, 1fr) minmax(0, 1fr)" : "minmax(0, 1fr)", columnGap: gap, alignItems: "start" }}
+                    >
+                      {columns === 2 && rule && <div style={{ position: "absolute", top: 0, bottom: 0, left: "50%", borderLeft: rule }}></div>}
+                      {page.columns.map((ids, ci) => (
+                        <div key={ci} data-page-column="">
+                          {renderUnits(ids, { side: ci > 0 ? "right" : "left" })}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div data-folio="" style={FOLIO_STYLE}>{pi + 1}</div>
                 </section>
