@@ -89,7 +89,7 @@ export function PgfPlot({ kind, block, onPatch }) {
         {kind === "bar" && rows.map((r, i) => (
           <div
             key={block.id + "b" + i}
-            style={{ position: "absolute", bottom: 0, left: "calc(" + xAt(kind, i, n) * 100 + "% - 11px)", width: 22, height: yAt(r.value) * 100 + "%", background: BLUE_FILL, border: "0.8px solid " + BLUE, boxSizing: "border-box" }}
+            style={{ position: "absolute", bottom: 0, left: "calc(" + xAt(kind, i, n) * 100 + "% - 6.67px)", width: 13.33, height: yAt(r.value) * 100 + "%", background: BLUE_FILL, border: "0.8px solid " + BLUE, boxSizing: "border-box" }}
           >
             {/* nodes near coords */}
             <EditableText

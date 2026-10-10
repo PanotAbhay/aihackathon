@@ -15,6 +15,7 @@ import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWord
 import { articleHtml, previewDocument } from "../../utils/exportHtml.js";
 import { blocksToLatex, texFileName } from "../../utils/latexExport.js";
 import { makeZip } from "../../utils/zip.js";
+import { framedImages } from "../../utils/imageCrop.js";
 import { fontLinks, fontVars } from "../../utils/fonts.js";
 import { presetSettings } from "../../data/fontSystems.js";
 import { TopBar } from "./components/TopBar.jsx";
@@ -139,9 +140,10 @@ export function ComposePage() {
     win.document.close();
   }
 
-  function handleExportTex() {
+  async function handleExportTex() {
     const blocks = doc.getBlocks();
-    const { tex, images } = blocksToLatex(blocks, { columns: active.layout === "print-2" ? 2 : 1 });
+    const crops = await framedImages(blocks);
+    const { tex, images } = blocksToLatex(blocks, { columns: active.layout === "print-2" ? 2 : 1, crops });
     const name = texFileName(blocks);
     const blob = images.length
       ? makeZip([{ name: "main.tex", data: new TextEncoder().encode(tex) }, ...images])

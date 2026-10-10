@@ -375,7 +375,10 @@ export const TEMPLATES = {
       abstractLabel: "Abstract",
       captions: true,
       charts: "pgfplots",
+      // Same proportions and wording as the exported placeholder, so the PDF matches the page.
       imageSlot: {
+        aspect: true,
+        label: "Image placeholder",
         empty: { background: "#FFFFFF", border: "0.8px solid #000000" },
         text: { fontFamily: "var(--body-font)", fontStyle: "italic", fontSize: pt(10), color: "#555555" },
       },
