@@ -518,6 +518,8 @@ a:hover { color: var(--red); }
 /* LaTeX-style paragraphs: indented, no gap, first after a heading flush left. Inlined on export. */
 [data-prose][data-indent] > p { margin: 0; text-indent: 1.5em; }
 [data-prose][data-indent] > p:first-child { text-indent: 0; }
+/* A run of paragraphs continued on a new page or column starts with a new, indented paragraph. */
+[data-prose][data-indent][data-continued] > p:first-child { text-indent: 1.5em; }
 [data-lede="1"] > p:first-child::first-letter {
   float: left; font-family: var(--h1-font, var(--font-serif)); font-size: 76px;
   line-height: 0.72; font-weight: 600; color: var(--ink); margin: 6px 12px 0 0;

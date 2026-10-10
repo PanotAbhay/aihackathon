@@ -5,7 +5,7 @@ import { selectedProseIds } from "../utils/dom.js";
 
 // Drag state for palette items and block handles, plus the drop indicator position.
 export function useBlockDrag({ getBlocks, save, insertBlock, onFill }) {
-  const [drop, setDrop] = useState({ index: -1, group: null, y: 0 });
+  const [drop, setDrop] = useState({ index: -1, line: null });
   const dragRef = useRef(null);
 
   function startDrag(e, payload, data, effect) {
@@ -25,13 +25,15 @@ export function useBlockDrag({ getBlocks, save, insertBlock, onFill }) {
     startDrag(e, { kind: "move", id, run }, id, "move");
   }
 
-  function showDrop(index, group = null, y = 0) {
-    if (drop.index !== index || drop.group !== group || drop.y !== y) setDrop({ index, group, y });
+  // `line` is where to draw the insertion line on the canvas (see dropBoundary in Canvas).
+  function showDrop(index, line) {
+    const same = drop.index === index && drop.line && line && drop.line.top === line.top && drop.line.left === line.left;
+    if (!same) setDrop({ index, line });
   }
 
   function clearDrop() {
     dragRef.current = null;
-    setDrop({ index: -1, group: null, y: 0 });
+    setDrop({ index: -1, line: null });
   }
 
   // `prose` is set when dropping beside paragraphs: { groupIds, adjacentId }.

@@ -11,7 +11,7 @@ import { useImport } from "../../hooks/useImport.js";
 import { useAiFill } from "../../hooks/useAiFill.js";
 import { NEW_BLOCK, TEMPLATES } from "../../data/index.js";
 import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWords } from "../../utils/blocks.js";
-import { articleHtml } from "../../utils/exportHtml.js";
+import { articleHtml, previewDocument } from "../../utils/exportHtml.js";
 import { blocksToLatex, texFileName } from "../../utils/latexExport.js";
 import { makeZip } from "../../utils/zip.js";
 import { fontLinks, fontVars } from "../../utils/fonts.js";
@@ -140,9 +140,19 @@ export function ComposePage() {
     else done();
   }
 
+  function handlePreview() {
+    const node = document.querySelector("[data-article]");
+    if (!node) return;
+    const html = articleHtml(node, fontLinks(active.fonts));
+    const win = window.open("", "_blank");
+    if (!win) { flash("ALLOW POP-UPS TO OPEN THE PREVIEW", true); return; }
+    win.document.write(previewDocument(html, { title: active.title, print: active.layout !== "web" }));
+    win.document.close();
+  }
+
   function handleExportTex() {
     const blocks = doc.getBlocks();
-    const { tex, images } = blocksToLatex(blocks);
+    const { tex, images } = blocksToLatex(blocks, { columns: active.layout === "print-2" ? 2 : 1 });
     const name = texFileName(blocks);
     const blob = images.length
       ? makeZip([{ name: "main.tex", data: new TextEncoder().encode(tex) }, ...images])
@@ -203,6 +213,9 @@ export function ComposePage() {
         docTitle={active ? active.title : ""}
         onDocTitle={(title) => active && workspace.updateDoc(active.id, { title: title.trim() || template.label })}
         templateKey={active ? template.key : null}
+        layout={active ? active.layout : "web"}
+        onLayout={active ? (layout) => workspace.updateDoc(active.id, { layout }) : null}
+        onPreview={active ? handlePreview : null}
         note={note}
         noteErr={noteErr}
         busy={busy || filler.building.length > 0}
@@ -250,6 +263,8 @@ export function ComposePage() {
               building={filler.building}
               look={{ ...template.look, ...fontVars(active.fonts) }}
               theme={template.theme}
+              layout={active.layout}
+              zoom={zoom}
               allowed={template.blocks}
               drop={drag.drop}
               readTime={Math.max(1, Math.round(countWords(doc.blocks) / 220))}

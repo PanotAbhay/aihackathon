@@ -28,7 +28,13 @@ export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
     reader.readAsDataURL(file);
   }
 
+  // Only photo files are caught here; dragged blocks pass through to the canvas.
+  function hasFiles(e) {
+    return Array.from(e.dataTransfer.types || []).includes("Files");
+  }
+
   function handleDrop(e, index) {
+    if (!hasFiles(e)) return;
     e.preventDefault();
     e.stopPropagation();
     const f = e.dataTransfer.files && e.dataTransfer.files[0];
@@ -45,7 +51,7 @@ export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
             title="Click or drop a photo"
             style={slotStyle(src, height)}
             onClick={(e) => { e.stopPropagation(); pickFile("image/*", (f) => readImage(i, f)); }}
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onDragOver={(e) => { if (hasFiles(e)) { e.preventDefault(); e.stopPropagation(); } }}
             onDrop={(e) => handleDrop(e, i)}
           >
             {!src && (

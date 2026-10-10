@@ -31,6 +31,11 @@
   gap: 3px;
 }
 
+.block-chrome--right {
+  left: auto;
+  right: -52px;
+}
+
 .block-chrome-btn {
   width: 26px;
   height: 26px;
