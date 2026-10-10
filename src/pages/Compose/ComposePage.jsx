@@ -271,6 +271,7 @@ export function ComposePage() {
               onDropAt={drag.dropAt}
               onMoveStart={drag.startMoveDrag}
               onDragEnd={drag.clearDrop}
+              onNotice={flash}
             />
           )}
         </div>

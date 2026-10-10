@@ -28,7 +28,8 @@ function loadFont(id) {
 // Turn one level's step choices into concrete values against its preset.
 function resolveLevel(base, choice) {
   return {
-    size: Math.round(base.size * step(SIZE_STEPS, choice.size).scale),
+    // Two decimals: exact point sizes (10pt = 13.33px) must not round to a different size.
+    size: round(base.size * step(SIZE_STEPS, choice.size).scale, 2),
     lh: round(base.lh + step(LINE_HEIGHT_STEPS, choice.lh).delta, 2),
     ls: round(base.ls + step(LETTER_SPACING_STEPS, choice.ls).delta, 3),
   };

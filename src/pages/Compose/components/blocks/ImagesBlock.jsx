@@ -1,75 +1,70 @@
-import { pickFile } from "../../../../utils/fileReaders.js";
+import { pickFile, prepareImage } from "../../../../utils/fileReaders.js";
 import { EditableText } from "./EditableText.jsx";
 import { Caption } from "./Caption.jsx";
+import { ImageSlot } from "./ImageSlot.jsx";
 import { FIGURE, MONO_OVERLINE } from "./articleStyles.js";
 
 const SLOT_HEIGHTS = { 1: 340, 2: 250 };
 
 const SUBFIGURE = "abcdefgh";
 
-function slotStyle(src, height, placeholder) {
-  return {
-    height,
-    background: src ? "var(--placeholder) center/cover no-repeat url(" + src + ")" : "var(--placeholder)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    border: "1px dashed " + (src ? "transparent" : "var(--rule)"),
-    ...(!src && placeholder),
-  };
-}
-
-export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
+export function ImagesBlock({ block, theme, number, onPatch, onDragEnd, onNotice }) {
   const slots = block.slots || [""];
   const n = slots.length;
   const height = SLOT_HEIGHTS[n] || 180;
 
-  function readImage(index, file) {
-    const reader = new FileReader();
-    reader.onload = () => onPatch((x) => { x.slots[index] = reader.result; });
-    reader.readAsDataURL(file);
+  async function readImage(index, file) {
+    try {
+      const src = await prepareImage(file);
+      // A new photo starts centred and unzoomed.
+      onPatch((x) => {
+        x.slots[index] = src;
+        if (x.frames) x.frames[index] = null;
+      });
+    } catch {
+      onNotice("COULDN’T READ THAT IMAGE — USE A JPEG OR PNG (EXPORT IPHONE HEIC PHOTOS AS JPEG)", true);
+    }
   }
 
-  // Only photo files are caught here; dragged blocks pass through to the canvas.
-  function hasFiles(e) {
-    return Array.from(e.dataTransfer.types || []).includes("Files");
-  }
-
-  function handleDrop(e, index) {
-    if (!hasFiles(e)) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if (f && /^image\//.test(f.type)) readImage(index, f);
+  // Some formats (e.g. HEIC) arrive without a MIME type, so any dropped file is tried and failures reported.
+  function handleDropFile(index, file) {
+    if (file) readImage(index, file);
     onDragEnd();
+  }
+
+  function saveFrame(index, frame) {
+    onPatch((x) => {
+      x.frames = Array.from({ length: x.slots.length }, (_, k) => (x.frames && x.frames[k]) || null);
+      x.frames[index] = frame;
+    });
   }
 
   return (
     <figure style={{ ...FIGURE, ...theme.figure }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(" + n + ",1fr)", gap: n > 2 ? 12 : 16 }}>
         {slots.map((src, i) => (
-          <div
+          <ImageSlot
             key={block.id + "s" + i}
-            data-empty={src ? undefined : ""}
-            title="Click or drop a photo"
-            style={slotStyle(src, height, theme.imageSlot && theme.imageSlot.empty)}
-            onClick={(e) => { e.stopPropagation(); pickFile("image/*", (f) => readImage(i, f)); }}
-            onDragOver={(e) => { if (hasFiles(e)) { e.preventDefault(); e.stopPropagation(); } }}
-            onDrop={(e) => handleDrop(e, i)}
+            src={src}
+            frame={block.frames && block.frames[i]}
+            height={height}
+            emptyStyle={theme.imageSlot && theme.imageSlot.empty}
+            onPick={() => pickFile("image/*", (f) => readImage(i, f))}
+            onDropFile={(f) => handleDropFile(i, f)}
+            onFrame={(frame) => saveFrame(i, frame)}
           >
-            {!src && !theme.imageSlot && (
+            {!theme.imageSlot && (
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", color: "var(--muted)", textAlign: "center", padding: "0 12px" }}>DROP PHOTO<br />OR CLICK</span>
             )}
-            {!src && theme.imageSlot && <span style={theme.imageSlot.text}>Image — click or drop a file</span>}
-          </div>
+            {theme.imageSlot && <span style={theme.imageSlot.text}>Image — click or drop a file</span>}
+          </ImageSlot>
         ))}
       </div>
       {/* LaTeX subfigures: (a), (b), (c) under each image of a pair or gallery. */}
       {theme.captions && slots.length > 1 && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(" + n + ",1fr)", gap: n > 2 ? 12 : 16, marginTop: 6 }}>
           {slots.map((_, i) => (
-            <div key={i} style={{ textAlign: "center", fontFamily: "var(--body-font)", fontSize: 14, color: "var(--ink)" }}>({SUBFIGURE[i]})</div>
+            <div key={i} style={{ textAlign: "center", fontFamily: "var(--body-font)", fontSize: "var(--body-size)", color: "var(--ink)" }}>({SUBFIGURE[i]})</div>
           ))}
         </div>
       )}

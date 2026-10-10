@@ -81,15 +81,15 @@ function MonoByline({ block, onPatch, readTime }) {
   );
 }
 
-// LaTeX: \maketitle's centred author, affiliation and \today.
+// LaTeX: \maketitle's centred author, affiliation and \today, all \large (12pt).
 function LatexByline({ block, onPatch }) {
   const text = { fontFamily: "var(--font-serif)", letterSpacing: "0", color: "var(--ink)", fontWeight: 400 };
   const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   return (
-    <div style={{ textAlign: "center", marginBottom: 30 }}>
-      <NameField block={block} onPatch={onPatch} style={{ ...text, fontSize: 17, display: "block", marginBottom: 4 }} />
-      <DeskField block={block} onPatch={onPatch} style={{ ...text, fontSize: 15, display: "block", marginBottom: 12 }} />
-      <div style={{ ...text, fontSize: 16 }}>{today}</div>
+    <div style={{ textAlign: "center", marginBottom: 20 }}>
+      <NameField block={block} onPatch={onPatch} style={{ ...text, fontSize: 16, lineHeight: 1.17, display: "block" }} />
+      <DeskField block={block} onPatch={onPatch} style={{ ...text, fontSize: 16, lineHeight: 1.17, display: "block", marginBottom: 13 }} />
+      <div style={{ ...text, fontSize: 16, lineHeight: 1.17 }}>{today}</div>
     </div>
   );
 }

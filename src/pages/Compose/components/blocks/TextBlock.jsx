@@ -37,7 +37,8 @@ const TEXT_VARIANTS = {
 // Which theme entry restyles each text type.
 const THEME_PART = { h1: "h1", standfirst: "standfirst", h2: "h2", h3: "h3", body: "body", dropcap: "body", bullets: "list", numbered: "list" };
 
-const ABSTRACT_LABEL = { textAlign: "center", fontFamily: "var(--font-serif)", fontWeight: 700, fontSize: 14.5, color: "var(--ink)", marginBottom: 6 };
+// Same size as the abstract itself (\small in LaTeX), set bold.
+const ABSTRACT_LABEL = { textAlign: "center", fontFamily: "var(--font-serif)", fontWeight: 700, fontSize: "var(--standfirst-size)", color: "var(--ink)", marginBottom: 6 };
 
 export function TextBlock({ block, theme, number, onPatch }) {
   const variant = TEXT_VARIANTS[block.type];

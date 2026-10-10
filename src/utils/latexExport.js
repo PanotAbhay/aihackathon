@@ -7,7 +7,7 @@ function rotatedLabels(rows) {
 }
 
 const PREAMBLE = [
-  "\\documentclass[11pt%COLUMNS%]{article}",
+  "\\documentclass[10pt%COLUMNS%]{article}",
   "\\usepackage[T1]{fontenc}",
   "\\usepackage{lmodern}",
   "\\usepackage[a4paper,margin=1in]{geometry}",
