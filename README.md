@@ -11,6 +11,32 @@ npm install
 npm run dev
 ```
 
+### Sharing publicly
+
+`npm run share` builds the app and serves it at `http://127.0.0.1:4173`. Put a tunnel in front of it to get a public HTTPS link. The link works only while your machine is awake and both commands are running.
+
+With ngrok (free account):
+
+1. `winget install ngrok.ngrok`, then sign up at dashboard.ngrok.com and run `ngrok config add-authtoken <token>`.
+2. Terminal 1: `npm run share`. Terminal 2: `ngrok http 127.0.0.1:4173`. Your free dev domain is under **Domains** in the dashboard; pass it with `--url <name>.ngrok-free.app` if the agent doesn't pick it up.
+
+On the free plan, visitors click through an ngrok warning page once, and monthly bandwidth and request caps apply.
+
+Other tunnels:
+
+- **Cloudflare Quick Tunnel**: `cloudflared tunnel --url http://127.0.0.1:4173`. No account and no warning page. The `*.trycloudflare.com` URL changes on every run.
+- **VS Code port forwarding**: in the Ports panel, forward 4173 and set visibility to Public. Needs a GitHub or Microsoft sign-in.
+- **Tailscale Funnel**: `tailscale funnel 4173`. Stable `*.ts.net` URL; needs a Tailscale account.
+- **localtunnel / Pinggy**: `npx localtunnel --port 4173` or `ssh -p 443 -R0:127.0.0.1:4173 a.pinggy.io`. Nothing to install, but less reliable.
+
+The app has no backend, so a static host keeps it online without your machine:
+
+- **Netlify Drop**: `npm run build`, then drag `dist/` onto app.netlify.com/drop.
+- **Vercel, Netlify or Cloudflare Pages**: import this repo with build command `npm run build` and output directory `dist`.
+- **GitHub Pages**: also set `base: "/aihackathon/"` in `vite.config.js` and `basename={import.meta.env.BASE_URL}` on `BrowserRouter` in `main.jsx`.
+
+A tunnel host has to be listed in `server.allowedHosts` in `vite.config.js`, or Vite answers "Blocked request". Visitors enter their own AI key in Settings. The Ollama provider calls Ollama on the visitor's own machine, which needs `OLLAMA_ORIGINS` set to the public URL.
+
 ### Layout
 
 ```
