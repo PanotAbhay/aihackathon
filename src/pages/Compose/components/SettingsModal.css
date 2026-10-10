@@ -1,0 +1,23 @@
+.settings-body {
+  padding: 22px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-select {
+  padding: 10px 11px;
+  cursor: pointer;
+}
+
+.settings-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 10px 11px;
+}

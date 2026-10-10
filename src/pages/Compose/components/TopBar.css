@@ -1,0 +1,153 @@
+.top-bar {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 20px 0 0;
+}
+
+.top-bar-brand {
+  width: 284px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding-left: 26px;
+}
+
+.top-bar-logo {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  letter-spacing: 0.34em;
+  color: #C9A227;
+}
+
+.top-bar-doc {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-bar-title {
+  font-family: var(--font-sans);
+  font-size: 14.5px;
+  color: #F2EFE9;
+  outline: none;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+.top-bar-title-caret {
+  font-size: 17px;
+  color: rgba(242,239,233,0.4);
+}
+
+.top-bar-status {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: rgba(242,239,233,0.38);
+  margin-left: 6px;
+}
+
+.top-bar-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+.top-bar-note {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+}
+
+.top-bar-saved {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.top-bar-saved-icon {
+  font-size: 16px;
+  color: rgba(242,239,233,0.45);
+}
+
+.top-bar-saved-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: rgba(242,239,233,0.45);
+}
+
+.top-bar-zoom {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.top-bar-zoom-btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  cursor: pointer;
+  color: rgba(242,239,233,0.6);
+}
+
+.top-bar-zoom-pct {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: rgba(242,239,233,0.6);
+  min-width: 38px;
+  text-align: center;
+}
+
+.top-bar-icon {
+  font-size: 17px;
+}
+
+.top-bar-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255,255,255,0.1);
+}
+
+.top-bar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: #F2EFE9;
+  background: linear-gradient(160deg, rgba(255,255,255,0.13), rgba(255,255,255,0.05));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 9px;
+  padding: 10px 17px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
+}
+
+.top-bar-btn--gold {
+  font-weight: 500;
+  color: #1A1613;
+  background: linear-gradient(165deg,#D9B44A,#B98F1F);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 11px 21px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.34), 0 6px 18px rgba(201,162,39,0.22);
+}

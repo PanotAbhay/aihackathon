@@ -1,0 +1,547 @@
+/* ─────────────────────────────────────────────
+   Nutshell Today — Webfonts
+   Three families load from CDN (Satoshi via Fontshare):
+     • Baskervville  — editorial serif, headlines & titles
+     • Satoshi       — interface sans, body & UI
+     • Roboto Mono   — labels, data, timestamps
+───────────────────────────────────────────── */
+
+/* Baskervville is a variable font on Google Fonts with a real wght axis
+   (400–700) — request the full range so 600/700 are genuine, not faux-bold. */
+/* latin-ext */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-italic-latin-ext.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-italic-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-italic-latin-ext.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-italic-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-italic-latin-ext.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-italic-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-latin-ext.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-latin-ext.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-latin-ext.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Baskervville';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./assets/fonts/baskervville-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-cyrillic-ext.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-cyrillic.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-greek.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-vietnamese.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-latin-ext.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-cyrillic-ext.woff2") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-cyrillic.woff2") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-greek.woff2") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-vietnamese.woff2") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-latin-ext.woff2") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./assets/fonts/roboto-mono-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+.hero-title, .article-title, .opinion-title, h1, h2 { font-synthesis: none; }
+
+/* Satoshi — explicit @font-face with clean (bracket-free) CDN URLs so the font
+   inlines reliably when the design is bundled into a standalone file. */
+@font-face {
+  font-family: 'Satoshi';
+  src: url("./assets/fonts/satoshi-300.woff2") format('woff2');
+  font-weight: 300; font-display: swap; font-style: normal;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url("./assets/fonts/satoshi-400.woff2") format('woff2');
+  font-weight: 400; font-display: swap; font-style: normal;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url("./assets/fonts/satoshi-500.woff2") format('woff2');
+  font-weight: 500; font-display: swap; font-style: normal;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url("./assets/fonts/satoshi-700.woff2") format('woff2');
+  font-weight: 700; font-display: swap; font-style: normal;
+}
+
+/* ─────────────────────────────────────────────
+   Nutshell Today — Color tokens
+   A warm newsprint palette: off-white paper, near-black ink,
+   one editorial red, one civic blue, and a quiet grey ramp.
+───────────────────────────────────────────── */
+
+:root {
+  /* ── Paper / surfaces ── */
+  --paper:            #F7F6F2;  /* page background — warm newsprint */
+  --paper-faint:      #faf9f7;  /* zebra rows, faint panels */
+  --placeholder:      #e0ddd6;  /* image loading boxes */
+  --skeleton:         #eae7e1;  /* skeleton blocks (coming-soon cards) */
+
+  /* ── Ink / text ── */
+  --ink:              #1E1E1E;  /* primary text, headlines */
+  --ink-soft:         #333333;  /* nutshell list copy */
+  --ink-body:         #444444;  /* running body copy */
+  --ink-secondary:    #555555;  /* excerpts, secondary copy */
+  --muted:            #999999;  /* metadata, captions */
+  --muted-light:      #bbbbbb;  /* labels, de-emphasised meta */
+  --faint:            #cccccc;  /* divid'd-out labels, footer note */
+  --ticker-grey:      #9d9d9d;  /* ticker item text */
+
+  /* ── Accents ── */
+  --red:              #c0392b;  /* editorial red — live, alerts, hovers */
+  --blue:             #2554E8;  /* civic blue — links, interactive */
+  --blue-deep:        #1A3ADB;  /* alt selection highlight, notes */
+
+  /* ── Borders / rules ── */
+  --rule:             #dedad4;  /* primary hairline divider */
+  --rule-light:       #eae7e1;  /* inner / secondary hairline */
+  --rule-faint:       #f0ede8;  /* faintest separators */
+
+  /* ── On-color text ── */
+  --on-accent:        #F7F6F2;  /* text on red / dark fills */
+  --on-dot:           #ffffff;
+
+  /* ─────────────────────────────────────────
+     Semantic aliases — prefer these in components
+  ───────────────────────────────────────────── */
+  --surface-page:     var(--paper);
+  --surface-card:     var(--paper);
+  --surface-sunken:   var(--paper-faint);
+  --surface-media:    var(--placeholder);
+
+  --text-heading:     var(--ink);
+  --text-body:        var(--ink-body);
+  --text-excerpt:     var(--ink-secondary);
+  --text-meta:        var(--muted);
+  --text-label:       var(--muted-light);
+
+  --border-divider:   var(--rule);
+  --border-inner:     var(--rule-light);
+
+  --accent-live:      var(--red);
+  --accent-link:      var(--blue);
+
+  --selection-a:      var(--red);
+  --selection-b:      var(--blue-deep);
+}
+
+/* ─────────────────────────────────────────────
+   Nutshell Today — Typography tokens
+   Three families, each with its own purpose-built scale.
+   Rule of thumb:
+     headline      → serif  (Baskervville)
+     label / data  → mono   (Roboto Mono)
+     everything    → sans   (Satoshi)
+───────────────────────────────────────────── */
+
+:root {
+  /* ── Families ── */
+  --font-serif: 'Baskervville', Georgia, serif;
+  --font-sans:  'Satoshi', system-ui, sans-serif;
+  --font-mono:  'Roboto Mono', ui-monospace, monospace;
+
+  /* ── Baskervville — editorial titles (24 → 36 → 42) ── */
+  --serif-subhead:     18px;   /* card / widget headings */
+  --serif-subhead-ls:  -0.01em;
+  --serif-headline:    36px;   /* article titles, hero */
+  --serif-headline-ls: -0.03em;
+  --serif-display:     42px;   /* page-level titles */
+  --serif-display-ls:  -0.03em;
+
+  /* ── Satoshi — body & interface (14 → 18 → 72) ── */
+  --sans-body:        14px;    /* body text, nav, cards */
+  --sans-body-ls:     0.075em;
+  --sans-lead:        18px;    /* section labels, large UI */
+  --sans-lead-ls:     0.1em;
+  --sans-display:     72px;    /* large counters / numbers */
+  --sans-display-ls:  -0.04em;
+
+  /* ── Roboto Mono — labels, data, metadata (10 → 12 → 14) ── */
+  --mono-overline:    10px;    /* micro labels, timestamps */
+  --mono-overline-ls: 0.14em;
+  --mono-label:       12px;    /* standard labels */
+  --mono-label-ls:    0.1em;
+  --mono-data:        14px;    /* prominent data, clock */
+  --mono-data-ls:     0.04em;
+
+  /* ── Weights ── */
+  --weight-serif-regular: 400;
+  --weight-serif-bold:    600;
+  --weight-body:          400;
+  --weight-medium:        500;
+  --weight-semibold:      600;
+  --weight-bold:          700;
+  --weight-mono:          400;
+  --weight-mono-medium:   500;
+
+  /* ── Line heights ── */
+  --leading-tight:   1.15;  /* headlines */
+  --leading-snug:    1.45;  /* card titles */
+  --leading-body:    1.85;  /* running copy (28px @ 14px) */
+}
+
+/* ─────────────────────────────────────────────
+   Nutshell Today — Spacing, layout, radius & shadow
+   The site is a centred 900px column of hairline-ruled
+   sections. Geometry is sharp; corners are mostly square.
+───────────────────────────────────────────── */
+
+:root {
+  /* ── Spacing scale (4px base) ── */
+  --space-0:   0;
+  --space-1:   2px;
+  --space-2:   4px;
+  --space-3:   6px;
+  --space-4:   8px;
+  --space-5:   10px;
+  --space-6:   12px;
+  --space-7:   14px;
+  --space-8:   16px;
+  --space-10:  20px;
+  --space-12:  24px;   /* column gutter */
+  --space-14:  28px;
+  --space-16:  32px;
+  --space-18:  36px;
+  --space-20:  40px;
+  --space-24:  48px;
+  --space-28:  56px;
+  --space-32:  64px;
+  --space-36:  72px;
+  --space-40:  80px;
+  --space-48:  96px;   /* navbar height */
+
+  /* ── Layout ── */
+  --layout-max:      900px;   /* main content column */
+  --layout-reading:  620px;   /* article reading measure */
+  --gutter:          24px;    /* horizontal page padding */
+  --nav-height:      96px;
+  --ticker-height:   44px;
+
+  /* ── Radius (newspaper = mostly square) ── */
+  --radius-none:  0;
+  --radius-xs:    2px;   /* swatches, code chips */
+  --radius-sm:    4px;   /* cards, tokens, buttons */
+  --radius-pill:  999px; /* switch track, dots */
+
+  /* ── Borders ── */
+  --border-hairline: 1px solid var(--rule);
+  --border-inner-hairline: 1px solid var(--rule-light);
+
+  /* ── Shadow (used sparingly — only on scroll) ── */
+  --shadow-nav:  0 2px 14px rgba(0, 0, 0, 0.07);
+  --shadow-pop:  0 4px 20px rgba(0, 0, 0, 0.10);
+
+  /* ── Motion ── */
+  --ease:        ease;        /* @kind other */
+  --dur-fast:    0.15s;       /* @kind other */
+  --dur:         0.2s;        /* @kind other */
+  --dur-slow:    0.6s;        /* @kind other */
+}
+
+/* ─────────────────────────────────────────────
+   Nutshell Today — Base layer
+   Minimal reset + document defaults + brand motifs
+   (selection colours, shared keyframes).
+───────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--surface-page);
+  color: var(--text-heading);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Lining numerals on serif headlines */
+.hero-title,
+.article-title,
+.opinion-title,
+.editorials-page-heading,
+.about-heading,
+[data-serif] {
+  font-variant-numeric: lining-nums;
+}
+
+/* ── Brand selection colour ──
+   The live site randomises red / blue on each click.
+   Add .sel-red or .sel-blue to an ancestor to opt in. */
+.sel-red ::selection  { background: var(--selection-a); color: var(--on-accent); }
+.sel-blue ::selection { background: var(--selection-b); color: var(--on-accent); }
+
+/* ── Shared keyframes ── */
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1;    transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.65); }
+}
+
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-40%); }
+}
+
+/* ─────────────────────────────────────────────
+   Compose — editor globals
+───────────────────────────────────────────── */
+
+#root { height: 100%; }
+
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { background: var(--paper); color: var(--ink); }
+img { display: block; }
+a { color: var(--blue); text-decoration: none; }
+a:hover { color: var(--red); }
+[contenteditable] { outline: none; }
+[contenteditable]:empty::before { content: attr(data-ph); color: var(--muted-light); }
+@keyframes nt-rw-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes nt-rw-in {
+  0%   { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: none; }
+}
+[data-rw="1"] {
+  background-image: linear-gradient(100deg,
+    rgba(192,57,43,0) 20%, rgba(192,57,43,0.16) 42%,
+    rgba(192,57,43,0.16) 58%, rgba(192,57,43,0) 80%);
+  background-size: 200% 100%;
+  animation: nt-rw-sweep 1.25s linear infinite;
+  color: var(--muted);
+  transition: color 0.3s ease;
+}
+[data-rw="done"] { animation: nt-rw-in 0.45s ease both; }
+@keyframes nt-rw-in-inline {
+  0%   { opacity: 0.35; background-color: rgba(192,57,43,0.20); }
+  100% { opacity: 1; background-color: transparent; }
+}
+span[data-rw="done"] { animation: nt-rw-in-inline 0.55s ease both; }
+
+/* Paragraphs the browser creates on Enter can't carry inline styles. */
+[data-prose] > p { margin: 0 0 18px; }
+[data-prose] > p:last-child { margin-bottom: 0; }
+[data-lede="1"] > p:first-child::first-letter {
+  float: left; font-family: var(--font-serif); font-size: 76px;
+  line-height: 0.72; font-weight: 600; color: var(--ink); margin: 6px 12px 0 0;
+}
+[data-dropcap]::first-letter {
+  float: left; font-family: var(--font-serif); font-size: 76px;
+  line-height: 0.72; font-weight: 600; color: var(--ink); margin: 6px 12px 0 0;
+}
+.nt-blk [data-chrome] { opacity: 0; transition: opacity 0.12s ease; }
+.nt-blk:hover [data-chrome], .nt-blk[data-sel="1"] [data-chrome] { opacity: 1; }
+::selection { background: var(--red); color: var(--on-accent); }
+.ms {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal; font-style: normal; line-height: 1;
+  letter-spacing: normal; text-transform: none; display: inline-block;
+  white-space: nowrap; direction: ltr; user-select: none;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 6px; }
+
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 300;
+  src: url("./assets/fonts/material-symbols-outlined.woff") format('woff');
+}

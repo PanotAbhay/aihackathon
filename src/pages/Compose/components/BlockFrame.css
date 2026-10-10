@@ -1,0 +1,115 @@
+.block-handles {
+  position: absolute;
+  left: -14px;
+  top: -14px;
+  right: -14px;
+  bottom: -14px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.block-handle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #FFFDF9;
+  border: 1px solid rgba(176,141,74,0.75);
+}
+
+.block-handle--tl { left: -3.5px; top: -3.5px; }
+.block-handle--tr { right: -3.5px; top: -3.5px; }
+.block-handle--bl { left: -3.5px; bottom: -3.5px; }
+.block-handle--br { right: -3.5px; bottom: -3.5px; }
+
+.block-chrome {
+  position: absolute;
+  left: -52px;
+  top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.block-chrome-btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B635A;
+  background: #FFFDF9;
+  border: 1px solid rgba(26,22,18,0.13);
+  border-radius: 7px;
+  box-shadow: 0 1px 3px rgba(26,22,18,0.07);
+  cursor: pointer;
+}
+
+.block-chrome-btn--drag {
+  cursor: grab;
+}
+
+.block-chrome-icon {
+  font-size: 17px;
+}
+
+.block-chrome-icon--sm {
+  font-size: 16px;
+}
+
+.block-toolbar {
+  position: absolute;
+  right: 0;
+  top: -30px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 5;
+}
+
+.block-type-select {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  color: #1A1613;
+  background: #FFFDF9;
+  border: 1px solid rgba(26,22,18,0.13);
+  border-radius: 7px;
+  box-shadow: 0 1px 3px rgba(26,22,18,0.07);
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.block-section-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: #8A8177;
+}
+
+.block-toolbar-btn {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  color: #4A443C;
+  background: #FFFDF9;
+  border: 1px solid rgba(26,22,18,0.13);
+  border-radius: 7px;
+  box-shadow: 0 1px 3px rgba(26,22,18,0.07);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.block-toolbar-btn--gold {
+  font-weight: 500;
+  color: #1A1613;
+  background: linear-gradient(165deg,#D9B44A,#B98F1F);
+  border: 1px solid rgba(26,22,18,0.14);
+  box-shadow: 0 2px 6px rgba(201,162,39,0.28);
+  padding: 6px 11px;
+}
+
+.block-toolbar-icon {
+  font-size: 15px;
+}

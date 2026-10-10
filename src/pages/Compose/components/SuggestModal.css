@@ -1,0 +1,29 @@
+.suggest-body {
+  padding: 22px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.suggest-replace {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+  margin-top: 4px;
+}
+
+.suggest-replace-box {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.suggest-replace-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
