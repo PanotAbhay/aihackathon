@@ -8,7 +8,8 @@ import { DropLine } from "./DropLine.jsx";
 import "./Canvas.css";
 
 const MASTHEAD_TYPES = ["h1", "standfirst", "byline"];
-// Two-column pages set everything smaller, as a typesetter would for narrow columns.
+// Two-column pages set everything smaller, as a typesetter would for narrow columns — unless the
+// template already uses true print sizes (LaTeX's 10pt type stays 10pt in two columns).
 const TWO_COLUMN_SCALE = 0.8;
 // Blocks that may float past following paragraphs when they don't fit (see planPages).
 const FLOAT_TYPES = ["image", "pair", "gallery", "chart", "line", "poll", "table", "stats", "timeline", "nutshell"];
@@ -55,6 +56,8 @@ function numberBlocks(blocks) {
 
 // On paper, photos stay inside the text block, and narrow columns get compact stats and tables.
 function printTheme(theme, columns) {
+  // Templates with true print sizes (LaTeX) already set their own figure spacing and table type.
+  if (theme.twoColumnScale === 1) return theme;
   const t = { ...theme, figure: { ...theme.figure, margin: "24px 0" } };
   if (columns !== 2) return t;
   return {
@@ -177,7 +180,9 @@ export function Canvas({
 }) {
   const print = layout === "print-1" || layout === "print-2";
   const columns = layout === "print-2" ? 2 : 1;
-  const scale = columns === 2 ? TWO_COLUMN_SCALE : 1;
+  const scale = columns === 2 ? (baseTheme.twoColumnScale ?? TWO_COLUMN_SCALE) : 1;
+  const margin = baseTheme.pageMargin || A4.margin;
+  const pageStyle = { ...PAGE_STYLE, padding: margin };
   const theme = print ? printTheme(baseTheme, columns) : baseTheme;
   const innerRef = useRef(null);
   const [measured, setMeasured] = useState({ heights: {}, lines: {} });
@@ -199,7 +204,7 @@ export function Canvas({
         if (PROSE_TYPES.includes(b.type) && lines[b.id]) Object.assign(unit, { lineHeight: lines[b.id], textHeight: height - paraGap, lede: b.type === "dropcap" });
         return unit;
       }),
-      { columns, mastheadCount: masthead, scale },
+      { columns, mastheadCount: masthead, scale, margin },
     )
     : null;
 
@@ -324,9 +329,9 @@ export function Canvas({
           <>
             <div data-article="" data-layout={layout} className="print-desk">
               {pages.map((page, pi) => (
-                <section key={pi} data-page="" style={PAGE_STYLE}>
+                <section key={pi} data-page="" style={pageStyle}>
                   {/* Scaled content keeps the sheet exactly A4: it is laid out wider and zoomed down to fit. */}
-                  <div data-page-content="" style={scale !== 1 ? { zoom: scale, width: (A4.width - A4.margin * 2) / scale } : undefined}>
+                  <div data-page-content="" style={scale !== 1 ? { zoom: scale, width: (A4.width - margin * 2) / scale } : undefined}>
                     {page.masthead.length > 0 && <div data-page-masthead="">{renderUnits(page.masthead, { span: columns === 2 })}</div>}
                     {/* Both columns must be exactly the same width: a paragraph split across them has to wrap identically. */}
                     <div

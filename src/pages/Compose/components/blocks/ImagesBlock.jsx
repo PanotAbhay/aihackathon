@@ -68,7 +68,7 @@ export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
       {theme.captions && slots.length > 1 && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(" + n + ",1fr)", gap: n > 2 ? 12 : 16, marginTop: 6 }}>
           {slots.map((_, i) => (
-            <div key={i} style={{ textAlign: "center", fontFamily: "var(--body-font)", fontSize: 14, color: "var(--ink)" }}>({SUBFIGURE[i]})</div>
+            <div key={i} style={{ textAlign: "center", fontFamily: "var(--body-font)", fontSize: "var(--body-size)", color: "var(--ink)" }}>({SUBFIGURE[i]})</div>
           ))}
         </div>
       )}

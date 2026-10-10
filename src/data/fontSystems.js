@@ -112,10 +112,12 @@ export const TEMPLATE_FONT_PRESETS = [
     body: type("baskervville", 16.5, 400, 1.7, 0),
   },
   {
-    id: "tpl-latex", label: "LaTeX", note: "Computer Modern throughout",
-    h1: type("cmu", 30, 400, 1.25, 0), h2: type("cmu", 20, 700, 1.3, 0),
-    h3: type("cmu", 17, 700, 1.3, 0), standfirst: type("cmu", 14.5, 400, 1.45, 0),
-    body: type("cmu", 16, 400, 1.5, 0),
+    // article class at 10pt: \LARGE 17.28/22pt title, \Large 14.4/18pt section, \large 12/14pt
+    // subsection, \small 9/11pt abstract, \normalsize 10/12pt body (pt × 4/3 = px).
+    id: "tpl-latex", label: "LaTeX", note: "Computer Modern, article 10pt",
+    h1: type("cmu", 23.04, 400, 1.27, 0), h2: type("cmu", 19.2, 700, 1.25, 0),
+    h3: type("cmu", 16, 700, 1.17, 0), standfirst: type("cmu", 12, 400, 1.22, 0),
+    body: type("cmu", 13.33, 400, 1.2, 0),
   },
   {
     id: "tpl-lab", label: "Lab manual", note: "Satoshi throughout",

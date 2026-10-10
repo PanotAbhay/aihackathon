@@ -16,7 +16,8 @@ const AXIS = "0.8px solid #000000";
 const BLUE = "#0000FF";
 const BLUE_FILL = "#B3B3FF"; // blue!30!white
 const TICK = 5;
-const TEXT = { fontFamily: "var(--body-font)", fontSize: 12.5, color: "#000000", letterSpacing: "0", lineHeight: 1 };
+// pgfplots sets tick labels and nodes near coords in the document's \normalsize.
+const TEXT = { fontFamily: "var(--body-font)", fontSize: "var(--body-size)", color: "#000000", letterSpacing: "0", lineHeight: 1 };
 
 // "Nice" y ticks (steps of 1, 2 or 5 × 10^k), starting at zero like ymin=0.
 function niceTicks(max) {
@@ -95,7 +96,7 @@ export function PgfPlot({ kind, block, onPatch }) {
               as="span"
               value={String(r.value)}
               onCommit={setValue(i)}
-              style={{ ...TEXT, fontSize: 11.5, position: "absolute", bottom: "calc(100% + 4px)", left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}
+              style={{ ...TEXT, position: "absolute", bottom: "calc(100% + 4px)", left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}
             />
           </div>
         ))}
@@ -120,7 +121,7 @@ export function PgfPlot({ kind, block, onPatch }) {
                   as="span"
                   value={String(r.value)}
                   onCommit={setValue(i)}
-                  style={{ ...TEXT, fontSize: 11.5, position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}
+                  style={{ ...TEXT, position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}
                 />
               </div>
             ))}

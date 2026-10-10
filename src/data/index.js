@@ -175,6 +175,9 @@ const CM = "'CMU Serif', 'Latin Modern Roman', serif";
 // LaTeX furniture text follows the tab's body font (Computer Modern by default).
 const CM_TEXT = { fontFamily: "var(--body-font)", letterSpacing: "0", color: "#000000", textWrap: "auto" };
 const LATEX_INK = { color: "#000000", textWrap: "auto" };
+// LaTeX sizes are given in points (article class, 10pt) and drawn at 96 dpi.
+const pt = (n) => (n * 4) / 3;
+const LATEX_BODY = { ...CM_TEXT, fontSize: pt(10), lineHeight: 1.2 };
 
 export const TEMPLATES = {
   news: {
@@ -363,7 +366,10 @@ export const TEMPLATES = {
     },
     theme: {
       article: { maxWidth: 720, padding: "72px 64px 160px 84px" },
-      columns: { columnGap: 32 },
+      // \columnsep = 10pt; 1in page margins as in the .tex export; true sizes in two columns (no shrink).
+      columns: { columnGap: pt(10) },
+      pageMargin: 96,
+      twoColumnScale: 1,
       numbering: true,
       paragraphIndent: true,
       abstractLabel: "Abstract",
@@ -371,35 +377,37 @@ export const TEMPLATES = {
       charts: "pgfplots",
       imageSlot: {
         empty: { background: "#FFFFFF", border: "0.8px solid #000000" },
-        text: { fontFamily: "var(--body-font)", fontStyle: "italic", fontSize: 14, color: "#555555" },
+        text: { fontFamily: "var(--body-font)", fontStyle: "italic", fontSize: pt(10), color: "#555555" },
       },
       texExport: true,
-      h1: { ...LATEX_INK, textAlign: "center", margin: "8px 0 16px", textWrap: "balance" },
+      h1: { ...LATEX_INK, textAlign: "center", margin: "0 0 " + pt(15) + "px", textWrap: "balance" },
       byline: { variant: "latex" },
-      standfirst: { ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 44px 30px" },
-      body: { ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 0 10px" },
-      list: { ...LATEX_INK, margin: "6px 0 12px", paddingLeft: 30 },
-      h2: { ...LATEX_INK, margin: "34px 0 12px" },
-      h3: { ...LATEX_INK, margin: "24px 0 10px" },
+      // abstract: \small inside a quotation-style indent
+      standfirst: { ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 " + pt(25) + "px " + pt(20) + "px" },
+      body: { ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 0 " + pt(6) + "px" },
+      list: { ...LATEX_INK, margin: pt(6) + "px 0 " + pt(8) + "px", paddingLeft: pt(25) },
+      // \section: 3.5ex before, 2.3ex after; \subsection: 3.25ex / 1.5ex (at 10pt, 1ex ≈ 4.3pt)
+      h2: { ...LATEX_INK, margin: pt(15) + "px 0 " + pt(10) + "px" },
+      h3: { ...LATEX_INK, margin: pt(14) + "px 0 " + pt(6.5) + "px" },
       quote: {
-        wrap: { borderLeft: "none", padding: 0, margin: "14px 40px 18px" },
-        text: { ...CM_TEXT, fontSize: 16, lineHeight: 1.5 },
-        cite: { ...CM_TEXT, fontSize: 15, textAlign: "right", marginTop: 6 },
+        wrap: { borderLeft: "none", padding: 0, margin: pt(8) + "px " + pt(25) + "px " + pt(10) + "px" },
+        text: LATEX_BODY,
+        cite: { ...LATEX_BODY, textAlign: "right", marginTop: pt(3) },
       },
-      figure: { margin: "26px 0 22px" },
+      figure: { margin: pt(14) + "px 0 " + pt(12) + "px" },
       nutshell: {
-        box: { background: "transparent", border: "0.8px solid #000000", padding: "14px 18px", margin: "22px 0" },
-        title: { ...CM_TEXT, fontSize: 16, marginBottom: 8 },
-        list: { ...CM_TEXT, fontSize: 15.5, lineHeight: 1.5 },
+        box: { background: "transparent", border: "0.8px solid #000000", padding: pt(8) + "px " + pt(10) + "px", margin: pt(12) + "px 0" },
+        title: { ...LATEX_BODY, marginBottom: pt(4) },
+        list: LATEX_BODY,
       },
       table: {
-        table: { borderTop: "1.6px solid #000000", borderBottom: "1.6px solid #000000", marginTop: 6 },
-        head: { ...CM_TEXT, fontSize: 15, padding: "7px 14px 6px 0", textAlign: "left" },
-        cell: { ...CM_TEXT, fontSize: 15, fontWeight: 400, padding: "4px 14px 4px 0" },
+        table: { borderTop: "1.06px solid #000000", borderBottom: "1.06px solid #000000", marginTop: pt(3) },
+        head: { ...LATEX_BODY, padding: pt(3) + "px " + pt(12) + "px " + pt(2) + "px 0", textAlign: "left" },
+        cell: { ...LATEX_BODY, fontWeight: 400, padding: pt(1.5) + "px " + pt(12) + "px " + pt(1.5) + "px 0" },
         zebra: false,
         bodyRules: false,
       },
-      divider: { text: "∗     ∗     ∗", style: { ...CM_TEXT, fontSize: 16, letterSpacing: "0.1em" } },
+      divider: { text: "∗     ∗     ∗", style: { ...LATEX_BODY, letterSpacing: "0.1em", margin: pt(12) + "px 0" } },
     },
     blocks: ["byline", "body", "h2", "h3", "quote", "bullets", "numbered", "divider", "image", "pair", "gallery", "chart", "line", "table", "nutshell"],
     aiRules: [

@@ -16,11 +16,12 @@ const LEDE_LINES = 3; // a drop cap needs its first lines together
 // units: [{ id, height, keepWithNext, float?, lineHeight?, lede? }] — lineHeight marks a splittable paragraph.
 // Returns pages: [{ masthead: [id], columns: [[item]] }], item = { id, show?, skip? }:
 // `show` = visible px from the top (the paragraph continues elsewhere), `skip` = px already shown.
-// `scale` is the content zoom inside the page (heights are measured in unzoomed px).
-export function planPages(units, { columns, mastheadCount, scale = 1 }) {
+// `scale` is the content zoom inside the page (heights are measured in unzoomed px);
+// `margin` the page margin when a template sets its own.
+export function planPages(units, { columns, mastheadCount, scale = 1, margin = A4.margin }) {
   const masthead = units.slice(0, mastheadCount);
   const mastheadHeight = masthead.reduce((n, u) => n + u.height, 0);
-  const body = PAGE_BODY / scale;
+  const body = (A4.height - margin * 2) / scale;
   const firstPageRoom = body - mastheadHeight - SAFETY;
   const pageRoom = body - SAFETY;
   const pages = [];
