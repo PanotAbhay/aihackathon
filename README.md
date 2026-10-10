@@ -81,6 +81,10 @@ AI import formats into the tab's template. If the model thinks another template 
 
 The LaTeX paper template adds an **Export .tex** button to the top bar. It converts the article into a compilable `article`-class document: sections, abstract, booktabs tables and pgfplots charts. If the article has photos, you get a `.zip` with `main.tex` and a `figures/` folder (each photo cropped as framed on the page), ready to upload to Overleaf. Figures, tables and charts keep the editor's size, placement and placeholder text, so the compiled PDF matches the page. The converter is `src/utils/latexExport.js`.
 
+The Lab manual template also handles book-length manuals. It adds **Code listing** (numbered lines, SQL and Python colouring; click to edit the plain text) and the **Structure** group: **Chapter** and **Appendix** (numbered 1, 2… and A, B…, each starting a new A4 page) and **Contents** (built from the chapters and headings, with page numbers in print layouts). Long listings and contents split across pages at a line break. Select text and press **Inline code** in the format bar to set it in the monospace font (`\texttt` in the .tex export).
+
+PDF import reads structure from the fonts as well as the text. Typewriter-font runs become code listings (LaTeX listings' line numbers and spacing are cleaned up), larger type becomes chapters and headings ("Chapter 2" over a title becomes a chapter), a Contents page becomes a contents block, figures are cut out of the pages as pictures with their "Figure 2.1:" captions, and bold lead-ins and inline typewriter text keep their styling. The imported text marks this as `# Chapter 2: …`, `##`/`###` headings, ``` fences, `[[image N]]` and `[[toc]]`, which Import as plain text and Format with AI both convert directly (`paraBlocks` in `src/utils/blocks.js`). Templates without those blocks get ordinary headings and paragraphs instead. Pictures stay with the import until the next file is loaded; they are not autosaved with the recovered text.
+
 To add a template, add an entry to `TEMPLATES`; the picker, menu and prompts pick it up automatically.
 
 ### Adding a block type
