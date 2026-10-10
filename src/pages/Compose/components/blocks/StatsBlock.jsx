@@ -10,6 +10,8 @@ const NEW_STAT = { value: "00", label: "LABEL" };
 export function StatsBlock({ block, theme, onPatch }) {
   const cells = block.cells || [];
   const t = theme.stats || {};
+  // Narrow print columns put two stats per row.
+  const perRow = Math.min(t.perRow || cells.length, Math.max(1, cells.length));
 
   function addAt(index) {
     onPatch((x) => { if (x.cells.length < MAX_STATS) x.cells.splice(index, 0, { ...NEW_STAT }); });
@@ -22,9 +24,9 @@ export function StatsBlock({ block, theme, onPatch }) {
   return (
     <figure style={FIGURE}>
       <FigureHeader block={block} onPatch={onPatch} titlePlaceholder="Title" notePlaceholder="Source" marginBottom={20} />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(" + Math.max(1, cells.length) + ",1fr)", ...t.grid }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(" + perRow + ",1fr)", rowGap: 18, ...t.grid }}>
         {cells.map((c, i) => (
-          <div key={block.id + "c" + i} style={i === 0 ? { padding: "4px 14px 4px 0" } : { padding: "4px 14px", borderLeft: "1px solid var(--rule)" }}>
+          <div key={block.id + "c" + i} style={i % perRow === 0 ? { padding: "4px 14px 4px 0" } : { padding: "4px 14px", borderLeft: "1px solid var(--rule)" }}>
             <div data-chrome="" className="stat-cell-controls">
               <button className="stat-cell-btn" title="Remove this stat" onClick={(e) => { e.stopPropagation(); removeAt(i); }}>×</button>
               <button className="stat-cell-btn" title="Add a stat after this one" onClick={(e) => { e.stopPropagation(); addAt(i + 1); }}>+</button>

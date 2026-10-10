@@ -62,7 +62,11 @@ src/
 
 ### Templates
 
-A starter window (shown on first visit, and from the rail's template button) offers **News**, **Finance**, **Research**, **LaTeX paper** and **Lab manual**. Each template, defined in `TEMPLATES` in `src/data/index.js`, sets:
+### Documents and tabs
+
+Work happens in **tabs**, and each tab is a separate document with its own template, content, font settings and undo history. **+** in the tab bar (or the rail's template button) opens the template picker; picking a template opens a new tab with that template's starter page. Each document has a **layout**, switched from the top bar: **Web** (one continuous page) or **Print A4** with one or two columns. Print layouts show real A4 sheets: paragraphs split across columns and pages at line breaks (at least two lines either side), headings stay with what follows, and figures, tables and charts that don't fit float to the top of the next column, as in LaTeX. **Preview** opens the rendered document in a new browser tab (A4 sheets for print layouts, ready to print), and Copy HTML exports the same pages. A document's template is **fixed** once chosen. To try the same content in another template, open another tab with that template. All tabs autosave to `localStorage` (`nt-fb-workspace`); a document saved by the earlier single-page version opens as the first tab.
+
+The picker offers **News**, **Finance**, **Research**, **LaTeX paper** and **Lab manual**. Each template, defined in `TEMPLATES` in `src/data/index.js`, sets:
 
 - **look**: CSS variable overrides applied to the canvas (accent colour, paper, rules, headline font)
 - **theme**: layout and per-element style overrides (column width, headline alignment, body font, attribution variant, quote, key-facts box, table and divider styles), merged into the blocks' inline styles so Copy HTML exports them
@@ -70,7 +74,9 @@ A starter window (shown on first visit, and from the rail's template button) off
 - **aiRules**: extra instructions for import and drag-to-fill
 - **starter**: the demo page you get when you pick it
 
-On AI import the model picks the best-fitting template, and its rules and allowed blocks shape the result. The top-bar menu switches the template of the current page without touching its text.
+Each template also has its own **font preset** (`TEMPLATE_FONT_PRESETS` in `src/data/fontSystems.js`). A new tab's font settings start from it, and Settings → Fonts adjusts that tab only. Themes control layout and colour but never hard-code type, so the font settings always take effect.
+
+AI import formats into the tab's template. If the model thinks another template fits better, the confirmation message says so.
 
 The LaTeX paper template adds an **Export .tex** button to the top bar. It converts the article into a compilable `article`-class document: sections, abstract, booktabs tables and pgfplots charts. If the article has photos, you get a `.zip` with `main.tex` and a `figures/` folder, ready to upload to Overleaf. The converter is `src/utils/latexExport.js`.
 
@@ -94,8 +100,9 @@ The document, AI settings and zoom persist in `localStorage` (keys in `STORAGE_K
 - [React](https://react.dev) and React DOM (MIT)
 - [React Router](https://reactrouter.com) (MIT)
 - [Vite](https://vitejs.dev) and [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react) (MIT)
+- [PDF.js](https://mozilla.github.io/pdf.js/) (`pdfjs-dist`), by Mozilla, PDF import (Apache 2.0)
 
-`.docx` and PDF import use only browser built-ins (`DecompressionStream`); no parsing library is bundled. HTML export also uses only browser built-ins.
+`.docx` import uses only browser built-ins (`DecompressionStream`). PDF import uses PDF.js, loaded only when a PDF is imported, so pages come out in order with their fonts' characters (ligatures included) and figures are never read as text. HTML export uses only browser built-ins.
 
 ### AI services
 

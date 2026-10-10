@@ -2,11 +2,11 @@ export const STORAGE_KEYS = {
   doc: "nt-fb-doc",
   docPrev: "nt-fb-doc-prev",
   ai: "nt-fb-ai",
-  fonts: "nt-fb-fonts",
   zoom: "nt-fb-zoom",
   recovered: "nt-fb-recovered",
   legacyRecovered: "nt-feature-builder",
   template: "nt-fb-template",
+  workspace: "nt-fb-workspace",
 };
 
 export const TEXTISH_TYPES = ["h1", "standfirst", "h2", "h3", "body", "dropcap", "bullets", "numbered"];
@@ -141,6 +141,14 @@ export const TEXT_TYPE_OPTIONS = [
   { value: "numbered", label: "Numbered list" },
 ];
 
+// Page layouts a document can use: one continuous web page, or A4 sheets with one or two columns.
+export const LAYOUTS = [
+  { key: "web", label: "Web", icon: "web", hint: "Web — one continuous page" },
+  { key: "print-1", label: "A4", icon: "description", hint: "Print — A4 pages, single column" },
+  { key: "print-2", label: "A4 · 2 col", icon: "view_column_2", hint: "Print — A4 pages, two columns" },
+];
+export const LAYOUT_KEYS = LAYOUTS.map((l) => l.key);
+
 export const AI_MODELS = {
   builtin: "claude-sonnet-4-5",
   anthropic: "claude-sonnet-4-5",
@@ -161,27 +169,31 @@ export const AI_PROVIDERS = [
 // per-element style overrides (merged into the blocks' inline styles, so
 // "Copy HTML" carries them), the blocks the palette offers, extra rules for
 // the AI, and the demo page it starts from.
-const SERIF_BODY = { fontFamily: "var(--font-serif)", letterSpacing: "0", color: "#2B2B2B" };
+const DARK_TEXT = { color: "#2B2B2B" };
 const NEWS_COLUMN = { maxWidth: 620, marginLeft: "auto", marginRight: "auto" };
 const CM = "'CMU Serif', 'Latin Modern Roman', serif";
-const CM_TEXT = { fontFamily: CM, letterSpacing: "0", color: "#000000", textWrap: "auto" };
+// LaTeX furniture text follows the tab's body font (Computer Modern by default).
+const CM_TEXT = { fontFamily: "var(--body-font)", letterSpacing: "0", color: "#000000", textWrap: "auto" };
+const LATEX_INK = { color: "#000000", textWrap: "auto" };
 
 export const TEMPLATES = {
   news: {
     key: "news",
+    fontPreset: "tpl-news",
     label: "News",
     icon: "newspaper",
     description: "Reported stories and features. A centred front-page headline, serif reading column, wide photos and The Nutshell summary.",
     look: {},
     theme: {
       article: { maxWidth: 840, padding: "60px 60px 160px 84px" },
-      h1: { textAlign: "center", fontSize: 50, lineHeight: 1.08, letterSpacing: "-0.025em", margin: "6px auto 18px", maxWidth: 680 },
-      standfirst: { textAlign: "center", fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 20, lineHeight: 1.5, color: "var(--ink-secondary)", maxWidth: 600, margin: "0 auto 26px" },
+      columns: { columnGap: 48, columnRule: "1px solid var(--rule)" },
+      h1: { textAlign: "center", margin: "6px auto 18px", maxWidth: 680 },
+      standfirst: { textAlign: "center", fontStyle: "italic", color: "var(--ink-secondary)", maxWidth: 600, margin: "0 auto 26px" },
       byline: { variant: "centered" },
-      body: { ...SERIF_BODY, ...NEWS_COLUMN, fontSize: 17.5, lineHeight: 1.75, marginBottom: 18 },
-      list: { ...SERIF_BODY, ...NEWS_COLUMN, fontSize: 17, paddingLeft: 26, boxSizing: "border-box" },
-      h2: { ...NEWS_COLUMN, fontSize: 28, margin: "48px auto 16px" },
-      h3: { ...NEWS_COLUMN, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.1em", margin: "34px auto 12px" },
+      body: { ...DARK_TEXT, ...NEWS_COLUMN, marginBottom: 18 },
+      list: { ...DARK_TEXT, ...NEWS_COLUMN, paddingLeft: 26, boxSizing: "border-box" },
+      h2: { ...NEWS_COLUMN, margin: "48px auto 16px" },
+      h3: { ...NEWS_COLUMN, textTransform: "uppercase", margin: "34px auto 12px" },
       quote: {
         wrap: { borderLeft: "none", borderTop: "2px solid var(--ink)", borderBottom: "1px solid var(--rule)", padding: "26px 10px 24px", margin: "44px auto", maxWidth: 560, textAlign: "center" },
         text: { fontStyle: "italic", fontSize: 30, lineHeight: 1.25 },
@@ -189,8 +201,8 @@ export const TEMPLATES = {
       figure: { margin: "38px -44px" },
       nutshell: {
         box: { ...NEWS_COLUMN, background: "transparent", border: "none", borderTop: "3px solid var(--ink)", borderBottom: "1px solid var(--rule)", padding: "16px 0 20px", margin: "36px auto" },
-        title: { fontFamily: "var(--font-serif)", fontSize: 21, fontWeight: 600 },
-        list: { fontFamily: "var(--font-serif)", fontSize: 16.5, lineHeight: 1.65 },
+        title: { fontFamily: "var(--h2-font)", fontSize: 21, fontWeight: 600 },
+        list: { fontSize: 16.5, lineHeight: 1.65 },
       },
       timeline: { wrap: { ...NEWS_COLUMN, boxSizing: "border-box", marginTop: 32, marginBottom: 32 } },
       divider: { text: "•   •   •", style: { letterSpacing: "0.2em", color: "var(--muted)" } },
@@ -224,18 +236,20 @@ export const TEMPLATES = {
   },
   finance: {
     key: "finance",
+    fontPreset: "tpl-finance",
     label: "Finance",
     icon: "trending_up",
     description: "Markets, earnings and the economy. Salmon-paper briefing that leads with the numbers — stat rows, trend lines and results tables.",
     look: { "--red": "#0D7680", "--paper": "#FFF1E5", "--paper-faint": "#F7E3D2", "--rule": "#E6CDB8", "--rule-light": "#F0DAC8", "--ink": "#33302E", "--ink-body": "#3D3935", "--ink-secondary": "#5C5651", "--muted": "#857D76", "--placeholder": "#EBD5C3" },
     theme: {
       article: { maxWidth: 840, padding: "44px 44px 160px 80px" },
-      h1: { fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 40, lineHeight: 1.1, letterSpacing: "-0.025em", borderTop: "6px solid var(--ink)", paddingTop: 18, margin: "0 0 16px" },
-      standfirst: { fontSize: 19, lineHeight: 1.45, color: "var(--ink-body)" },
+      columns: { columnGap: 44, columnRule: "1px solid var(--rule)" },
+      h1: { borderTop: "6px solid var(--ink)", paddingTop: 18, margin: "0 0 16px" },
+      standfirst: { color: "var(--ink-body)" },
       byline: { variant: "inline" },
-      body: { fontSize: 15, lineHeight: 1.7, letterSpacing: "0.01em", color: "var(--ink)" },
-      list: { fontSize: 15, color: "var(--ink)" },
-      h2: { fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 21, letterSpacing: "-0.01em", borderTop: "1px solid var(--ink)", paddingTop: 12, margin: "40px 0 14px" },
+      body: { color: "var(--ink)" },
+      list: { color: "var(--ink)" },
+      h2: { borderTop: "1px solid var(--ink)", paddingTop: 12, margin: "40px 0 14px" },
       h3: { color: "var(--red)" },
       quote: {
         wrap: { borderLeft: "4px solid var(--red)", padding: "4px 0 4px 22px" },
@@ -279,19 +293,21 @@ export const TEMPLATES = {
   },
   research: {
     key: "research",
+    fontPreset: "tpl-research",
     label: "Research",
     icon: "science",
     description: "Papers and studies explained. Journal-style column with an abstract, key findings, method and results tables.",
     look: { "--red": "#1F4E9C", "--paper": "#FDFDFB", "--paper-faint": "#F2F4F8", "--rule": "#D8DBE2", "--rule-light": "#E6E8ED" },
     theme: {
       article: { maxWidth: 760, padding: "64px 56px 160px 84px" },
-      h1: { fontWeight: 400, fontSize: 38, lineHeight: 1.18, letterSpacing: "-0.015em", margin: "0 0 18px" },
-      standfirst: { fontFamily: "var(--font-serif)", fontSize: 15.5, lineHeight: 1.7, color: "var(--ink-body)", background: "var(--paper-faint)", borderLeft: "3px solid var(--red)", padding: "16px 20px", margin: "0 0 24px" },
+      columns: { columnGap: 40 },
+      h1: { margin: "0 0 18px" },
+      standfirst: { color: "var(--ink-body)", background: "var(--paper-faint)", borderLeft: "3px solid var(--red)", padding: "16px 20px", margin: "0 0 24px" },
       byline: { variant: "plain" },
-      body: { ...SERIF_BODY, fontSize: 16.5, lineHeight: 1.7, textAlign: "justify", hyphens: "auto" },
-      list: { ...SERIF_BODY, fontSize: 16 },
-      h2: { fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--red)", margin: "40px 0 12px" },
-      h3: { fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, fontSize: 18, letterSpacing: "0" },
+      body: { ...DARK_TEXT, textAlign: "justify", hyphens: "auto" },
+      list: { ...DARK_TEXT },
+      h2: { textTransform: "uppercase", color: "var(--red)", margin: "40px 0 12px" },
+      h3: { fontStyle: "italic" },
       quote: {
         wrap: { borderLeft: "none", padding: "0 44px", margin: "30px 0" },
         text: { fontSize: 20, fontStyle: "italic", lineHeight: 1.5 },
@@ -299,7 +315,7 @@ export const TEMPLATES = {
       nutshell: {
         box: { background: "transparent", border: "1px solid var(--red)", padding: "18px 22px" },
         title: { color: "var(--red)", textTransform: "uppercase", letterSpacing: "0.14em", fontSize: 12 },
-        list: { fontFamily: "var(--font-serif)", fontSize: 15.5 },
+        list: { fontSize: 15.5 },
       },
       table: { table: { borderTop: "2px solid var(--ink)", borderBottom: "2px solid var(--ink)" }, head: { paddingTop: 10, color: "var(--ink)" }, zebra: false },
       divider: { text: "§", style: { fontFamily: "var(--font-serif)", fontSize: 20, letterSpacing: "0", color: "var(--muted)" } },
@@ -335,6 +351,7 @@ export const TEMPLATES = {
   },
   latex: {
     key: "latex",
+    fontPreset: "tpl-latex",
     label: "LaTeX paper",
     icon: "functions",
     description: "Typeset like a LaTeX article — Computer Modern, abstract, numbered sections, captioned figures and booktabs tables.",
@@ -343,22 +360,27 @@ export const TEMPLATES = {
       "--ink": "#000000", "--ink-body": "#000000", "--ink-secondary": "#000000", "--ink-soft": "#000000",
       "--muted": "#333333", "--muted-light": "#555555", "--rule": "#000000", "--rule-light": "#BBBBBB", "--red": "#2F4FA2",
       "--font-serif": CM, "--font-sans": CM, "--font-mono": "'CMU Typewriter Text', monospace",
-      "--body-font": CM, "--h1-font": CM, "--h2-font": CM, "--h3-font": CM, "--standfirst-font": CM,
     },
     theme: {
       article: { maxWidth: 720, padding: "72px 64px 160px 84px" },
+      columns: { columnGap: 32 },
       numbering: true,
       paragraphIndent: true,
       abstractLabel: "Abstract",
       captions: true,
+      charts: "pgfplots",
+      imageSlot: {
+        empty: { background: "#FFFFFF", border: "0.8px solid #000000" },
+        text: { fontFamily: "var(--body-font)", fontStyle: "italic", fontSize: 14, color: "#555555" },
+      },
       texExport: true,
-      h1: { ...CM_TEXT, textAlign: "center", fontWeight: 400, fontSize: 30, lineHeight: 1.25, margin: "8px 0 16px", textWrap: "balance" },
+      h1: { ...LATEX_INK, textAlign: "center", margin: "8px 0 16px", textWrap: "balance" },
       byline: { variant: "latex" },
-      standfirst: { ...CM_TEXT, fontSize: 14.5, lineHeight: 1.45, textAlign: "justify", hyphens: "auto", margin: "0 44px 30px" },
-      body: { ...CM_TEXT, fontSize: 16, lineHeight: 1.5, textAlign: "justify", hyphens: "auto", margin: "0 0 10px" },
-      list: { ...CM_TEXT, fontSize: 16, lineHeight: 1.5, margin: "6px 0 12px", paddingLeft: 30 },
-      h2: { ...CM_TEXT, fontWeight: 700, fontSize: 20, lineHeight: 1.3, margin: "34px 0 12px" },
-      h3: { ...CM_TEXT, fontWeight: 700, fontSize: 17, lineHeight: 1.3, margin: "24px 0 10px" },
+      standfirst: { ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 44px 30px" },
+      body: { ...LATEX_INK, textAlign: "justify", hyphens: "auto", margin: "0 0 10px" },
+      list: { ...LATEX_INK, margin: "6px 0 12px", paddingLeft: 30 },
+      h2: { ...LATEX_INK, margin: "34px 0 12px" },
+      h3: { ...LATEX_INK, margin: "24px 0 10px" },
       quote: {
         wrap: { borderLeft: "none", padding: 0, margin: "14px 40px 18px" },
         text: { ...CM_TEXT, fontSize: 16, lineHeight: 1.5 },
@@ -408,7 +430,7 @@ export const TEMPLATES = {
       { type: "h2", html: "Results" },
       { type: "body", html: "Table 1 compares our model with two baselines. The lightweight model matches the accuracy of the much larger ResNet-50 encoder while running five times faster, which makes city-scale inference practical." },
       { type: "table", a: "Segmentation accuracy on the held-out tiles.", rows: [["Model", "Parameters", "IoU", "Time per tile"], ["Threshold baseline", "—", "0.61", "0.01 s"], ["U-Net, ResNet-50", "32.5 M", "0.88", "0.42 s"], ["U-Net, MobileNetV3 (ours)", "6.6 M", "0.87", "0.08 s"]] },
-      { type: "chart", a: "Estimated usable rooftop area by neighbourhood.", b: "km²", bars: [{ label: "MIRPUR", value: 4.1 }, { label: "UTTARA", value: 3.6 }, { label: "MOHAMMADPUR", value: 2.4 }, { label: "GULSHAN", value: 1.8 }, { label: "OLD DHAKA", value: 1.1 }] },
+      { type: "chart", a: "Estimated usable rooftop area by neighbourhood.", b: "Area (km²)", bars: [{ label: "Mirpur", value: 4.1 }, { label: "Uttara", value: 3.6 }, { label: "Mohammadpur", value: 2.4 }, { label: "Gulshan", value: 1.8 }, { label: "Old Dhaka", value: 1.1 }] },
       { type: "body", html: "Applying the model to all 41,000 tiles yields 13.4 km² of usable rooftop area. At a conservative 140 W per square metre, this corresponds to 1.9 GW of installable capacity." },
       { type: "h2", html: "Conclusion" },
       { type: "body", html: "Satellite imagery and a compact segmentation model are enough to produce a credible city-wide estimate of rooftop solar potential in Dhaka. Future work will validate the estimate against field surveys and account for structural load limits." },
@@ -416,18 +438,19 @@ export const TEMPLATES = {
   },
   lab: {
     key: "lab",
+    fontPreset: "tpl-lab",
     label: "Lab manual",
     icon: "biotech",
     description: "Step-by-step practicals. Worksheet layout with a boxed aim, section banners, safety callout and fill-in results tables.",
     look: { "--red": "#C26A12", "--paper": "#F7F7F5", "--paper-faint": "#EEEEEA", "--rule": "#CFCFC8", "--rule-light": "#E2E2DC", "--font-serif": "var(--font-sans)" },
     theme: {
       article: { maxWidth: 860, padding: "44px 44px 160px 80px" },
-      h1: { fontWeight: 700, fontSize: 36, lineHeight: 1.12, letterSpacing: "-0.02em", margin: "0 0 16px" },
-      standfirst: { fontSize: 16, lineHeight: 1.6, color: "var(--ink)", background: "#FFFFFF", border: "1.5px solid var(--ink)", padding: "14px 18px", margin: "0 0 22px" },
+      columns: { columnGap: 44, columnRule: "1px dashed var(--rule)" },
+      h1: { margin: "0 0 16px" },
+      standfirst: { color: "var(--ink)", background: "#FFFFFF", border: "1.5px solid var(--ink)", padding: "14px 18px", margin: "0 0 22px" },
       byline: { variant: "mono" },
-      body: { fontSize: 15, lineHeight: 1.7, letterSpacing: "0.01em" },
-      list: { fontSize: 15, lineHeight: 1.95 },
-      h2: { fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14, letterSpacing: "0.1em", textTransform: "uppercase", color: "#FFFFFF", background: "var(--ink)", padding: "9px 14px", margin: "36px 0 16px" },
+      list: { lineHeight: 1.95 },
+      h2: { textTransform: "uppercase", color: "#FFFFFF", background: "var(--ink)", padding: "9px 14px", margin: "36px 0 16px" },
       h3: { color: "var(--red)" },
       nutshell: {
         box: { background: "#FDF3E6", border: "none", borderLeft: "5px solid var(--red)", padding: "18px 22px" },

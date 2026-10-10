@@ -19,27 +19,26 @@ function TemplatePreview({ template }) {
   );
 }
 
-export function TemplatePicker({ currentKey, onPick, onClose }) {
+export function TemplatePicker({ canClose, onPick, onClose }) {
   return (
     <div className="template-overlay">
       <div className="template-window">
         <div className="template-head">
           <div>
-            <div className="template-kicker">START A NEW PIECE</div>
+            <div className="template-kicker">NEW DOCUMENT</div>
             <div className="template-title">Choose a template</div>
-            <div className="template-desc">Each template sets the look, the elements you can add and how the AI formats an import. You get a starter page with demo elements to edit.</div>
+            <div className="template-desc">The template sets the look, the elements you can add and how the AI formats an import, and stays fixed for this document. It opens in a new tab with a starter page to edit.</div>
           </div>
-          <button className="template-close" title="Close" onClick={onClose}><span className="ms template-close-icon">close</span></button>
+          {canClose && <button className="template-close" title="Close" onClick={onClose}><span className="ms template-close-icon">close</span></button>}
         </div>
         <div className="template-grid">
           {Object.values(TEMPLATES).map((t) => (
-            <button key={t.key} className={`template-card${t.key === currentKey ? " template-card--current" : ""}`} onClick={() => onPick(t.key)}>
+            <button key={t.key} className="template-card" onClick={() => onPick(t.key)}>
               <TemplatePreview template={t} />
               <div className="template-card-body">
                 <div className="template-card-name">
                   <span className="ms template-card-icon">{t.icon}</span>
                   {t.label}
-                  {t.key === currentKey && <span className="template-card-badge">CURRENT</span>}
                 </div>
                 <div className="template-card-desc">{t.description}</div>
                 <div className="template-card-meta">{t.blocks.length} ELEMENT TYPES</div>
@@ -47,7 +46,7 @@ export function TemplatePicker({ currentKey, onPick, onClose }) {
             </button>
           ))}
         </div>
-        <div className="template-foot">Picking a template replaces the current page — Ctrl+Z brings it back. To change the look without losing your text, use the template menu in the top bar.</div>
+        <div className="template-foot">To try the same content in another template, open another tab with that template and import or paste it there. Each tab keeps its own fonts and history.</div>
       </div>
     </div>
   );

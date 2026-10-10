@@ -2,6 +2,7 @@ import { EditableText } from "./EditableText.jsx";
 import { FigureHeader } from "./FigureHeader.jsx";
 import { Caption } from "./Caption.jsx";
 import { RowControls } from "./RowControls.jsx";
+import { PgfPlot } from "./PgfPlot.jsx";
 import { FIGURE, maxValue } from "./articleStyles.js";
 
 const X0 = 40;
@@ -39,6 +40,26 @@ function smoothPath(pts) {
 
 export function LineChartBlock({ block, theme, number, onPatch }) {
   const rows = block.bars || [];
+  const controls = (
+    <RowControls
+      noun="POINT"
+      onAdd={() => onPatch((x) => {
+        if (x.bars.length < MAX_POINTS) x.bars.push({ label: "NEXT", value: x.bars.length ? x.bars[x.bars.length - 1].value : 10 });
+      })}
+      onRemove={() => onPatch((x) => { if (x.bars.length > 2) x.bars.pop(); })}
+    />
+  );
+
+  if (theme.charts === "pgfplots") {
+    return (
+      <figure style={{ ...FIGURE, paddingTop: 18 }}>
+        <PgfPlot kind="line" block={block} onPatch={onPatch} />
+        <Caption kind="Figure" number={number} placeholder="Trend title" value={block.a} onCommit={(v) => onPatch((x) => { x.a = v; })} style={{ marginTop: 10 }} />
+        {controls}
+      </figure>
+    );
+  }
+
   const max = maxValue(rows);
   const pts = plotPoints(rows, max);
   const linePath = smoothPath(pts);
@@ -92,13 +113,7 @@ export function LineChartBlock({ block, theme, number, onPatch }) {
           style={{ marginTop: 14 }}
         />
       )}
-      <RowControls
-        noun="POINT"
-        onAdd={() => onPatch((x) => {
-          if (x.bars.length < MAX_POINTS) x.bars.push({ label: "NEXT", value: x.bars.length ? x.bars[x.bars.length - 1].value : 10 });
-        })}
-        onRemove={() => onPatch((x) => { if (x.bars.length > 2) x.bars.pop(); })}
-      />
+      {controls}
     </figure>
   );
 }

@@ -11,7 +11,6 @@ import { TableBlock } from "./blocks/TableBlock.jsx";
 import { TimelineBlock } from "./blocks/TimelineBlock.jsx";
 import { NutshellBlock } from "./blocks/NutshellBlock.jsx";
 import { DividerBlock } from "./blocks/DividerBlock.jsx";
-import { DropLine } from "./DropLine.jsx";
 import "./BlockFrame.css";
 
 const BLOCK_BODIES = {
@@ -44,10 +43,21 @@ function changeType(x, type) {
   x.type = type;
 }
 
-function wrapStyle(selected, inLive) {
+// Carried into Copy HTML, which lays a two-column document out with CSS columns: the
+// masthead spans both, furniture never splits, headings stay with what follows.
+const KEEP_TOGETHER = ["quote", "image", "pair", "gallery", "stats", "table", "chart", "line", "poll", "timeline", "nutshell", "divider", "bullets", "numbered"];
+
+function columnStyle(type, span) {
+  if (span) return { columnSpan: "all" };
+  if (type === "h2" || type === "h3") return { breakInside: "avoid", breakAfter: "avoid" };
+  return KEEP_TOGETHER.includes(type) ? { breakInside: "avoid" } : {};
+}
+
+function wrapStyle(selected, inLive, layout) {
   return {
     position: "relative",
     padding: "1px 0",
+    ...layout,
     ...(selected && { outline: "1px solid rgba(176,141,74,0.55)", outlineOffset: 14 }),
     ...(inLive && { boxShadow: "inset 3px 0 0 rgba(201,162,39,0.45)", paddingLeft: 16, marginLeft: -16 }),
   };
@@ -93,37 +103,20 @@ export function BlockFrame({
   allowed,
   theme,
   number,
-  dropActive,
+  span,
+  chromeSide = "left",
   readTime,
   onSelect,
   onPatch,
   onDelete,
   onDeleteSection,
   onDuplicate,
-  onShowDrop,
-  onDropAt,
   onMoveStart,
   onDragEnd,
 }) {
   const isHeading = HEADING_TYPES.includes(block.type);
   const showChrome = block.type !== "h1" && block.type !== "standfirst";
   const Body = bodyFor(block.type);
-
-  function dropIndex(e) {
-    const r = e.currentTarget.getBoundingClientRect();
-    return e.clientY < r.top + r.height / 2 ? index : index + 1;
-  }
-
-  function handleDragOver(e) {
-    e.preventDefault();
-    onShowDrop(dropIndex(e));
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    onDropAt(dropIndex(e));
-  }
 
   function stop(fn) {
     return (e) => { e.stopPropagation(); fn(); };
@@ -135,17 +128,15 @@ export function BlockFrame({
       data-type={block.type}
       data-sel={selected ? "1" : "0"}
       data-rw={building ? "1" : undefined}
-      style={wrapStyle(selected, inLive)}
+      data-drop-index={index}
+      data-unit={block.id}
+      style={wrapStyle(selected, inLive, columnStyle(block.type, span))}
       onClick={(e) => { e.stopPropagation(); onSelect(block.id, index); }}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
     >
-      <DropLine visible={dropActive} />
-
       {selected && <SelectionHandles />}
 
       {showChrome && (
-        <div data-chrome="" className="block-chrome">
+        <div data-chrome="" className={`block-chrome${chromeSide === "right" ? " block-chrome--right" : ""}`}>
           <div
             className="block-chrome-btn block-chrome-btn--drag"
             draggable="true"

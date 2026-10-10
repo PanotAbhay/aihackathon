@@ -29,3 +29,27 @@
   font-size: 12.5px;
   color: #8A8177;
 }
+
+.canvas-inner {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Print layouts: A4 sheets on a dark desk, like a print preview. */
+.canvas--print {
+  background: #34302B;
+}
+
+.print-desk {
+  padding: 36px 0 8px;
+}
+
+.canvas-tail--print {
+  width: 794px;
+  margin: 0 auto 60px;
+  border-color: rgba(255,255,255,0.22);
+}
+
+.canvas-tail--print .canvas-tail-label {
+  color: rgba(242,239,233,0.55);
+}

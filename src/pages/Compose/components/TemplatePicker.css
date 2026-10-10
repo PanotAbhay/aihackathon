@@ -100,10 +100,6 @@
   transform: translateY(-1px);
 }
 
-.template-card--current {
-  border-color: rgba(201,162,39,0.42);
-}
-
 .template-preview {
   height: 132px;
   padding: 18px 22px;
@@ -159,14 +155,6 @@
 
 .template-card-icon {
   font-size: 19px;
-  color: #C9A227;
-}
-
-.template-card-badge {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
   color: #C9A227;
 }
 

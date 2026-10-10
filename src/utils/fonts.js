@@ -2,6 +2,11 @@ import {
   FONT_OPTIONS, LETTER_SPACING_STEPS, LINE_HEIGHT_STEPS, SIZE_STEPS, TEXT_LEVELS, presetById,
 } from "../data/fontSystems.js";
 
+// Saved settings from an older shape (raw numbers per level) are discarded for the template's own.
+export function validFonts(saved) {
+  return !!saved && !!saved.preset && TEXT_LEVELS.every((l) => saved[l.id] && SIZE_STEPS.some((s) => s.id === saved[l.id].size));
+}
+
 const byId = (id) => FONT_OPTIONS.find((f) => f.id === id) || FONT_OPTIONS[0];
 const step = (steps, id) => steps.find((s) => s.id === id) || steps[1];
 const round = (n, places) => Number(n.toFixed(places));
@@ -35,18 +40,19 @@ export function fontLinks(fonts) {
   return [...ids].map(byId).filter((f) => f.google).map(googleHref);
 }
 
-// Push the chosen typography into CSS variables that the article's text reads.
-export function applyFonts(fonts) {
+// The chosen typography as CSS variables, applied to a tab's canvas so each tab keeps its own.
+export function fontVars(fonts) {
   const preset = presetById(fonts.preset);
-  const root = document.documentElement.style;
+  const vars = {};
   for (const { id: level } of TEXT_LEVELS) {
     const choice = fonts[level];
     const v = resolveLevel(preset[level], choice);
     loadFont(choice.font);
-    root.setProperty(`--${level}-font`, byId(choice.font).stack);
-    root.setProperty(`--${level}-weight`, String(choice.weight));
-    root.setProperty(`--${level}-size`, v.size + "px");
-    root.setProperty(`--${level}-lh`, String(v.lh));
-    root.setProperty(`--${level}-ls`, v.ls + "em");
+    vars[`--${level}-font`] = byId(choice.font).stack;
+    vars[`--${level}-weight`] = String(choice.weight);
+    vars[`--${level}-size`] = v.size + "px";
+    vars[`--${level}-lh`] = String(v.lh);
+    vars[`--${level}-ls`] = v.ls + "em";
   }
+  return vars;
 }

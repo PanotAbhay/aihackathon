@@ -2,6 +2,7 @@ import { EditableText } from "./EditableText.jsx";
 import { FigureHeader } from "./FigureHeader.jsx";
 import { Caption } from "./Caption.jsx";
 import { RowControls } from "./RowControls.jsx";
+import { PgfPlot } from "./PgfPlot.jsx";
 import { FIGURE, maxValue } from "./articleStyles.js";
 
 const MAX_BARS = 7;
@@ -9,6 +10,23 @@ const MAX_BARS = 7;
 export function BarChartBlock({ block, theme, number, onPatch }) {
   const bars = block.bars || [];
   const max = maxValue(bars);
+  const controls = (
+    <RowControls
+      noun="BAR"
+      onAdd={() => onPatch((x) => { if (x.bars.length < MAX_BARS) x.bars.push({ label: "Label", value: 25 }); })}
+      onRemove={() => onPatch((x) => { if (x.bars.length > 1) x.bars.pop(); })}
+    />
+  );
+
+  if (theme.charts === "pgfplots") {
+    return (
+      <figure style={{ ...FIGURE, paddingTop: 18 }}>
+        <PgfPlot kind="bar" block={block} onPatch={onPatch} />
+        <Caption kind="Figure" number={number} placeholder="Chart title" value={block.a} onCommit={(v) => onPatch((x) => { x.a = v; })} style={{ marginTop: 10 }} />
+        {controls}
+      </figure>
+    );
+  }
 
   return (
     <figure style={{ ...FIGURE, ...(theme.captions && { paddingTop: 22 }) }}>
@@ -52,11 +70,7 @@ export function BarChartBlock({ block, theme, number, onPatch }) {
           style={{ marginTop: 14 }}
         />
       )}
-      <RowControls
-        noun="BAR"
-        onAdd={() => onPatch((x) => { if (x.bars.length < MAX_BARS) x.bars.push({ label: "LABEL", value: 25 }); })}
-        onRemove={() => onPatch((x) => { if (x.bars.length > 1) x.bars.pop(); })}
-      />
+      {controls}
     </figure>
   );
 }

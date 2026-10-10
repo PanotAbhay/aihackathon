@@ -1,7 +1,13 @@
 import { IMAGE_TYPES } from "../data/index.js";
 
+// Same rule as the on-screen plot (PgfPlot): long tick labels rotate.
+function rotatedLabels(rows) {
+  const longest = Math.max(0, ...rows.map((r) => String(r.label || "").length));
+  return longest * rows.length > 36;
+}
+
 const PREAMBLE = [
-  "\\documentclass[11pt]{article}",
+  "\\documentclass[11pt%COLUMNS%]{article}",
   "\\usepackage[T1]{fontenc}",
   "\\usepackage{lmodern}",
   "\\usepackage[a4paper,margin=1in]{geometry}",
@@ -63,7 +69,7 @@ function plotFigure(block, plot) {
     "\\begin{figure}[ht]",
     "  \\centering",
     "  \\begin{tikzpicture}",
-    "    \\begin{axis}[" + plot.axis + ", width=0.85\\linewidth, height=6cm, xtick=data, xticklabels={" + labels + "}, ylabel={" + escapeTex(block.b) + "}, x tick label style={font=\\small}]",
+    "    \\begin{axis}[" + plot.axis + ", width=0.85\\linewidth, height=6cm, xtick=data, xticklabels={" + labels + "}, ylabel={" + escapeTex(block.b) + "}, x tick label style={font=\\small" + (rotatedLabels(bars) ? ", rotate=45, anchor=east" : "") + "}]",
     "      \\addplot" + plot.style + " coordinates {" + coords + "};",
     "    \\end{axis}",
     "  \\end{tikzpicture}",
@@ -81,7 +87,7 @@ function dataUrlBytes(url) {
   return { bytes, ext };
 }
 
-function imageFigure(block, figureIndex, images) {
+function imageFigure(block, figureIndex, images, wide) {
   const slots = block.slots || [""];
   const width = slots.length === 1 ? "\\linewidth" : slots.length === 2 ? "0.48\\linewidth" : "0.31\\linewidth";
   const graphics = slots.map((src, k) => {
@@ -97,16 +103,18 @@ function imageFigure(block, figureIndex, images) {
   const body = slots.length === 1
     ? "  " + graphics[0]
     : graphics.map((g) => "  \\begin{subfigure}{" + width + "}\n    \\centering\n    " + g + "\n  \\end{subfigure}").join("\\hfill\n");
-  return ["\\begin{figure}[ht]", "  \\centering", body, "  \\caption{" + escapeTex(block.a) + "}", "\\end{figure}"].join("\n");
+  // In two columns, pairs and galleries span the page (figure*), like they do on screen.
+  const env = wide ? "figure*" : "figure";
+  return ["\\begin{" + env + "}[ht]", "  \\centering", body, "  \\caption{" + escapeTex(block.a) + "}", "\\end{" + env + "}"].join("\n");
 }
 
-function table(block) {
+function table(block, wide) {
   const rows = block.rows || [];
   if (!rows.length) return "";
   const cols = Math.max(...rows.map((r) => r.length));
   const line = (r) => "    " + Array.from({ length: cols }, (_, i) => escapeTex(r[i] || "")).join(" & ") + " \\\\";
   return [
-    "\\begin{table}[ht]",
+    "\\begin{" + (wide ? "table*" : "table") + "}[ht]",
     "  \\centering",
     block.a ? "  \\caption{" + escapeTex(block.a) + "}" : "",
     "  \\begin{tabular}{" + "l".repeat(cols) + "}",
@@ -116,12 +124,12 @@ function table(block) {
     ...rows.slice(1).map(line),
     "    \\bottomrule",
     "  \\end{tabular}",
-    "\\end{table}",
+    "\\end{" + (wide ? "table*" : "table") + "}",
   ].filter(Boolean).join("\n");
 }
 
 // Turn the document into a compilable article. Returns the .tex source and any embedded photos as files.
-export function blocksToLatex(blocks) {
+export function blocksToLatex(blocks, { columns = 2 } = {}) {
   const images = [];
   const front = { title: "", author: "", affiliation: "" };
   const body = [];
@@ -142,18 +150,18 @@ export function blocksToLatex(blocks) {
     else if (t === "byline") body.push("\\noindent\\textit{" + escapeTex([b.a, b.b].filter(Boolean).join(", ")) + "}");
     else if (t === "divider") body.push("\\begin{center}\n$\\ast$\\quad$\\ast$\\quad$\\ast$\n\\end{center}");
     else if (t === "nutshell") body.push("\\begin{center}\n\\fbox{\\parbox{0.92\\linewidth}{\n\\textbf{" + escapeTex(b.a) + "}\n" + list("itemize", b.html) + "\n}}\n\\end{center}");
-    else if (t === "table") body.push(table(b));
-    else if (t === "chart") { figures += 1; body.push(plotFigure(b, { axis: "ybar, ymin=0, nodes near coords, enlarge x limits=0.15", style: "[fill=blue!40, draw=blue!70!black]" })); }
-    else if (t === "line") { figures += 1; body.push(plotFigure(b, { axis: "ymin=0", style: "[mark=*, smooth, thick, blue!70!black]" })); }
+    else if (t === "table") body.push(table(b, columns === 2));
+    else if (t === "chart") { figures += 1; body.push(plotFigure(b, { axis: "ybar, ymin=0, nodes near coords, enlarge x limits=0.15", style: "[fill=blue!30!white, draw=blue]" })); }
+    else if (t === "line") { figures += 1; body.push(plotFigure(b, { axis: "ymin=0, nodes near coords, enlarge x limits=0.05", style: "[color=blue, mark=*]" })); }
     else if (t === "poll") body.push(table({ a: b.a, rows: [["", escapeTex(b.b) || "Share"], ...(b.bars || []).map((r) => [r.label, r.value + "%"])] }));
-    else if (t === "stats") body.push(table({ a: b.a, rows: [(b.cells || []).map((c) => c.label), (b.cells || []).map((c) => c.value)] }));
+    else if (t === "stats") body.push(table({ a: b.a, rows: [(b.cells || []).map((c) => c.label), (b.cells || []).map((c) => c.value)] }, columns === 2));
     else if (t === "timeline") body.push("\\begin{description}\n" + (b.rows || []).map((r) => "  \\item[" + escapeTex(r.d) + "] \\textbf{" + escapeTex(r.t) + "} " + escapeTex(r.x)).join("\n") + "\n\\end{description}");
-    else if (IMAGE_TYPES.includes(t)) { figures += 1; body.push(imageFigure(b, figures, images)); }
+    else if (IMAGE_TYPES.includes(t)) { figures += 1; body.push(imageFigure(b, figures, images, columns === 2 && t !== "image")); }
   });
 
   const author = front.author ? front.author + (front.affiliation ? " \\\\ \\small " + front.affiliation : "") : "";
   const tex = [
-    PREAMBLE,
+    PREAMBLE.replace("%COLUMNS%", columns === 2 ? ",twocolumn" : ""),
     "",
     "\\title{" + front.title + "}",
     "\\author{" + author + "}",

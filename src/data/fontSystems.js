@@ -11,6 +11,7 @@ export const FONT_OPTIONS = [
   { id: "dm-sans", label: "DM Sans", stack: "'DM Sans', system-ui, sans-serif", google: "DM+Sans" },
   { id: "space-grotesk", label: "Space Grotesk", stack: "'Space Grotesk', system-ui, sans-serif", google: "Space+Grotesk" },
   { id: "georgia", label: "Georgia (system)", stack: "Georgia, 'Times New Roman', serif" },
+  { id: "cmu", label: "Computer Modern", stack: "'CMU Serif', 'Latin Modern Roman', serif" },
 ];
 
 // Text styles the settings control, in the order the panel lists them.
@@ -90,9 +91,44 @@ export const FONT_PRESETS = [
   },
 ];
 
-export const DEFAULT_PRESET = "editorial";
+// Each template's own typography, the starting point for a tab's font settings.
+export const TEMPLATE_FONT_PRESETS = [
+  {
+    id: "tpl-news", label: "News", note: "Baskervville + Satoshi",
+    h1: type("baskervville", 50, 600, 1.08, -0.025), h2: type("baskervville", 28, 600, 1.2, -0.02),
+    h3: type("satoshi", 14, 700, 1.3, 0.1), standfirst: type("baskervville", 20, 400, 1.5, 0),
+    body: type("baskervville", 17.5, 400, 1.75, 0),
+  },
+  {
+    id: "tpl-finance", label: "Finance", note: "Satoshi throughout",
+    h1: type("satoshi", 40, 700, 1.1, -0.025), h2: type("satoshi", 21, 700, 1.25, -0.01),
+    h3: type("satoshi", 17, 700, 1.3, 0.075), standfirst: type("satoshi", 19, 400, 1.45, 0),
+    body: type("satoshi", 15, 400, 1.7, 0.01),
+  },
+  {
+    id: "tpl-research", label: "Research", note: "Baskervville + Satoshi labels",
+    h1: type("baskervville", 38, 400, 1.18, -0.015), h2: type("satoshi", 13, 700, 1.3, 0.16),
+    h3: type("baskervville", 18, 400, 1.3, 0), standfirst: type("baskervville", 15.5, 400, 1.7, 0),
+    body: type("baskervville", 16.5, 400, 1.7, 0),
+  },
+  {
+    id: "tpl-latex", label: "LaTeX", note: "Computer Modern throughout",
+    h1: type("cmu", 30, 400, 1.25, 0), h2: type("cmu", 20, 700, 1.3, 0),
+    h3: type("cmu", 17, 700, 1.3, 0), standfirst: type("cmu", 14.5, 400, 1.45, 0),
+    body: type("cmu", 16, 400, 1.5, 0),
+  },
+  {
+    id: "tpl-lab", label: "Lab manual", note: "Satoshi throughout",
+    h1: type("satoshi", 36, 700, 1.12, -0.02), h2: type("satoshi", 14, 700, 1.3, 0.1),
+    h3: type("satoshi", 17, 700, 1.3, 0.075), standfirst: type("satoshi", 16, 400, 1.6, 0),
+    body: type("satoshi", 15, 400, 1.7, 0.01),
+  },
+];
 
-export const presetById = (id) => FONT_PRESETS.find((p) => p.id === id) || FONT_PRESETS[0];
+export const DEFAULT_PRESET = "tpl-news";
+
+export const presetById = (id) =>
+  TEMPLATE_FONT_PRESETS.find((p) => p.id === id) || FONT_PRESETS.find((p) => p.id === id) || TEMPLATE_FONT_PRESETS[0];
 
 // Settings state for a preset as designed: its fonts and weights, every step at the middle.
 export function presetSettings(id) {

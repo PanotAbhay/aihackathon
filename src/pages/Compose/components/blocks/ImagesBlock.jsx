@@ -5,7 +5,9 @@ import { FIGURE, MONO_OVERLINE } from "./articleStyles.js";
 
 const SLOT_HEIGHTS = { 1: 340, 2: 250 };
 
-function slotStyle(src, height) {
+const SUBFIGURE = "abcdefgh";
+
+function slotStyle(src, height, placeholder) {
   return {
     height,
     background: src ? "var(--placeholder) center/cover no-repeat url(" + src + ")" : "var(--placeholder)",
@@ -14,6 +16,7 @@ function slotStyle(src, height) {
     justifyContent: "center",
     cursor: "pointer",
     border: "1px dashed " + (src ? "transparent" : "var(--rule)"),
+    ...(!src && placeholder),
   };
 }
 
@@ -28,7 +31,13 @@ export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
     reader.readAsDataURL(file);
   }
 
+  // Only photo files are caught here; dragged blocks pass through to the canvas.
+  function hasFiles(e) {
+    return Array.from(e.dataTransfer.types || []).includes("Files");
+  }
+
   function handleDrop(e, index) {
+    if (!hasFiles(e)) return;
     e.preventDefault();
     e.stopPropagation();
     const f = e.dataTransfer.files && e.dataTransfer.files[0];
@@ -44,17 +53,26 @@ export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
             key={block.id + "s" + i}
             data-empty={src ? undefined : ""}
             title="Click or drop a photo"
-            style={slotStyle(src, height)}
+            style={slotStyle(src, height, theme.imageSlot && theme.imageSlot.empty)}
             onClick={(e) => { e.stopPropagation(); pickFile("image/*", (f) => readImage(i, f)); }}
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            onDragOver={(e) => { if (hasFiles(e)) { e.preventDefault(); e.stopPropagation(); } }}
             onDrop={(e) => handleDrop(e, i)}
           >
-            {!src && (
+            {!src && !theme.imageSlot && (
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", color: "var(--muted)", textAlign: "center", padding: "0 12px" }}>DROP PHOTO<br />OR CLICK</span>
             )}
+            {!src && theme.imageSlot && <span style={theme.imageSlot.text}>Image — click or drop a file</span>}
           </div>
         ))}
       </div>
+      {/* LaTeX subfigures: (a), (b), (c) under each image of a pair or gallery. */}
+      {theme.captions && slots.length > 1 && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(" + n + ",1fr)", gap: n > 2 ? 12 : 16, marginTop: 6 }}>
+          {slots.map((_, i) => (
+            <div key={i} style={{ textAlign: "center", fontFamily: "var(--body-font)", fontSize: 14, color: "var(--ink)" }}>({SUBFIGURE[i]})</div>
+          ))}
+        </div>
+      )}
       {theme.captions && (
         <Caption kind="Figure" number={number} value={block.a} onCommit={(v) => onPatch((x) => { x.a = v; })} style={{ marginTop: 10 }} />
       )}

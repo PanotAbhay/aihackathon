@@ -1,7 +1,7 @@
 import indexCss from "../index.css?raw";
 import pageCss from "./exportPage.css?raw";
 import { IMAGE_TYPES } from "../data/index.js";
-import { TYPE_VAR, cleanArticle } from "./exportHtml.js";
+import { cleanArticle } from "./exportHtml.js";
 
 // Builds a complete, self-contained HTML page from the live article: colour and
 // type tokens and embedded fonts, so it opens offline.
@@ -101,13 +101,21 @@ async function fontCss(fontLinks) {
   };
 }
 
-// The typography chosen in Settings, for rules that read it by variable (the drop cap).
-function typeVarsCss() {
-  const style = document.documentElement.style;
-  const decls = Array.from(style).filter((name) => TYPE_VAR.test(name))
-    .map((name) => name + ":" + style.getPropertyValue(name).trim() + ";");
-  return decls.length ? ":root{" + decls.join("") + "}" : "";
+// House tokens plus the tab's template colours and fonts (set on its canvas), as the
+// article sees them, for rules that read them by variable (page colours, the drop cap).
+function tokensCss(node) {
+  const names = new Set(Array.from(TOKENS_CSS.matchAll(/(--[\w-]+)\s*:/g), (m) => m[1]));
+  const canvas = node.closest(".canvas");
+  if (canvas) Array.from(canvas.style).filter((n) => n.startsWith("--")).forEach((n) => names.add(n));
+  const computed = getComputedStyle(node);
+  const decls = Array.from(names).map((n) => [n, computed.getPropertyValue(n).trim()])
+    .filter(([, v]) => v).map(([n, v]) => n + ":" + v + ";");
+  return ":root{" + decls.join("") + "}";
 }
+
+// Print layouts: the A4 sheets as laid out, one per printed page.
+const PRINT_CSS = "body{background:#E7E4DE;} [data-pages]{padding:32px 0;} @page{size:A4;margin:0;}"
+  + " @media print{body{background:none;} [data-pages]{padding:0;} [data-page]{box-shadow:none!important;margin:0!important;}}";
 
 // The drag-and-drop indicator: an empty, absolutely placed line in every block.
 function isDropLine(el) {
@@ -136,15 +144,18 @@ function photosToImages(article) {
   }
 }
 
-function exportArticle(node) {
+function exportArticle(node, print) {
   const src = cleanArticle(node);
-  const article = document.createElement("article");
+  const article = document.createElement(print ? "div" : "article");
+  if (print) article.setAttribute("data-pages", "");
   article.append(...Array.from(src.childNodes));
-  for (const wrap of Array.from(article.children)) {
+  for (const wrap of article.querySelectorAll("[data-type]")) {
     for (const kid of Array.from(wrap.children)) if (isDropLine(kid)) kid.remove();
     const prose = wrap.querySelector(":scope > [data-prose]");
     if (prose) prose.removeAttribute("data-ids");
   }
+  const pages = article.querySelectorAll("[data-page]");
+  if (pages.length) pages[pages.length - 1].style.breakAfter = "auto";
   photosToImages(article);
   return article.outerHTML;
 }
@@ -160,13 +171,14 @@ export function documentTitle(title) {
 // `fontLinks` are the Google Fonts stylesheets the chosen typography uses.
 export async function buildDocument({ node, title, fontLinks = [] }) {
   // Snapshot the article before waiting on fonts, so it matches the moment of the click.
-  const article = exportArticle(node);
-  const typeVars = typeVarsCss();
+  const print = node.getAttribute("data-layout") !== "web";
+  const article = exportArticle(node, print);
+  const tokens = tokensCss(node);
   const fonts = await fontCss(fontLinks);
   return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
     + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
     + "<title>" + escapeHtml(documentTitle(title)) + "</title>\n"
     + fonts.links.map((href) => "<link rel=\"stylesheet\" href=\"" + escapeHtml(href) + "\">\n").join("")
-    + "<style>\n" + fonts.css + "\n" + TOKENS_CSS + "\n" + typeVars + "\n" + PROSE_CSS + "\n" + pageCss + "\n</style>\n"
+    + "<style>\n" + fonts.css + "\n" + tokens + "\n" + PROSE_CSS + "\n" + pageCss + (print ? "\n" + PRINT_CSS : "") + "\n</style>\n"
     + "</head>\n<body>\n" + article + "\n</body>\n</html>\n";
 }
