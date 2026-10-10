@@ -37,14 +37,64 @@ export function articleHtml(node, fontLinks = []) {
   c.querySelectorAll("[data-rw]").forEach((n) => n.removeAttribute("data-rw"));
   // The indent rule lives in index.css, so bake it onto each paragraph.
   c.querySelectorAll("[data-indent] > p").forEach((p) => {
-    p.setAttribute("style", "margin:0;text-indent:" + (p.previousElementSibling ? "1.5em" : "0") + ";");
+    const indented = p.previousElementSibling || p.parentElement.hasAttribute("data-continued");
+    p.setAttribute("style", "margin:0;text-indent:" + (indented ? "1.5em" : "0") + ";");
   });
   c.querySelectorAll(".nt-blk").forEach((n) => {
     n.removeAttribute("class");
     n.removeAttribute("data-sel");
     n.removeAttribute("data-blk");
-    n.setAttribute("style", "position:relative;");
+    // Keep two-column behaviour: spanning heads and figures that must not split.
+    const keep = ["columnSpan", "breakInside", "breakAfter", "overflow", "height"]
+      .filter((k) => n.style[k])
+      .map((k) => k.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase()) + ":" + n.style[k] + ";")
+      .join("");
+    n.setAttribute("style", "position:relative;" + keep);
   });
   const links = fontLinks.map((href) => '<link rel="stylesheet" href="' + href + '">').join("");
-  return links + '<article style="max-width:688px;margin:0 auto;">' + c.innerHTML + "</article>";
+  // Paragraph spacing and drop caps come from index.css; carry them with the tab's own fonts.
+  const dropFont = computed.getPropertyValue("--h1-font").trim() || "serif";
+  const ink = computed.getPropertyValue("--ink").trim() || "#1E1E1E";
+  const proseCss = "<style>[data-prose]>p{margin:0 0 18px;}[data-prose]>p:last-child{margin-bottom:0;}"
+    + "[data-lede=\"1\"]>p:first-child::first-letter,[data-dropcap]::first-letter{float:left;font-family:" + dropFont
+    + ";font-size:76px;line-height:0.72;font-weight:600;color:" + ink + ";margin:6px 12px 0 0;}</style>";
+
+  // Print layouts export the A4 pages as laid out; the last page needs no page break after it.
+  if (node.getAttribute("data-layout") !== "web") {
+    const pages = c.querySelectorAll("[data-page]");
+    if (pages.length) pages[pages.length - 1].style.breakAfter = "auto";
+    return links + proseCss + '<div data-pages="">' + c.innerHTML + "</div>";
+  }
+  return links + proseCss + '<article style="max-width:688px;margin:0 auto;">' + c.innerHTML + "</article>";
+}
+
+// @font-face rules from the app's stylesheets, with font URLs made absolute so they load
+// in a new window.
+function fontFaceCss() {
+  let css = "";
+  Array.from(document.styleSheets).forEach((sheet) => {
+    let rules;
+    try { rules = sheet.cssRules; } catch { return; }
+    const base = sheet.href || location.href;
+    Array.from(rules).forEach((r) => {
+      if (r.type !== CSSRule.FONT_FACE_RULE) return;
+      css += r.cssText.replace(/url\(["']?([^"')]+)["']?\)/g, (_, u) => 'url("' + new URL(u, base).href + '")') + "\n";
+    });
+  });
+  return css;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+}
+
+// A standalone page for Preview: the exported article with the app's fonts. Print layouts show
+// the A4 sheets and print one sheet per page.
+export function previewDocument(html, { title, print }) {
+  const pageCss = print
+    ? "body{background:#E7E4DE;padding:32px 0;} @page{size:A4;margin:0;} @media print{body{background:none;padding:0;} [data-page]{box-shadow:none!important;margin:0!important;}}"
+    : "body{background:#FFFFFF;padding:48px 16px;}";
+  return "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>" + escapeHtml(title) + "</title>"
+    + "<style>" + fontFaceCss() + "*,*::before,*::after{box-sizing:border-box;} body{margin:0;-webkit-font-smoothing:antialiased;} img{display:block;} " + pageCss + "</style>"
+    + "</head><body>" + html + "</body></html>";
 }
