@@ -5,9 +5,10 @@ import "./TopBar.css";
 const EXPORT_ITEMS = [
   { id: "html", icon: "download", label: "Download HTML" },
   { id: "copy", icon: "content_copy", label: "Copy HTML" },
+  { id: "pdf", icon: "picture_as_pdf", label: "Export PDF" },
 ];
 
-function ExportMenu({ exported, exporting, onDownloadHtml, onCopy }) {
+function ExportMenu({ exported, exporting, onDownloadHtml, onCopy, onPdf }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -27,7 +28,7 @@ function ExportMenu({ exported, exporting, onDownloadHtml, onCopy }) {
     };
   }, [open]);
 
-  const actions = { html: onDownloadHtml, copy: onCopy };
+  const actions = { html: onDownloadHtml, copy: onCopy, pdf: onPdf };
   const label = exporting ? "Preparing…" : exported ? "Copied" : "Export";
 
   return (
@@ -44,7 +45,7 @@ function ExportMenu({ exported, exporting, onDownloadHtml, onCopy }) {
       </button>
       {open && (
         <div className="top-bar-menu" role="menu">
-          {EXPORT_ITEMS.map((item) => (
+          {EXPORT_ITEMS.filter((item) => actions[item.id]).map((item) => (
             <button
               key={item.id}
               className="top-bar-menu-item"
@@ -62,7 +63,7 @@ function ExportMenu({ exported, exporting, onDownloadHtml, onCopy }) {
 
 export function TopBar({
   docTitle, onDocTitle, templateKey, layout, onLayout, note, noteErr, busy, zoom, onZoomIn, onZoomOut,
-  exported, exporting, onExport, onDownloadHtml, onPreview, onExportTex, onImport,
+  exported, exporting, onExport, onDownloadHtml, onExportPdf, onPreview, onExportTex, onImport,
 }) {
   return (
     <div className="top-bar">
@@ -126,6 +127,7 @@ export function TopBar({
           exporting={exporting}
           onDownloadHtml={onDownloadHtml}
           onCopy={onExport}
+          onPdf={onExportPdf}
         />
         <button className="top-bar-btn top-bar-btn--gold" onClick={onImport}>
           <span className="ms top-bar-icon">auto_awesome</span>Import

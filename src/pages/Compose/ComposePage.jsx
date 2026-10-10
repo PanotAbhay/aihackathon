@@ -130,14 +130,24 @@ export function ComposePage() {
     if (sel || bar) { setSel(null); setBar(null); }
   }
 
-  function handlePreview() {
+  function openRendered(autoPrint) {
     const node = document.querySelector("[data-article]");
     if (!node) return;
     const html = articleHtml(node, fontLinks(active.fonts));
     const win = window.open("", "_blank");
-    if (!win) { flash("ALLOW POP-UPS TO OPEN THE PREVIEW", true); return; }
-    win.document.write(previewDocument(html, { title: active.title, print: active.layout !== "web" }));
+    if (!win) { flash("ALLOW POP-UPS TO OPEN THE " + (autoPrint ? "PDF EXPORT" : "PREVIEW"), true); return; }
+    win.document.write(previewDocument(html, { title: active.title, print: active.layout !== "web", autoPrint }));
     win.document.close();
+  }
+
+  function handlePreview() {
+    openRendered(false);
+  }
+
+  // The browser's print engine turns the A4 pages into a vector PDF: choose "Save as PDF".
+  function handleExportPdf() {
+    openRendered(true);
+    flash("CHOOSE “SAVE AS PDF” IN THE PRINT DIALOG");
   }
 
   async function handleExportTex() {
@@ -207,6 +217,7 @@ export function ComposePage() {
         layout={active ? active.layout : "web"}
         onLayout={active ? (layout) => workspace.updateDoc(active.id, { layout }) : null}
         onPreview={active ? handlePreview : null}
+        onExportPdf={active && active.layout !== "web" ? handleExportPdf : null}
         note={note}
         noteErr={noteErr}
         busy={busy || filler.building.length > 0}
