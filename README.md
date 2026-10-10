@@ -37,3 +37,26 @@ src/
 Article blocks use inline styles on purpose: "Copy HTML" exports the article DOM as-is, so the markup must carry its own styling. Everything else uses co-located CSS files.
 
 The document, AI settings and zoom persist in `localStorage` (keys in `STORAGE_KEYS`, same names as the standalone file).
+
+## Credits
+
+### Libraries
+
+- [React](https://react.dev) and React DOM (MIT)
+- [React Router](https://reactrouter.com) (MIT)
+- [Vite](https://vitejs.dev) and [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react) (MIT)
+
+`.docx` and PDF import use only browser built-ins (`DecompressionStream`); no parsing library is bundled.
+
+### Fonts
+
+Bundled in `src/assets/fonts/`:
+
+- [Baskervville](https://fonts.google.com/specimen/Baskervville), by ANRT, headlines and titles (SIL OFL 1.1)
+- [Satoshi](https://www.fontshare.com/fonts/satoshi), by Indian Type Foundry via Fontshare, interface text (Fontshare Free License)
+- [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono), by Christian Robertson, labels and data (Apache 2.0)
+- [Material Symbols Outlined](https://fonts.google.com/icons), by Google, icons (Apache 2.0)
+
+### Sample content
+
+`sample/Lab Manual.pdf` is a sample document for testing article import.
