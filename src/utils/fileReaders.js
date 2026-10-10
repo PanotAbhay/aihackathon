@@ -200,3 +200,54 @@ export function pickFile(accept, onPick) {
   };
   input.click();
 }
+
+const MAX_IMAGE_SIDE = 2000;
+const JPEG_QUALITY = 0.86;
+// Chrome refuses CSS url() values over ~2 MB, and localStorage holds ~5 MB in total, so photos are
+// stored resized. PNGs stay PNG (keeping transparency) while they are small enough.
+const MAX_PNG_CHARS = 900000;
+const MAX_URL_CHARS = 1200000;
+
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("unreadable image")); };
+    img.src = url;
+  });
+}
+
+// An uploaded photo as a data URL small enough to display and autosave. Rejects for formats the
+// browser can't decode (e.g. HEIC in Chrome).
+export async function prepareImage(file) {
+  const img = await loadImage(file);
+  let side = Math.min(MAX_IMAGE_SIDE, Math.max(img.naturalWidth, img.naturalHeight));
+  let quality = JPEG_QUALITY;
+  // Re-encode smaller until well under the ~2 MB url() limit (only very detailed photos need this).
+  for (let attempt = 0; ; attempt++) {
+    const url = encodeImage(img, file.type, side, quality);
+    if (url.length <= MAX_URL_CHARS || attempt >= 4) return url;
+    side = Math.round(side * 0.8);
+    quality = Math.max(0.6, quality - 0.08);
+  }
+}
+
+function encodeImage(img, type, side, quality) {
+  const scale = Math.min(1, side / Math.max(img.naturalWidth, img.naturalHeight));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+  const ctx = canvas.getContext("2d");
+  if (type === "image/png") {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const png = canvas.toDataURL("image/png");
+    if (png.length <= MAX_PNG_CHARS) return png;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  // JPEG has no transparency: paint it white first.
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", quality);
+}

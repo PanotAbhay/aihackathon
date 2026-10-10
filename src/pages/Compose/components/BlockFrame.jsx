@@ -113,6 +113,7 @@ export function BlockFrame({
   onDuplicate,
   onMoveStart,
   onDragEnd,
+  onNotice,
 }) {
   const isHeading = HEADING_TYPES.includes(block.type);
   const showChrome = block.type !== "h1" && block.type !== "standfirst";
@@ -163,7 +164,7 @@ export function BlockFrame({
         />
       )}
 
-      {Body && <Body block={block} theme={theme} number={number} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} />}
+      {Body && <Body block={block} theme={theme} number={number} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} onNotice={onNotice} />}
     </div>
   );
 }

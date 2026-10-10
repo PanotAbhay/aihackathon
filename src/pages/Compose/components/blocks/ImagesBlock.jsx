@@ -1,4 +1,4 @@
-import { pickFile } from "../../../../utils/fileReaders.js";
+import { pickFile, prepareImage } from "../../../../utils/fileReaders.js";
 import { EditableText } from "./EditableText.jsx";
 import { Caption } from "./Caption.jsx";
 import { FIGURE, MONO_OVERLINE } from "./articleStyles.js";
@@ -20,15 +20,18 @@ function slotStyle(src, height, placeholder) {
   };
 }
 
-export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
+export function ImagesBlock({ block, theme, number, onPatch, onDragEnd, onNotice }) {
   const slots = block.slots || [""];
   const n = slots.length;
   const height = SLOT_HEIGHTS[n] || 180;
 
-  function readImage(index, file) {
-    const reader = new FileReader();
-    reader.onload = () => onPatch((x) => { x.slots[index] = reader.result; });
-    reader.readAsDataURL(file);
+  async function readImage(index, file) {
+    try {
+      const src = await prepareImage(file);
+      onPatch((x) => { x.slots[index] = src; });
+    } catch {
+      onNotice("COULDN’T READ THAT IMAGE — USE A JPEG OR PNG (EXPORT IPHONE HEIC PHOTOS AS JPEG)", true);
+    }
   }
 
   // Only photo files are caught here; dragged blocks pass through to the canvas.
@@ -40,8 +43,9 @@ export function ImagesBlock({ block, theme, number, onPatch, onDragEnd }) {
     if (!hasFiles(e)) return;
     e.preventDefault();
     e.stopPropagation();
+    // Some formats (e.g. HEIC) arrive without a MIME type, so try any file and report failures.
     const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if (f && /^image\//.test(f.type)) readImage(index, f);
+    if (f) readImage(index, f);
     onDragEnd();
   }
 

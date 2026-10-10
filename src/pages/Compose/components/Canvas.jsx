@@ -177,6 +177,7 @@ export function Canvas({
   onDropAt,
   onMoveStart,
   onDragEnd,
+  onNotice,
 }) {
   const print = layout === "print-1" || layout === "print-2";
   const columns = layout === "print-2" ? 2 : 1;
@@ -294,6 +295,7 @@ export function Canvas({
           onDuplicate={onDuplicate}
           onMoveStart={onMoveStart}
           onDragEnd={onDragEnd}
+          onNotice={onNotice}
         />,
       );
       i += 1;
