@@ -12,7 +12,7 @@ export function ImportModal({ importer, busy, noteErr }) {
     <ModalShell variant="import">
       <div className="modal-head">
         <div className="modal-kicker">IMPORT ARTICLE</div>
-        <div className="modal-desc">Paste the raw article. Claude structures it into headline, standfirst, sub-headings, quotes and data — without rewriting your copy.</div>
+        <div className="modal-desc">Paste the raw article. The AI picks the best template (News, Finance, Research or Lab manual) and structures it into headline, standfirst, sub-headings, quotes and data — without rewriting your copy.</div>
       </div>
       <div className="import-sources">
         <button className="import-source-btn" onClick={importer.pickDocFile}>

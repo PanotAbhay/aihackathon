@@ -1,11 +1,13 @@
+import { TEMPLATES } from "../data/index.js";
+
 export const PDF_TRANSCRIBE_PROMPT = "Transcribe every word of this document as plain text. Put a blank line between paragraphs. " +
   "Do not summarise, translate, re-order or comment. Do not add headings that are not printed in the document. Output only the transcription.";
 
 export const IMPORT_PROMPT = [
   "You are a copy editor at Nutshell Today, a Bangladesh news publication.",
-  "You receive an article as numbered paragraphs. You do NOT rewrite it. Return a JSON plan of editorial elements.",
+  "You receive an article as numbered paragraphs. You do NOT rewrite it. First pick the template that fits it, then return a JSON plan of editorial elements.",
   "Respond with RAW JSON only — no prose, no code fences.",
-  '{"headline":"...","standfirst":"...","author":"...","desk":"...","insertions":[...]}',
+  '{"template":"news|finance|research|lab","headline":"...","standfirst":"...","author":"...","desk":"...","insertions":[...]}',
   'Each insertion: {"after":N,"type":...} where after is the paragraph index it FOLLOWS (-1 = before first).',
   "Types:",
   '{"after":3,"type":"h2","text":"Sentence case sub-heading"}',
@@ -29,21 +31,25 @@ export const IMPORT_PROMPT = [
   "1. NEVER invent facts, numbers, names or quotes. Use only what the paragraphs contain.",
   "2. headline: the article's own if present. standfirst: 1–2 sentences from its facts. author: byline name if present, else \"Staff Correspondent\".",
   "3. h2 roughly every 3–4 paragraphs, minimum 2. Sentence case, never numbered.",
-  "4. quote: only real quoted speech present in the text, verbatim, max 3. Skip if none.",
-  "5. ALWAYS one image at after:-1, plus 1–3 more image/pair/gallery at natural breaks.",
+  "4. quote: only real quoted speech present in the text, verbatim. Skip if none.",
+  "5. Use ONLY the block types the chosen template allows, and follow that template's rules below. They override these general rules.",
   "6. DATA FURNITURE — use each only when the text genuinely supports it, and never twice on the same figures:",
   "   stats → 3–4 standalone headline figures. chart → 3+ comparable numbers on one measure.",
   "   line → a measure tracked across 3+ time points. poll → survey/percentage shares.",
   "   timeline → 3+ dated events. table → 2+ items compared on the same attributes (or a flattened table in the source).",
-  "7. ALWAYS one nutshell at after:1 or after:2 — four plain-language bullets summarising the whole piece. This is the house signature; never skip it.",
+  "7. nutshell: four plain-language bullets summarising the whole piece, when the template asks for one.",
   "8. bullets/numbered only where the source is genuinely a list. h3 only under an existing h2, for a sub-point.",
   '9. One divider after the last paragraph. Sort by "after". Never two insertions at the same "after".',
   "10. The first paragraphs are often the article's own headline and byline line. Use them for \"headline\"/\"author\" — never echo them back as a sub-heading or quote.",
   '11. The standfirst MUST NOT restate the headline. Write a genuinely different sentence that adds the stakes or the finding. If you cannot, return "" for standfirst.',
+  "TEMPLATES — pick the one whose description best fits the article:",
+  ...Object.values(TEMPLATES).map((t) =>
+    '"' + t.key + '" (' + t.label + "): " + t.description + "\n   Allowed types: " + t.blocks.filter((b) => b !== "byline").join(", ") + "\n   Rules: " + t.aiRules.join(" ")
+  ),
 ].join("\n");
 
 // Build ONE element of a type the editor chose by dropping it beside the text.
-export function elementPrompt(count, type) {
+export function elementPrompt(count, type, rules) {
   const multi = count > 1;
   return [
     multi
@@ -63,6 +69,7 @@ export function elementPrompt(count, type) {
     '{"type":"bullets","items":["First point","Second point"]}  (same shape for "numbered")',
     '{"type":"h2","text":"Sentence case sub-heading"}',
     '{"type":"h3","text":"Smaller sub-heading"}',
+    rules.length ? "HOUSE RULES FOR THIS PIECE: " + rules.join(" ") : "",
     "Produce a \"" + type + "\" element. Build it from whatever the text offers — you may draw on any date, figure, name or claim in it. Every field must come from the text. Only fall back to a different type if the text contains nothing at all that could fill it.",
   ].filter(Boolean).join("\n");
 }

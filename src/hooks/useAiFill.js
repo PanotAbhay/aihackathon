@@ -8,7 +8,7 @@ function plainText(html) {
 }
 
 // Replace a freshly dropped template block with one the AI builds from nearby paragraphs.
-export function useAiFill({ getBlocks, save, flash, aiConfig }) {
+export function useAiFill({ getBlocks, save, flash, aiConfig, rules }) {
   const [building, setBuilding] = useState([]);
 
   async function fillFromText(blockId, type, sourceIds) {
@@ -24,7 +24,7 @@ export function useAiFill({ getBlocks, save, flash, aiConfig }) {
     flash("BUILDING " + type.toUpperCase() + " FROM " + (count > 1 ? count + " PARAGRAPHS" : "THE PARAGRAPH") + "…");
 
     try {
-      const res = await callAi(aiConfig, elementPrompt(count, type), text, count > 1 ? 4000 : 1400);
+      const res = await callAi(aiConfig, elementPrompt(count, type, rules), text, count > 1 ? 4000 : 1400);
       const blk = elementToBlock(parseJsonReply(res), "% who agree");
       if (!blk) throw new Error("no element");
       const cur = getBlocks();

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { STORAGE_KEYS } from "../data/index.js";
+import { STORAGE_KEYS, TEMPLATES } from "../data/index.js";
 import { readStorage, writeStorage } from "../utils/storage.js";
 import { nid, plainParas, parseJsonReply, blocksFromPlan } from "../utils/blocks.js";
 import { readDocx, readPdf, pickFile } from "../utils/fileReaders.js";
@@ -18,7 +18,7 @@ function importErrorMessage(e) {
   return "COULDN’T FORMAT — TRY AGAIN.";
 }
 
-export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig }) {
+export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, template, onTemplate }) {
   const [recovered, setRecovered] = useState(() =>
     // Any article text imported previously stays available to re-import.
     readStorage(STORAGE_KEYS.recovered) || readStorage(STORAGE_KEYS.legacyRecovered) || ""
@@ -89,6 +89,7 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig }) 
     const paras = plainParas(raw);
     if (paras.length < 2) { failEmpty(); return; }
     const body = paras.slice(1);
+    const lede = template.blocks.includes("dropcap") ? "dropcap" : "body";
     // A leading "By …" line is the byline, not the opening paragraph.
     let author = "Staff Correspondent";
     const first = body.length ? String(body[0]).trim() : "";
@@ -100,7 +101,7 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig }) 
       { id: nid(), type: "h1", html: paras[0] },
       { id: nid(), type: "standfirst", html: "" },
       { id: nid(), type: "byline", a: author, b: "Nutshell Today" },
-      ...body.map((p, i) => ({ id: nid(), type: i === 0 ? "dropcap" : "body", html: p })),
+      ...body.map((p, i) => ({ id: nid(), type: i === 0 ? lede : "body", html: p })),
     ]);
     setImportOpen(false);
     setImportNote("");
@@ -134,14 +135,18 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig }) 
     try {
       const call = callAi(aiConfig, IMPORT_PROMPT, paras.map((p, i) => "[" + i + "] " + p).join("\n\n"), 4000);
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("TIMED_OUT")), IMPORT_TIMEOUT));
-      const { blocks, counts } = blocksFromPlan(parseJsonReply(await Promise.race([call, timeout])), paras);
+      const plan = parseJsonReply(await Promise.race([call, timeout]));
+      // The model suggests the template; an unknown answer keeps the current one.
+      const picked = TEMPLATES[plan.template] || template;
+      const { blocks, counts } = blocksFromPlan(plan, paras, picked.blocks);
 
       stopTimer();
       save(blocks);
+      onTemplate(picked.key);
       setBusy(false);
       setImportOpen(false);
       setImportNote("");
-      flash("FORMATTED · " + counts.h2 + " SUB-HEADS · " + counts.quote + " QUOTES · " + counts.img + " IMAGES");
+      flash("FORMATTED AS " + picked.label.toUpperCase() + " · " + counts.h2 + " SUB-HEADS · " + counts.data + " DATA ELEMENTS · " + counts.img + " IMAGES");
     } catch (e) {
       stopTimer();
       console.error("[Compose] import failed", e);

@@ -32,6 +32,8 @@ export function Canvas({
   blocks,
   sel,
   building,
+  look,
+  allowed,
   drop,
   readTime,
   onClearSel,
@@ -51,7 +53,7 @@ export function Canvas({
   const tailActive = drop.index === blocks.length;
 
   return (
-    <div className="canvas" onMouseDown={onClearSel}>
+    <div className="canvas" style={look} onMouseDown={onClearSel}>
       <div data-article="" style={{ maxWidth: 796, margin: "0 auto", padding: "44px 36px 160px 72px" }}>
         {groupBlocks(blocks).map((item) => {
           if (item.kind === "prose") {
@@ -80,6 +82,7 @@ export function Canvas({
               selected={sel === block.id}
               inLive={index >= liveFrom && index < liveTo}
               building={building.includes(block.id)}
+              allowed={allowed}
               dropActive={drop.index === index}
               readTime={readTime}
               onSelect={onSelect}

@@ -1,4 +1,4 @@
-import { NEW_BLOCK, IMAGE_TYPES, HEADING_TYPES, STORAGE_KEYS } from "../data/index.js";
+import { NEW_BLOCK, IMAGE_TYPES, HEADING_TYPES, STORAGE_KEYS, TEMPLATES } from "../data/index.js";
 import { readJson } from "./storage.js";
 
 let uid = 0;
@@ -16,14 +16,8 @@ export function cloneBlock(block) {
   return JSON.parse(JSON.stringify(block));
 }
 
-export function createStarterBlocks() {
-  return [
-    { id: nid(), type: "h1", html: "Your headline goes here" },
-    { id: nid(), type: "standfirst", html: "A standfirst summarising the piece in one or two sentences." },
-    { id: nid(), type: "byline", a: "Reporter Name", b: "Desk" },
-    withId(NEW_BLOCK.image()),
-    withId(NEW_BLOCK.dropcap()),
-  ];
+export function createStarterBlocks(templateKey = "news") {
+  return TEMPLATES[templateKey].starter.map((b) => withId(cloneBlock(b)));
 }
 
 export function loadSavedBlocks() {
@@ -184,8 +178,9 @@ function normalize(s) {
   return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
-// Weave the model's plan of insertions around the untouched source paragraphs.
-export function blocksFromPlan(plan, paras) {
+// Weave the model's plan of insertions around the untouched source paragraphs,
+// keeping only the block types the chosen template allows.
+export function blocksFromPlan(plan, paras, allowed) {
   const headline = plan.headline || paras[0];
   const author = plan.author || "Staff Correspondent";
   let standfirst = plan.standfirst || "";
@@ -212,9 +207,12 @@ export function blocksFromPlan(plan, paras) {
 
   const counts = { h2: 0, quote: 0, img: 0, data: 0 };
   function emit(o) {
-    if (String(o.type || "").toLowerCase() === "divider") { blocks.push({ id: nid(), type: "divider" }); return; }
+    if (String(o.type || "").toLowerCase() === "divider") {
+      if (allowed.includes("divider")) blocks.push({ id: nid(), type: "divider" });
+      return;
+    }
     const blk = elementToBlock(o);
-    if (!blk) return;
+    if (!blk || !allowed.includes(blk.type)) return;
     blocks.push(withId(blk));
     if (blk.type === "h2") counts.h2++;
     else if (blk.type === "quote") counts.quote++;
@@ -242,7 +240,8 @@ export function blocksFromPlan(plan, paras) {
     // sub-heading the plan already lifted verbatim out of the body.
     if (k && !skip[k]) {
       skip[k] = true;
-      blocks.push({ id: nid(), type: ledeDone ? "body" : "dropcap", html: paras[i] });
+      const lede = !ledeDone && allowed.includes("dropcap");
+      blocks.push({ id: nid(), type: lede ? "dropcap" : "body", html: paras[i] });
       ledeDone = true;
     }
     emitAfter(i);
