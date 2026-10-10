@@ -96,7 +96,8 @@ export function ComposePage() {
     const at = cur.findIndex((x) => x.id === id);
     if (at < 0) return;
     const end = sectionEnd(cur, at);
-    if (!window.confirm("Delete this sub-heading and the " + (end - at - 1) + " blocks under it?")) return;
+    const what = cur[at].type === "chapter" || cur[at].type === "appendix" ? cur[at].type : "sub-heading";
+    if (!window.confirm("Delete this " + what + " and the " + (end - at - 1) + " blocks under it?")) return;
     const next = cur.slice();
     next.splice(at, end - at);
     doc.save(next);

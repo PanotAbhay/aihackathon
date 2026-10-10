@@ -1,4 +1,4 @@
-import { NEW_BLOCK, IMAGE_TYPES, HEADING_TYPES, TEMPLATES } from "../data/index.js";
+import { NEW_BLOCK, IMAGE_TYPES, HEADING_TYPES, CHAPTER_TYPES, TEMPLATES } from "../data/index.js";
 
 let uid = 0;
 
@@ -26,11 +26,15 @@ export function countWords(blocks) {
   }, 0);
 }
 
-// A sub-heading owns every block after it until the next heading.
+// A sub-heading owns every block after it until the next heading; a chapter, until the next chapter.
 export function sectionEnd(blocks, i) {
-  if (!HEADING_TYPES.includes(blocks[i].type)) return i + 1;
+  const type = blocks[i].type;
+  let stops;
+  if (CHAPTER_TYPES.includes(type)) stops = ["h1", ...CHAPTER_TYPES];
+  else if (HEADING_TYPES.includes(type)) stops = ["h1", "h2", "h3", ...CHAPTER_TYPES];
+  else return i + 1;
   let j = i + 1;
-  while (j < blocks.length && !["h1", "h2", "h3"].includes(blocks[j].type)) j += 1;
+  while (j < blocks.length && !stops.includes(blocks[j].type)) j += 1;
   return j;
 }
 

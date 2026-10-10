@@ -13,6 +13,8 @@ export const TEXTISH_TYPES = ["h1", "standfirst", "h2", "h3", "body", "dropcap",
 export const PROSE_TYPES = ["body", "dropcap"];
 export const IMAGE_TYPES = ["image", "pair", "gallery"];
 export const HEADING_TYPES = ["h2", "h3"];
+// Chapters own everything up to the next chapter and open a new page in print layouts.
+export const CHAPTER_TYPES = ["chapter", "appendix"];
 // Dropped beside a paragraph, these are built by the AI from that text.
 export const AI_FILL_TYPES = ["h2", "h3", "quote", "bullets", "numbered", "stats", "chart", "line", "poll", "table", "timeline", "nutshell"];
 
@@ -88,6 +90,10 @@ export const NEW_BLOCK = {
   }),
   nutshell: () => ({ type: "nutshell", a: "The Nutshell", html: "<li>First key point.</li><li>Second key point.</li><li>Third key point.</li>" }),
   divider: () => ({ type: "divider" }),
+  code: () => ({ type: "code", lang: "sql", a: "", text: "SELECT ename, job, sal\nFROM emp\nWHERE deptno = 30\nORDER BY sal DESC;" }),
+  chapter: () => ({ type: "chapter", html: "Chapter title" }),
+  appendix: () => ({ type: "appendix", html: "Appendix title" }),
+  toc: () => ({ type: "toc", a: "Contents" }),
 };
 
 export const PALETTE_GROUPS = [
@@ -104,6 +110,16 @@ export const PALETTE_GROUPS = [
       { type: "bullets", label: "Bullet list", icon: "format_list_bulleted", hint: "Bulleted list" },
       { type: "numbered", label: "Numbered list", icon: "format_list_numbered", hint: "Numbered list" },
       { type: "divider", label: "Divider", icon: "horizontal_rule", hint: "Section divider" },
+      { type: "code", label: "Code listing", icon: "code", hint: "Numbered code listing with syntax colours" },
+    ],
+  },
+  {
+    key: "g-structure",
+    label: "STRUCTURE",
+    items: [
+      { type: "chapter", label: "Chapter", icon: "bookmark", hint: "Numbered chapter that starts a new page" },
+      { type: "appendix", label: "Appendix", icon: "bookmark_add", hint: "Lettered appendix that starts a new page" },
+      { type: "toc", label: "Contents", icon: "toc", hint: "Table of contents built from the headings" },
     ],
   },
   {
@@ -481,14 +497,21 @@ export const TEMPLATES = {
       },
       table: { grid: true, zebra: false },
       divider: { text: "", style: { borderTop: "1.5px dashed var(--rule)", height: 0 } },
+      chapter: {
+        label: { color: "var(--red)" },
+        title: { borderBottom: "3px solid var(--ink)", paddingBottom: 12 },
+      },
+      code: { wrap: { background: "#FFFFFF", border: "1.5px solid var(--ink)" } },
     },
-    blocks: ["byline", "body", "h2", "h3", "bullets", "numbered", "divider", "image", "pair", "chart", "line", "table", "stats", "nutshell"],
+    blocks: ["byline", "body", "h2", "h3", "bullets", "numbered", "divider", "code", "image", "pair", "chart", "line", "table", "stats", "nutshell", "chapter", "appendix", "toc"],
     aiRules: [
       "Structure as sections with h2: Aim, Safety, Equipment, Procedure, Results, Questions — using only those the source covers.",
       "Equipment and materials → bullets. Procedure → numbered, one action per step, keeping every quantity, temperature and time exactly.",
       "Safety warnings go in ONE nutshell titled \"Safety\" placed before the procedure.",
       "Results to record → table with empty cells for the student; measured relationships → line.",
       "No pull quotes, no drop caps, no timelines.",
+      "A long manual with several labs is a book: chapter per lab or part, appendix for reference material at the end (scripts, tables, answers), one toc after the title. Keep the source's own chapters when it has them.",
+      "Commands, queries, scripts and program output → code, copied verbatim with one line per source line.",
     ],
     starter: [
       { type: "h1", html: "Experiment 3: How temperature affects the rate of a reaction" },

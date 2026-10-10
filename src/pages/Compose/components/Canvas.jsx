@@ -1,5 +1,5 @@
 import { useState, useRef, useLayoutEffect } from "react";
-import { PROSE_TYPES, HEADING_TYPES, IMAGE_TYPES } from "../../../data/index.js";
+import { PROSE_TYPES, HEADING_TYPES, CHAPTER_TYPES, IMAGE_TYPES } from "../../../data/index.js";
 import { sectionEnd } from "../../../utils/blocks.js";
 import { A4, planPages } from "../../../utils/pagination.js";
 import { BlockFrame } from "./BlockFrame.jsx";
@@ -13,6 +13,9 @@ const MASTHEAD_TYPES = ["h1", "standfirst", "byline"];
 const TWO_COLUMN_SCALE = 0.8;
 // Blocks that may float past following paragraphs when they don't fit (see planPages).
 const FLOAT_TYPES = ["image", "pair", "gallery", "chart", "line", "poll", "table", "stats", "timeline", "nutshell"];
+const SECTION_TYPES = [...HEADING_TYPES, ...CHAPTER_TYPES];
+// Headings listed by a contents block.
+const OUTLINE_TYPES = [...CHAPTER_TYPES, "h2", "h3"];
 
 // Inline because Copy HTML and Preview export the pages as they are.
 const PAGE_STYLE = {
@@ -38,15 +41,21 @@ const FOLIO_STYLE = {
   color: "var(--muted)",
 };
 
-// LaTeX-style numbers for sections ("2", "2.1"), figures and tables, keyed by block id.
-function numberBlocks(blocks) {
+// Chapters are always numbered (1, 2… and appendices A, B…). With `all`, so are LaTeX-style
+// sections ("2", "2.1"), figures and tables. Keyed by block id.
+function numberBlocks(blocks, all) {
   const numbers = {};
+  let chapter = 0;
+  let appendix = 0;
   let section = 0;
   let subsection = 0;
   let figure = 0;
   let table = 0;
   blocks.forEach((b) => {
-    if (b.type === "h2") { section += 1; subsection = 0; numbers[b.id] = String(section); }
+    if (b.type === "chapter") { chapter += 1; numbers[b.id] = String(chapter); }
+    else if (b.type === "appendix") { appendix += 1; numbers[b.id] = String.fromCharCode(64 + Math.min(appendix, 26)); }
+    else if (!all) return;
+    else if (b.type === "h2") { section += 1; subsection = 0; numbers[b.id] = String(section); }
     else if (b.type === "h3") { subsection += 1; numbers[b.id] = section ? section + "." + subsection : String(subsection); }
     else if (IMAGE_TYPES.includes(b.type) || b.type === "chart" || b.type === "line") { figure += 1; numbers[b.id] = String(figure); }
     else if (b.type === "table") { table += 1; numbers[b.id] = String(table); }
@@ -72,7 +81,7 @@ function printTheme(theme, columns) {
 // Selecting a heading highlights every block in its section.
 function liveRange(blocks, sel) {
   const si = sel ? blocks.findIndex((b) => b.id === sel) : -1;
-  if (si < 0 || !HEADING_TYPES.includes(blocks[si].type)) return [-1, -1];
+  if (si < 0 || !SECTION_TYPES.includes(blocks[si].type)) return [-1, -1];
   return [si, sectionEnd(blocks, si)];
 }
 
@@ -82,12 +91,30 @@ function mastheadCount(blocks, types) {
   return n;
 }
 
+// The page each heading lands on, for a contents block (1-based, as the folios).
+function pageNumbers(pages) {
+  const at = {};
+  pages.forEach((page, pi) => {
+    [page.masthead, ...page.columns].forEach((items) => items.forEach((it) => {
+      const id = typeof it === "string" ? it : it.id;
+      if (!(id in at)) at[id] = pi + 1;
+    }));
+  });
+  return at;
+}
+
+function plainText(html) {
+  return String(html || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim();
+}
+
 // Heights of every block and paragraph (and paragraphs' line heights), in unzoomed CSS px.
 // Paragraphs use a fixed gap so a height never depends on where it lands, which would make
-// the layout oscillate.
+// the layout oscillate. Code listings and contents ([data-split]) are measured whole even when
+// drawn as slices, with where their lines start.
 function measureUnits(root, paraGap) {
   const heights = {};
   const lines = {};
+  const splits = {};
   root.querySelectorAll("[data-unit]").forEach((el) => { heights[el.getAttribute("data-unit")] = el.offsetHeight; });
   root.querySelectorAll("[data-prose]").forEach((wrap) => {
     const ids = JSON.parse(wrap.getAttribute("data-ids") || "[]");
@@ -102,7 +129,15 @@ function measureUnits(root, paraGap) {
       }
     });
   });
-  return { heights, lines };
+  root.querySelectorAll("[data-split]").forEach((el) => {
+    const id = el.getAttribute("data-split");
+    const body = el.querySelector("[data-split-lines]");
+    // The block frame adds 1px of padding above and below.
+    heights[id] = el.offsetHeight + 2;
+    const lineHeight = body ? parseFloat(getComputedStyle(body).lineHeight) : 0;
+    if (lineHeight && body.offsetHeight >= lineHeight * 4) splits[id] = { lineHeight, textHeight: body.offsetHeight, top: body.offsetTop };
+  });
+  return { heights, lines, splits };
 }
 
 function sameHeights(a, b) {
@@ -188,12 +223,13 @@ export function Canvas({
   const pageStyle = { ...PAGE_STYLE, padding: margin };
   const theme = print ? printTheme(baseTheme, columns) : baseTheme;
   const innerRef = useRef(null);
-  const [measured, setMeasured] = useState({ heights: {}, lines: {} });
+  const [measured, setMeasured] = useState({ heights: {}, lines: {}, splits: {} });
   // Re-layout passes since the content last changed; a hard stop guards against any oscillation.
   const passesRef = useRef({ blocks: null, count: 0 });
-  const { heights, lines } = measured;
+  const { heights, lines, splits } = measured;
   const [liveFrom, liveTo] = liveRange(blocks, sel);
-  const numbers = theme.numbering || theme.captions ? numberBlocks(blocks) : {};
+  const numbers = numberBlocks(blocks, !!(theme.numbering || theme.captions));
+  const chaptered = blocks.some((b) => CHAPTER_TYPES.includes(b.type));
   const indexOf = Object.fromEntries(blocks.map((b, i) => [b.id, i]));
   const paraGap = theme.paragraphIndent ? 0 : 18;
 
@@ -202,14 +238,27 @@ export function Canvas({
     ? planPages(
       blocks.map((b) => {
         const height = heights[b.id] ?? 40;
-        const unit = { id: b.id, height, keepWithNext: HEADING_TYPES.includes(b.type), float: FLOAT_TYPES.includes(b.type) };
+        const unit = {
+          id: b.id,
+          height,
+          keepWithNext: SECTION_TYPES.includes(b.type),
+          float: FLOAT_TYPES.includes(b.type),
+          // A book's chapters and contents each start a page.
+          pageBreak: CHAPTER_TYPES.includes(b.type) || (b.type === "toc" && chaptered),
+        };
         // Paragraphs can split across columns and pages at a line break.
         if (PROSE_TYPES.includes(b.type) && lines[b.id]) Object.assign(unit, { lineHeight: lines[b.id], textHeight: height - paraGap, lede: b.type === "dropcap" });
+        else if (splits[b.id]) Object.assign(unit, splits[b.id]);
         return unit;
       }),
       { columns, mastheadCount: masthead, scale, margin },
     )
     : null;
+
+  const pageOf = pages ? pageNumbers(pages) : {};
+  const outline = blocks.some((b) => b.type === "toc")
+    ? blocks.filter((b) => OUTLINE_TYPES.includes(b.type)).map((b) => ({ id: b.id, type: b.type, number: numbers[b.id], text: plainText(b.html), page: pageOf[b.id] }))
+    : [];
 
   // Re-measure after every render; a changed height re-flows the pages once.
   useLayoutEffect(() => {
@@ -258,7 +307,7 @@ export function Canvas({
         const members = group.map((g) => blocks[indexOf[g.id]]);
         const last = group[group.length - 1];
         // The visible part of a group whose last paragraph continues in the next column.
-        const clip = last.show ? group.slice(0, -1).reduce((n, g) => n + (heights[g.id] || 0), 0) + last.show + (group[0].skip ? -group[0].skip : 0) : null;
+        const clip = last.show ? group.slice(0, -1).reduce((n, g) => n + (heights[g.id] || 0), 0) + last.show - (group.length > 1 && group[0].skip ? group[0].skip : 0) : null;
         out.push(
           <ProseBlock
             key={"prose" + block.id + (group[0].skip ? "-" + group[0].skip : "")}
@@ -275,9 +324,10 @@ export function Canvas({
         i += group.length;
         continue;
       }
+      const { skip, show } = list[i];
       out.push(
         <BlockFrame
-          key={block.id}
+          key={block.id + (skip ? "-" + skip : "")}
           block={block}
           index={index}
           sectionSize={sectionEnd(blocks, index) - index}
@@ -287,6 +337,8 @@ export function Canvas({
           allowed={allowed}
           theme={theme}
           number={numbers[block.id]}
+          outline={outline}
+          slice={skip || show ? { skip: skip || 0, clip: show || null } : null}
           span={span}
           chromeSide={side}
           readTime={readTime}

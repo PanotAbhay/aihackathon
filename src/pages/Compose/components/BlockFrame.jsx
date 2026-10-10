@@ -1,4 +1,4 @@
-import { TEXTISH_TYPES, HEADING_TYPES, IMAGE_TYPES, TEXT_TYPE_OPTIONS } from "../../../data/index.js";
+import { TEXTISH_TYPES, HEADING_TYPES, CHAPTER_TYPES, IMAGE_TYPES, TEXT_TYPE_OPTIONS } from "../../../data/index.js";
 import { TextBlock } from "./blocks/TextBlock.jsx";
 import { BylineBlock } from "./blocks/BylineBlock.jsx";
 import { QuoteBlock } from "./blocks/QuoteBlock.jsx";
@@ -11,6 +11,9 @@ import { TableBlock } from "./blocks/TableBlock.jsx";
 import { TimelineBlock } from "./blocks/TimelineBlock.jsx";
 import { NutshellBlock } from "./blocks/NutshellBlock.jsx";
 import { DividerBlock } from "./blocks/DividerBlock.jsx";
+import { CodeBlock } from "./blocks/CodeBlock.jsx";
+import { ChapterBlock } from "./blocks/ChapterBlock.jsx";
+import { TocBlock } from "./blocks/TocBlock.jsx";
 import "./BlockFrame.css";
 
 const BLOCK_BODIES = {
@@ -24,6 +27,10 @@ const BLOCK_BODIES = {
   timeline: TimelineBlock,
   nutshell: NutshellBlock,
   divider: DividerBlock,
+  code: CodeBlock,
+  chapter: ChapterBlock,
+  appendix: ChapterBlock,
+  toc: TocBlock,
 };
 
 function bodyFor(type) {
@@ -49,7 +56,7 @@ const KEEP_TOGETHER = ["quote", "image", "pair", "gallery", "stats", "table", "c
 
 function columnStyle(type, span) {
   if (span) return { columnSpan: "all" };
-  if (type === "h2" || type === "h3") return { breakInside: "avoid", breakAfter: "avoid" };
+  if (type === "h2" || type === "h3" || CHAPTER_TYPES.includes(type)) return { breakInside: "avoid", breakAfter: "avoid" };
   return KEEP_TOGETHER.includes(type) ? { breakInside: "avoid" } : {};
 }
 
@@ -103,6 +110,8 @@ export function BlockFrame({
   allowed,
   theme,
   number,
+  outline,
+  slice,
   span,
   chromeSide = "left",
   readTime,
@@ -115,7 +124,7 @@ export function BlockFrame({
   onDragEnd,
   onNotice,
 }) {
-  const isHeading = HEADING_TYPES.includes(block.type);
+  const isHeading = HEADING_TYPES.includes(block.type) || CHAPTER_TYPES.includes(block.type);
   const showChrome = block.type !== "h1" && block.type !== "standfirst";
   const Body = bodyFor(block.type);
 
@@ -165,7 +174,7 @@ export function BlockFrame({
         />
       )}
 
-      {Body && <Body block={block} theme={theme} number={number} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} onNotice={onNotice} />}
+      {Body && <Body block={block} theme={theme} number={number} outline={outline} slice={slice} onPatch={onPatch} readTime={readTime} onDragEnd={onDragEnd} onNotice={onNotice} />}
     </div>
   );
 }
