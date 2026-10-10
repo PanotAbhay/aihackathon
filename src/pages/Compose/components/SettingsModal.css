@@ -21,3 +21,90 @@
   font-size: 13px;
   padding: 10px 11px;
 }
+
+/* Tabs and footer stay put; only the panel scrolls. */
+.modal-card--settings { display: flex; flex-direction: column; max-height: 86vh; overflow: hidden; }
+.settings-scroll { overflow-y: auto; min-height: 0; padding-bottom: 4px; }
+.modal-card--settings .modal-footer { padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.09); }
+
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 14px 26px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.09);
+}
+
+.settings-tab {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 8px 12px 10px;
+  margin-bottom: -1px;
+  font-family: var(--font-mono);
+  font-size: var(--mono-label);
+  letter-spacing: var(--mono-label-ls);
+  color: rgba(242,239,233,0.5);
+  cursor: pointer;
+}
+.settings-tab:hover { color: rgba(242,239,233,0.8); }
+.settings-tab--on { color: #C9A227; border-bottom-color: #C9A227; }
+
+.fonts-presets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+.fonts-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  cursor: pointer;
+  color: #F2EFE9;
+}
+.fonts-chip:hover { border-color: rgba(201,162,39,0.5); }
+.fonts-chip--on { border-color: #C9A227; background: rgba(201,162,39,0.12); }
+.fonts-chip-name { font-family: var(--font-sans); font-size: 13.5px; font-weight: 700; }
+.fonts-chip-note { font-family: var(--font-sans); font-size: 11.5px; color: rgba(242,239,233,0.5); }
+
+.fonts-sections { display: flex; flex-direction: column; border-top: 1px solid rgba(255,255,255,0.08); }
+.fonts-section { border-bottom: 1px solid rgba(255,255,255,0.08); }
+
+.fonts-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 2px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.fonts-section-name { flex: 1; }
+.fonts-section-head:hover .fonts-section-name { color: rgba(242,239,233,0.75); }
+.fonts-section-font { font-family: var(--font-sans); font-size: 12.5px; color: rgba(242,239,233,0.6); }
+.fonts-section-chevron { font-size: 18px; color: rgba(242,239,233,0.45); transition: transform 0.15s ease; }
+.fonts-section--open .fonts-section-chevron { transform: rotate(180deg); }
+.fonts-section--open .fonts-section-name { color: #C9A227; }
+
+.fonts-section-body { display: flex; flex-direction: column; gap: 10px; padding: 2px 2px 16px; }
+.fonts-row { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; }
+
+.fonts-seg { display: flex; gap: 4px; }
+.fonts-seg-btn {
+  flex: 1;
+  padding: 6px 4px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: rgba(242,239,233,0.7);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.fonts-seg-btn:hover { border-color: rgba(201,162,39,0.5); }
+.fonts-seg-btn--on { color: #F2EFE9; border-color: #C9A227; background: rgba(201,162,39,0.14); }
+
+.fonts-reset { align-self: flex-start; }

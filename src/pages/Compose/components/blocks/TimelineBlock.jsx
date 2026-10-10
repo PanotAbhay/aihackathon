@@ -1,6 +1,6 @@
 import { EditableText } from "./EditableText.jsx";
 import { RowControls } from "./RowControls.jsx";
-import { MONO_OVERLINE } from "./articleStyles.js";
+import { BODY_FONT, MONO_OVERLINE } from "./articleStyles.js";
 
 function dotStyle(last) {
   return {
@@ -31,8 +31,8 @@ export function TimelineBlock({ block, onPatch }) {
           <div key={block.id + "e" + i} style={{ position: "relative" }}>
             <span style={dotStyle(i === rows.length - 1)}></span>
             <EditableText data-ph="DATE" {...field(i, "d")} style={{ ...MONO_OVERLINE, color: "var(--muted)", marginBottom: 5 }} />
-            <EditableText data-ph="What happened" {...field(i, "t")} style={{ fontFamily: "var(--font-sans)", fontSize: 17, fontWeight: 700, color: "var(--ink)", marginBottom: 4 }} />
-            <EditableText data-ph="Detail" {...field(i, "x")} style={{ fontFamily: "var(--font-sans)", fontSize: 14, lineHeight: 1.65, color: "var(--ink-secondary)" }} />
+            <EditableText data-ph="What happened" {...field(i, "t")} style={{ fontFamily: BODY_FONT, fontSize: 17, fontWeight: 700, color: "var(--ink)", marginBottom: 4 }} />
+            <EditableText data-ph="Detail" {...field(i, "x")} style={{ fontFamily: BODY_FONT, fontSize: 14, lineHeight: 1.65, color: "var(--ink-secondary)" }} />
           </div>
         ))}
       </div>

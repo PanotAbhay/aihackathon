@@ -3,6 +3,7 @@ import { useFlash } from "../../hooks/useFlash.js";
 import { useDocument } from "../../hooks/useDocument.js";
 import { useZoom } from "../../hooks/useZoom.js";
 import { useAiSettings } from "../../hooks/useAiSettings.js";
+import { useFontSettings } from "../../hooks/useFontSettings.js";
 import { useSelectionBar } from "../../hooks/useSelectionBar.js";
 import { useShortcuts } from "../../hooks/useShortcuts.js";
 import { useBlockDrag } from "../../hooks/useBlockDrag.js";
@@ -11,6 +12,7 @@ import { useAiFill } from "../../hooks/useAiFill.js";
 import { NEW_BLOCK } from "../../data/index.js";
 import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWords } from "../../utils/blocks.js";
 import { articleHtml } from "../../utils/exportHtml.js";
+import { fontLinks } from "../../utils/fonts.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { IconRail } from "./components/IconRail.jsx";
 import { ElementsPanel } from "./components/ElementsPanel.jsx";
@@ -25,6 +27,7 @@ export function ComposePage() {
   const doc = useDocument(flash);
   const { zoom, zoomIn, zoomOut } = useZoom();
   const { aiConfig, saveAi } = useAiSettings();
+  const fonts = useFontSettings();
   const [bar, setBar] = useSelectionBar();
 
   const [sel, setSel] = useState(null);
@@ -120,7 +123,7 @@ export function ComposePage() {
   function handleExport() {
     const node = document.querySelector("[data-article]");
     if (!node) return;
-    const html = articleHtml(node);
+    const html = articleHtml(node, fontLinks(fonts.fonts));
     function done() {
       setExported(true);
       setTimeout(() => setExported(false), 1600);
@@ -192,7 +195,7 @@ export function ComposePage() {
       {bar && <FormatToolbar bar={bar} zoom={zoom} />}
 
       {settingsOpen && (
-        <SettingsModal aiConfig={aiConfig} onSave={saveAi} onClose={() => setSettingsOpen(false)} />
+        <SettingsModal aiConfig={aiConfig} onSave={saveAi} fonts={fonts} onClose={() => setSettingsOpen(false)} />
       )}
 
       {importer.importOpen && <ImportModal importer={importer} busy={busy} noteErr={noteErr} />}

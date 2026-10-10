@@ -2,6 +2,7 @@ export const STORAGE_KEYS = {
   doc: "nt-fb-doc",
   docPrev: "nt-fb-doc-prev",
   ai: "nt-fb-ai",
+  fonts: "nt-fb-fonts",
   zoom: "nt-fb-zoom",
   recovered: "nt-fb-recovered",
   legacyRecovered: "nt-feature-builder",

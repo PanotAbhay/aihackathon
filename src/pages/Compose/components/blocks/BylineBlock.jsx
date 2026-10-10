@@ -1,5 +1,5 @@
 import { EditableText } from "./EditableText.jsx";
-import { MONO_OVERLINE } from "./articleStyles.js";
+import { BODY_FONT, MONO_OVERLINE } from "./articleStyles.js";
 
 function initials(name) {
   return String(name || "NT").split(/\s+/).map((w) => w.charAt(0)).join("").slice(0, 2).toUpperCase();
@@ -17,14 +17,14 @@ export function BylineBlock({ block, onPatch, readTime }) {
           data-ph="Reporter name"
           value={block.a}
           onCommit={(v) => onPatch((x) => { x.a = v; })}
-          style={{ fontFamily: "var(--font-sans)", fontSize: "var(--sans-body)", fontWeight: 700, color: "var(--ink)" }}
+          style={{ fontFamily: BODY_FONT, fontSize: "var(--sans-body)", fontWeight: 700, color: "var(--ink)" }}
         />
         <EditableText
           as="span"
           data-ph="Desk"
           value={block.b}
           onCommit={(v) => onPatch((x) => { x.b = v; })}
-          style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "var(--muted)" }}
+          style={{ fontFamily: BODY_FONT, fontSize: 13, color: "var(--muted)" }}
         />
       </div>
       <div style={{ marginLeft: "auto", ...MONO_OVERLINE, color: "var(--muted-light)" }}>{readTime} MIN READ</div>

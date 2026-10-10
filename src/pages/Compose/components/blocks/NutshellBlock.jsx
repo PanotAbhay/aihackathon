@@ -1,4 +1,5 @@
 import { EditableText } from "./EditableText.jsx";
+import { BODY_FONT } from "./articleStyles.js";
 
 export function NutshellBlock({ block, onPatch }) {
   return (
@@ -7,14 +8,14 @@ export function NutshellBlock({ block, onPatch }) {
         data-ph="The Nutshell"
         value={block.a}
         onCommit={(v) => onPatch((x) => { x.a = v; })}
-        style={{ fontFamily: "var(--font-sans)", fontSize: "var(--sans-body)", fontWeight: 700, color: "var(--ink)", marginBottom: 14 }}
+        style={{ fontFamily: BODY_FONT, fontSize: "var(--sans-body)", fontWeight: 700, color: "var(--ink)", marginBottom: 14 }}
       />
       <EditableText
         as="ul"
         html
         value={block.html}
         onCommit={(v) => onPatch((x) => { x.html = v; })}
-        style={{ listStyle: "disc", paddingLeft: 20, margin: 0, fontFamily: "var(--font-sans)", fontSize: "var(--sans-body)", lineHeight: 1.7, color: "var(--ink-soft)" }}
+        style={{ listStyle: "disc", paddingLeft: 20, margin: 0, fontFamily: BODY_FONT, fontSize: "var(--sans-body)", lineHeight: 1.7, color: "var(--ink-soft)" }}
       />
     </div>
   );

@@ -1,6 +1,13 @@
+import { useState } from "react";
 import { AI_MODELS, AI_PROVIDERS } from "../../../data/index.js";
 import { ModalShell } from "./ModalShell.jsx";
+import { FontsPanel } from "./FontsPanel.jsx";
 import "./SettingsModal.css";
+
+const TABS = [
+  { id: "ai", label: "AI MODEL" },
+  { id: "fonts", label: "FONTS" },
+];
 
 function providerNote(provider) {
   if (provider === "builtin") return "Works only inside the design tool. For a standalone copy, pick a provider below.";
@@ -8,11 +15,11 @@ function providerNote(provider) {
   return "Your key is stored only in this browser and sent straight to the provider. Don’t publish a copy of this file with a key saved in it.";
 }
 
-export function SettingsModal({ aiConfig, onSave, onClose }) {
+function AiPanel({ aiConfig, onSave }) {
   const needsKey = aiConfig.provider !== "builtin" && aiConfig.provider !== "ollama";
 
   return (
-    <ModalShell variant="settings">
+    <>
       <div className="modal-head">
         <div className="modal-kicker">AI MODEL</div>
         <div className="modal-desc">Which model does the formatting.</div>
@@ -46,6 +53,25 @@ export function SettingsModal({ aiConfig, onSave, onClose }) {
           </div>
         )}
         <div className="modal-quote">{providerNote(aiConfig.provider)}</div>
+      </div>
+    </>
+  );
+}
+
+export function SettingsModal({ aiConfig, onSave, fonts, onClose }) {
+  const [tab, setTab] = useState("ai");
+
+  return (
+    <ModalShell variant="settings" docked={tab === "fonts"}>
+      <div className="settings-tabs">
+        {TABS.map((t) => (
+          <button key={t.id} className={"settings-tab" + (tab === t.id ? " settings-tab--on" : "")} onClick={() => setTab(t.id)}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div className="settings-scroll">
+        {tab === "fonts" ? <FontsPanel {...fonts} /> : <AiPanel aiConfig={aiConfig} onSave={onSave} />}
       </div>
       <div className="modal-footer">
         <button className="modal-btn modal-btn--primary" onClick={onClose}>Done</button>

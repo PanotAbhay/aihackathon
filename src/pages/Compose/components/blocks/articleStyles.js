@@ -1,11 +1,20 @@
 // Article blocks keep their styles inline: "Copy HTML" exports the article DOM
 // as-is, so the markup has to carry its own styling to paste anywhere.
 
+// Body copy follows the font settings; falls back to the house sans when none are set.
+export const BODY_FONT = "var(--body-font, var(--font-sans))";
+
+// Paragraphs and lists share the body size, weight and spacing from the font settings.
+export const BODY_METRICS = {
+  fontFamily: BODY_FONT,
+  fontSize: "var(--body-size, var(--sans-body))",
+  fontWeight: "var(--body-weight, 400)",
+  lineHeight: "var(--body-lh, 1.85)",
+  letterSpacing: "var(--body-ls, var(--sans-body-ls))",
+};
+
 export const BODY_TEXT = {
-  fontFamily: "var(--font-sans)",
-  fontSize: "var(--sans-body)",
-  lineHeight: 1.85,
-  letterSpacing: "var(--sans-body-ls)",
+  ...BODY_METRICS,
   color: "var(--ink-body)",
   margin: "0 0 18px",
   textWrap: "pretty",

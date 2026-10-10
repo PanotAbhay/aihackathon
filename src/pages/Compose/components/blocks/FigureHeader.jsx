@@ -1,5 +1,5 @@
 import { EditableText } from "./EditableText.jsx";
-import { MONO_OVERLINE } from "./articleStyles.js";
+import { BODY_FONT, MONO_OVERLINE } from "./articleStyles.js";
 
 export function FigureHeader({ block, onPatch, titlePlaceholder, notePlaceholder, marginBottom }) {
   return (
@@ -9,7 +9,7 @@ export function FigureHeader({ block, onPatch, titlePlaceholder, notePlaceholder
         data-ph={titlePlaceholder}
         value={block.a}
         onCommit={(v) => onPatch((x) => { x.a = v; })}
-        style={{ fontFamily: "var(--font-sans)", fontSize: "var(--sans-body)", fontWeight: 700, color: "var(--ink)" }}
+        style={{ fontFamily: BODY_FONT, fontSize: "var(--sans-body)", fontWeight: 700, color: "var(--ink)" }}
       />
       <EditableText
         as="span"

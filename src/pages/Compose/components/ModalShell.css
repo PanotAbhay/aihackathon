@@ -11,6 +11,21 @@
 }
 
 .modal-overlay--settings { z-index: 250; }
+
+.modal-overlay--docked {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  justify-content: flex-end;
+  align-items: stretch;
+  padding: 16px;
+  pointer-events: none;
+}
+.modal-overlay--docked .modal-card {
+  width: 400px;
+  max-height: none;
+  pointer-events: auto;
+}
 .modal-overlay--import { z-index: 200; }
 
 .modal-card {

@@ -1,6 +1,6 @@
 import { EditableText } from "./EditableText.jsx";
 import { RowControls } from "./RowControls.jsx";
-import { FIGURE, MONO_OVERLINE } from "./articleStyles.js";
+import { BODY_FONT, FIGURE, MONO_OVERLINE } from "./articleStyles.js";
 
 const HEAD_CELL = { textAlign: "left", padding: "0 8px 11px 0", ...MONO_OVERLINE, color: "var(--muted)" };
 
@@ -13,7 +13,7 @@ function cellStyle(ri, ci) {
   if (ri === 0) return HEAD_CELL;
   return {
     padding: "13px 8px 13px 0",
-    fontFamily: "var(--font-sans)",
+    fontFamily: BODY_FONT,
     fontSize: 14,
     color: ci === 0 ? "var(--ink)" : "var(--ink-body)",
     ...(ci === 0 && { fontWeight: 700 }),
