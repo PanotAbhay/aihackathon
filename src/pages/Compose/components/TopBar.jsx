@@ -1,6 +1,68 @@
+import { useEffect, useRef, useState } from "react";
 import "./TopBar.css";
 
-export function TopBar({ docTitle, onDocTitle, note, noteErr, busy, zoom, onZoomIn, onZoomOut, exported, onExport, onImport }) {
+const EXPORT_ITEMS = [
+  { id: "html", icon: "download", label: "Download HTML" },
+  { id: "copy", icon: "content_copy", label: "Copy HTML" },
+];
+
+function ExportMenu({ exported, exporting, onDownloadHtml, onCopy }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    function onDown(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    function onKey(e) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const actions = { html: onDownloadHtml, copy: onCopy };
+  const label = exporting ? "Preparing…" : exported ? "Copied" : "Export";
+
+  return (
+    <div className="top-bar-export" ref={ref}>
+      <button
+        className="top-bar-btn"
+        disabled={exporting}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+      >
+        <span className="ms top-bar-icon">ios_share</span>{label}
+        <span className="ms top-bar-caret">expand_more</span>
+      </button>
+      {open && (
+        <div className="top-bar-menu" role="menu">
+          {EXPORT_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              className="top-bar-menu-item"
+              role="menuitem"
+              onClick={() => { setOpen(false); actions[item.id](); }}
+            >
+              <span className="ms top-bar-icon">{item.icon}</span>{item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function TopBar({
+  docTitle, onDocTitle, note, noteErr, busy, zoom, onZoomIn, onZoomOut,
+  exported, exporting, onExport, onDownloadHtml, onImport,
+}) {
   return (
     <div className="top-bar">
       <div className="top-bar-brand">
@@ -31,9 +93,12 @@ export function TopBar({ docTitle, onDocTitle, note, noteErr, busy, zoom, onZoom
           <div className="top-bar-zoom-btn" title="Zoom in" onClick={onZoomIn}><span className="ms top-bar-icon">add</span></div>
         </div>
         <div className="top-bar-divider"></div>
-        <button className="top-bar-btn" onClick={onExport}>
-          <span className="ms top-bar-icon">visibility</span>{exported ? "Copied" : "Copy HTML"}
-        </button>
+        <ExportMenu
+          exported={exported}
+          exporting={exporting}
+          onDownloadHtml={onDownloadHtml}
+          onCopy={onExport}
+        />
         <button className="top-bar-btn top-bar-btn--gold" onClick={onImport}>
           <span className="ms top-bar-icon">auto_awesome</span>Import
         </button>

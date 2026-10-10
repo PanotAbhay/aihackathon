@@ -41,6 +41,7 @@ export function ImagesBlock({ block, onPatch, onDragEnd }) {
         {slots.map((src, i) => (
           <div
             key={block.id + "s" + i}
+            data-empty={src ? undefined : ""}
             title="Click or drop a photo"
             style={slotStyle(src, height)}
             onClick={(e) => { e.stopPropagation(); pickFile("image/*", (f) => readImage(i, f)); }}

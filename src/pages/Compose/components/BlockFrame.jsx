@@ -129,6 +129,7 @@ export function BlockFrame({
   return (
     <div
       className="nt-blk"
+      data-type={block.type}
       data-sel={selected ? "1" : "0"}
       data-rw={building ? "1" : undefined}
       style={wrapStyle(selected, inLive)}

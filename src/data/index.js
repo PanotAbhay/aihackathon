@@ -141,7 +141,7 @@ export const TEXT_TYPE_OPTIONS = [
 export const AI_MODELS = {
   builtin: "claude-sonnet-4-5",
   anthropic: "claude-sonnet-4-5",
-  openai: "gpt-4o",
+  openai: "gpt-5.6-terra",
   gemini: "gemini-2.0-flash",
   ollama: "llama3.1",
 };

@@ -11,6 +11,13 @@ npm install
 npm run dev
 ```
 
+### Exporting
+
+The **Export** menu in the top bar has two options:
+
+- **Download HTML**: saves one `.html` file with the fonts and colours embedded. It opens offline.
+- **Copy HTML**: copies the article markup to the clipboard.
+
 ### Sharing publicly
 
 `npm run share` builds the app and serves it at `http://127.0.0.1:4173`. Put a tunnel in front of it to get a public HTTPS link. The link works only while your machine is awake and both commands are running.
@@ -72,7 +79,16 @@ The document, AI settings and zoom persist in `localStorage` (keys in `STORAGE_K
 - [React Router](https://reactrouter.com) (MIT)
 - [Vite](https://vitejs.dev) and [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react) (MIT)
 
-`.docx` and PDF import use only browser built-ins (`DecompressionStream`); no parsing library is bundled.
+`.docx` and PDF import use only browser built-ins (`DecompressionStream`); no parsing library is bundled. HTML export also uses only browser built-ins.
+
+### AI services
+
+The app calls the model the user picks in Settings, with the user's own key. No SDK is bundled; requests are plain `fetch` calls in `src/utils/ai.js`.
+
+- [Anthropic Claude API](https://docs.anthropic.com) — default `claude-sonnet-4-5`; also reads scanned PDFs
+- [OpenAI API](https://platform.openai.com/docs)
+- [Google Gemini API](https://ai.google.dev) — also reads scanned PDFs
+- [Ollama](https://ollama.com), running locally — default model Meta [Llama 3.1](https://www.llama.com)
 
 ### Fonts
 
@@ -82,6 +98,15 @@ Bundled in `src/assets/fonts/`:
 - [Satoshi](https://www.fontshare.com/fonts/satoshi), by Indian Type Foundry via Fontshare, interface text (Fontshare Free License)
 - [Roboto Mono](https://fonts.google.com/specimen/Roboto+Mono), by Christian Robertson, labels and data (Apache 2.0)
 - [Material Symbols Outlined](https://fonts.google.com/icons), by Google, icons (Apache 2.0)
+
+Loaded from [Google Fonts](https://fonts.google.com) only when picked in the Fonts panel (all SIL OFL 1.1):
+
+- [Playfair Display](https://fonts.google.com/specimen/Playfair+Display), by Claus Eggers Sørensen
+- [Lora](https://fonts.google.com/specimen/Lora), by Cyreal
+- [Merriweather](https://fonts.google.com/specimen/Merriweather), by Sorkin Type
+- [Inter](https://fonts.google.com/specimen/Inter), by Rasmus Andersson
+- [DM Sans](https://fonts.google.com/specimen/DM+Sans), by Colophon Foundry
+- [Space Grotesk](https://fonts.google.com/specimen/Space+Grotesk), by Florian Karsten
 
 ### Sample content
 

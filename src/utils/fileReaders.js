@@ -100,6 +100,9 @@ export async function readPdf(file) {
     let e2 = en;
     while (e2 > b && (buf[e2 - 1] === 10 || buf[e2 - 1] === 13)) e2--;
     idx = en + 9;
+    // Images and embedded fonts are binary: a decoded screenshot is megabytes of
+    // pixels that contain "Tj" by chance and would be read as text.
+    if (/\/Subtype\s*\/(?!Form\b)|\/Length1\b/.test(s.slice(s.lastIndexOf("obj", st), st))) continue;
     const text = await decodeStream(buf.subarray(b, e2));
     if (!text || !/(TJ|Tj)/.test(text)) continue;
 

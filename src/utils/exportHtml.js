@@ -1,5 +1,5 @@
 // Variables written by the font settings (see utils/fonts.js).
-const TYPE_VAR = /^--(h1|h2|h3|standfirst|body)-/;
+export const TYPE_VAR = /^--(h1|h2|h3|standfirst|body)-/;
 
 // Swap font-setting var() references for their current values so the pasted article
 // keeps the chosen typography; other variables stay as house tokens.
@@ -23,8 +23,7 @@ function bakeTypeVars(css, computed) {
 }
 
 // Clone the live article and strip everything that only exists for editing.
-// `fontLinks` are stylesheet URLs for web fonts the article uses.
-export function articleHtml(node, fontLinks = []) {
+export function cleanArticle(node) {
   const c = node.cloneNode(true);
   const computed = getComputedStyle(document.documentElement);
   c.querySelectorAll("[style]").forEach((n) => n.setAttribute("style", bakeTypeVars(n.getAttribute("style"), computed)));
@@ -43,6 +42,11 @@ export function articleHtml(node, fontLinks = []) {
     n.removeAttribute("data-blk");
     n.setAttribute("style", "position:relative;");
   });
+  return c;
+}
+
+// `fontLinks` are stylesheet URLs for web fonts the article uses.
+export function articleHtml(node, fontLinks = []) {
   const links = fontLinks.map((href) => '<link rel="stylesheet" href="' + href + '">').join("");
-  return links + '<article style="max-width:688px;margin:0 auto;">' + c.innerHTML + "</article>";
+  return links + '<article style="max-width:688px;margin:0 auto;">' + cleanArticle(node).innerHTML + "</article>";
 }

@@ -9,10 +9,9 @@ import { useShortcuts } from "../../hooks/useShortcuts.js";
 import { useBlockDrag } from "../../hooks/useBlockDrag.js";
 import { useImport } from "../../hooks/useImport.js";
 import { useAiFill } from "../../hooks/useAiFill.js";
+import { useExport } from "../../hooks/useExport.js";
 import { NEW_BLOCK } from "../../data/index.js";
 import { createStarterBlocks, cloneBlock, nid, sectionEnd, mergeProse, countWords } from "../../utils/blocks.js";
-import { articleHtml } from "../../utils/exportHtml.js";
-import { fontLinks } from "../../utils/fonts.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { IconRail } from "./components/IconRail.jsx";
 import { ElementsPanel } from "./components/ElementsPanel.jsx";
@@ -35,7 +34,6 @@ export function ComposePage() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [docTitle, setDocTitle] = useState("Feature Story");
-  const [exported, setExported] = useState(false);
   // Where palette clicks insert; tracked without re-rendering on every caret move.
   const caretIdxRef = useRef(null);
 
@@ -48,6 +46,7 @@ export function ComposePage() {
   const filler = useAiFill({ getBlocks: doc.getBlocks, save: doc.save, flash, aiConfig });
   const drag = useBlockDrag({ getBlocks: doc.getBlocks, save: doc.save, insertBlock, onFill: filler.fillFromText });
   const importer = useImport({ busy, setBusy, flash, aiConfig, save: doc.save, setNoteErr });
+  const exporter = useExport({ docTitle, fonts: fonts.fonts, flash });
 
   function handleUndo() {
     if (doc.undo()) setSel(null);
@@ -120,18 +119,6 @@ export function ComposePage() {
     if (sel || bar) { setSel(null); setBar(null); }
   }
 
-  function handleExport() {
-    const node = document.querySelector("[data-article]");
-    if (!node) return;
-    const html = articleHtml(node, fontLinks(fonts.fonts));
-    function done() {
-      setExported(true);
-      setTimeout(() => setExported(false), 1600);
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(html).then(done, done);
-    else done();
-  }
-
   function handleReset() {
     if (window.confirm("Clear the article and start over?")) doc.save(createStarterBlocks());
   }
@@ -147,8 +134,10 @@ export function ComposePage() {
         zoom={zoom}
         onZoomIn={zoomIn}
         onZoomOut={zoomOut}
-        exported={exported}
-        onExport={handleExport}
+        exported={exporter.exported}
+        exporting={exporter.exporting}
+        onExport={exporter.copyHtml}
+        onDownloadHtml={exporter.downloadHtml}
         onImport={importer.openImport}
       />
 
@@ -159,7 +148,7 @@ export function ComposePage() {
           onImport={importer.openImport}
           onUndo={handleUndo}
           onRedo={handleRedo}
-          onExport={handleExport}
+          onExport={exporter.copyHtml}
           onSettings={() => setSettingsOpen(true)}
           onReset={handleReset}
         />
