@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-QMUL AI Hackathon team repo. The product is **Compose**, a visual feature builder for Nutshell Today (a Bangladesh news publication): import an article, have AI structure it, then edit it on the page. See README.md for the user-facing overview and file layout.
+QMUL AI Hackathon team repo. The product is **Compose**, a standalone prototype of a visual feature builder: import an article, have AI structure it, then edit it on the page. See README.md for the user-facing overview and file layout.
 
 ## Commands
 

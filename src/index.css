@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────
-   Nutshell Today — Webfonts
+   Compose — Webfonts
    Three families load from CDN (Satoshi via Fontshare):
      • Baskervville  — editorial serif, headlines & titles
      • Satoshi       — interface sans, body & UI
@@ -251,7 +251,7 @@
 }
 
 /* ─────────────────────────────────────────────
-   Nutshell Today — Color tokens
+   Compose — Color tokens
    A warm newsprint palette: off-white paper, near-black ink,
    one editorial red, one civic blue, and a quiet grey ramp.
 ───────────────────────────────────────────── */
@@ -312,7 +312,7 @@
 }
 
 /* ─────────────────────────────────────────────
-   Nutshell Today — Typography tokens
+   Compose — Typography tokens
    Three families, each with its own purpose-built scale.
    Rule of thumb:
      headline      → serif  (Baskervville)
@@ -367,7 +367,7 @@
 }
 
 /* ─────────────────────────────────────────────
-   Nutshell Today — Spacing, layout, radius & shadow
+   Compose — Spacing, layout, radius & shadow
    The site is a centred 900px column of hairline-ruled
    sections. Geometry is sharp; corners are mostly square.
 ───────────────────────────────────────────── */
@@ -425,7 +425,7 @@
 }
 
 /* ─────────────────────────────────────────────
-   Nutshell Today — Base layer
+   Compose — Base layer
    Minimal reset + document defaults + brand motifs
    (selection colours, shared keyframes).
 ───────────────────────────────────────────── */
