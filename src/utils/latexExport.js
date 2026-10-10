@@ -35,7 +35,7 @@ export function escapeTex(text) {
   return String(text == null ? "" : text).replace(/[\\{}$&#%_^~৳×−∗°²³±≈≤≥µ—–’‘“”…\u00a0]/g, (ch) => TEX_ESCAPES[ch]);
 }
 
-// Inline editor HTML (bold, italic, links) → LaTeX. Uses the browser's parser.
+// Inline editor HTML (bold, italic, code, links) → LaTeX. Uses the browser's parser.
 function inlineNodes(nodes) {
   return Array.from(nodes).map((n) => {
     if (n.nodeType === 3) return escapeTex(n.nodeValue);
@@ -44,6 +44,7 @@ function inlineNodes(nodes) {
     const tag = n.tagName.toLowerCase();
     if (tag === "b" || tag === "strong") return "\\textbf{" + inner + "}";
     if (tag === "i" || tag === "em") return "\\emph{" + inner + "}";
+    if (tag === "code") return "\\texttt{" + inner + "}";
     if (tag === "a") return "\\href{" + escapeTex(n.getAttribute("href") || "") + "}{" + inner + "}";
     if (tag === "br") return "\\\\\n";
     return inner;

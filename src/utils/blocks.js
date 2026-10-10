@@ -1,4 +1,5 @@
 import { NEW_BLOCK, IMAGE_TYPES, HEADING_TYPES, CHAPTER_TYPES, TEMPLATES } from "../data/index.js";
+import { guessLang } from "./highlight.js";
 
 let uid = 0;
 
@@ -93,12 +94,22 @@ export function plainParas(text) {
     const t = raw[i].trim();
     // A blank line is an explicit paragraph break — never swallow it.
     if (!t) { hardBreak = true; continue; }
-    const prev = out.length ? out[out.length - 1] : null;
+    // A ``` fence is one paragraph, kept line for line with its indentation.
+    if (t.startsWith("```")) {
+      const code = [];
+      let j = i + 1;
+      while (j < raw.length && raw[j].trim() !== "```") { code.push(raw[j].replace(/\s+$/, "")); j += 1; }
+      out.push(t + "\n" + code.join("\n") + "\n```");
+      i = j;
+      hardBreak = true;
+      continue;
+    }
+    const prev = out.length && !/^(```|#|\[\[)/.test(out[out.length - 1]) ? out[out.length - 1] : null;
     // Only un-wrap lines that are genuinely a wrapped continuation: directly
     // below the previous line, which is long and lacks terminal punctuation.
     // Short unpunctuated lines are headings, bylines and table rows, not prose.
     const wrapped = prev && !hardBreak && prev.length > 60 &&
-      !/[.!?:;…"”’)\]]$/.test(prev) && !/^[•\-–—*\d]/.test(t);
+      !/[.!?:;…"”’)\]]$/.test(prev) && !/^[•\-–—*\d#[]/.test(t);
     if (wrapped) out[out.length - 1] = prev + " " + t;
     else out.push(t);
     hardBreak = false;
@@ -140,7 +151,9 @@ export function elementToBlock(o, pollNote = "") {
   const hasRows = Array.isArray(o.rows) && o.rows.length;
   const hasItems = Array.isArray(o.items) && o.items.length;
 
-  if (HEADING_TYPES.includes(t) && o.text) return { type: t, html: o.text };
+  if ((HEADING_TYPES.includes(t) || CHAPTER_TYPES.includes(t)) && o.text) return { type: t, html: o.text };
+  if (t === "code" && o.text) return { type: "code", lang: o.lang || guessLang(o.text), a: o.caption || "", text: String(o.text) };
+  if (t === "toc") return NEW_BLOCK.toc();
   if (t === "quote" && o.text) {
     return { type: "quote", a: String(o.text).replace(/^["“]|["”]$/g, ""), b: o.cite ? "— " + String(o.cite).toUpperCase() : "" };
   }
@@ -172,6 +185,102 @@ export function elementToBlock(o, pollNote = "") {
   return null;
 }
 
+export function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+const CODE_STYLE = "font-family: var(--font-mono); font-size: 0.92em";
+
+export function inlineCodeHtml(text) {
+  return '<code style="' + CODE_STYLE + '">' + escapeHtml(text) + "</code>";
+}
+
+// Imported text marks **bold** and `code` (a PDF's bold and typewriter fonts); as editor HTML.
+export function inlineHtml(text) {
+  return escapeHtml(text)
+    .replace(/`([^`\n]+)`/g, (_, c) => '<code style="' + CODE_STYLE + '">' + c + "</code>")
+    .replace(/\*\*([^*\n]+?)\*\*/g, "<b>$1</b>");
+}
+
+// Paragraphs the PDF reader (or a writer) has already structured.
+const FENCE = /^```([\w+-]*)\n([\s\S]*?)\n?```$/;
+const IMAGE_MARK = /^\[\[image (\d+)\]\]$/;
+const TOC_MARK = /^\[\[toc\]\]$/;
+const CHAPTER_MARK = /^#\s+(Chapter|Appendix)\s+([A-Z]|\d+)\s*[:.–—-]?\s*(.*)$/i;
+const HEADING_MARK = /^(#{1,3})\s+(.+)$/;
+const FIGURE_CAPTION = /^(?:Figure|Fig\.)\s+[A-Z\d]+(?:[.-]\d+)*\s*[:.]\s*(.+)$/i;
+const LISTING_CAPTION = /^Listing\s+[A-Z\d]+(?:[.-]\d+)*\s*[:.]\s*(.+)$/i;
+// "2.1 ", "A.3 ", "4 " before a heading; dropped when the template numbers headings itself.
+const SECTION_NUMBER = /^(?:\d{1,2}(?:\.\d+)*\.?|[A-Z](?:\.\d+)+\.?)\s+/;
+const BULLET_ITEM = /^[•▪◦‣\-–*]\s+(.+)$/;
+const NUMBER_ITEM = /^\d{1,2}[.)]\s+(.+)$/;
+
+export function isMarked(para) {
+  return FENCE.test(para) || IMAGE_MARK.test(para) || TOC_MARK.test(para) || HEADING_MARK.test(para);
+}
+
+// The paragraph as the AI sees it: code is summarised, so long listings neither cost tokens nor get rewritten.
+export function promptPara(para) {
+  const m = FENCE.exec(para);
+  return m ? "```" + m[1] + " (" + m[2].split("\n").length + " lines of code)```" : para;
+}
+
+// Pick the document title out of the first paragraphs: the first "# " heading that isn't a chapter.
+export function splitHeadline(paras) {
+  const k = paras.slice(0, 6).findIndex((p) => /^#\s/.test(p) && !CHAPTER_MARK.test(p));
+  const at = k < 0 ? 0 : k;
+  return { headline: String(paras[at] || "").replace(/^#+\s+/, ""), rest: paras.filter((_, i) => i !== at) };
+}
+
+// One block per paragraph (null where a paragraph was absorbed, e.g. a caption), keeping only the
+// types the template allows. `images` fills [[image N]] markers; `numbered` drops the source's own
+// heading and figure numbers; `lists` gathers "•" and "1." paragraphs into lists.
+export function paraBlocks(paras, { allowed, numbered = false, images = [], lists = false }) {
+  const out = paras.map(() => null);
+  let list = null;
+  for (let i = 0; i < paras.length; i++) {
+    const p = paras[i];
+    let m;
+    const item = lists ? BULLET_ITEM.exec(p) || NUMBER_ITEM.exec(p) : null;
+    const listType = item && (BULLET_ITEM.test(p) ? "bullets" : "numbered");
+    if (!item || !allowed.includes(listType) || !list || list.type !== listType) list = null;
+
+    if ((m = FENCE.exec(p))) {
+      const caption = i > 0 && out[i - 1] && out[i - 1].type === "body" ? LISTING_CAPTION.exec(paras[i - 1]) : null;
+      if (caption && allowed.includes("code")) out[i - 1] = null;
+      out[i] = allowed.includes("code")
+        ? withId({ type: "code", lang: m[1] || guessLang(m[2]), a: caption ? caption[1] : "", text: m[2] })
+        : withId({ type: "body", html: m[2].split("\n").map(inlineCodeHtml).join("<br>") });
+    } else if ((m = IMAGE_MARK.exec(p))) {
+      if (!allowed.includes("image")) continue;
+      const next = paras[i + 1] || "";
+      const caption = FIGURE_CAPTION.exec(next);
+      out[i] = withId({ type: "image", slots: [images[Number(m[1])] || ""], a: caption ? (numbered ? caption[1] : next) : "", b: "" });
+      if (caption) i += 1;
+    } else if (TOC_MARK.test(p)) {
+      if (allowed.includes("toc")) out[i] = withId(NEW_BLOCK.toc());
+    } else if ((m = CHAPTER_MARK.exec(p))) {
+      const type = /^a/i.test(m[1]) ? "appendix" : "chapter";
+      const label = m[1] + " " + m[2];
+      out[i] = withId(allowed.includes(type)
+        ? { type, html: inlineHtml(m[3] || label) }
+        : { type: "h2", html: inlineHtml(numbered || !m[3] ? m[3] || label : label + ": " + m[3]) });
+    } else if ((m = HEADING_MARK.exec(p))) {
+      const text = numbered ? m[2].replace(SECTION_NUMBER, "") : m[2];
+      out[i] = withId({ type: m[1].length === 3 ? "h3" : "h2", html: inlineHtml(text) });
+    } else if (item && allowed.includes(listType)) {
+      if (list) out[list.at].html += "<li>" + inlineHtml(item[1]) + "</li>";
+      else {
+        out[i] = withId({ type: listType, html: "<li>" + inlineHtml(item[1]) + "</li>" });
+        list = { type: listType, at: i };
+      }
+    } else {
+      out[i] = withId({ type: "body", html: inlineHtml(p) });
+    }
+  }
+  return out;
+}
+
 function normalize(s) {
   return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
@@ -191,9 +300,10 @@ export function quotedInSource(quote, source) {
 }
 
 // Weave the model's plan of insertions around the untouched source paragraphs,
-// keeping only the block types the chosen template allows.
+// keeping only the block types the chosen template allows. Paragraphs the PDF reader
+// already structured (code, images, headings) convert directly; see paraBlocks.
 // `typeOrder` is the template's starter page as block types; its header order wins.
-export function blocksFromPlan(plan, paras, allowed, typeOrder = []) {
+export function blocksFromPlan(plan, paras, allowed, { numbered = false, images = [], typeOrder = [] } = {}) {
   const headline = plan.headline || paras[0];
   const author = plan.author || "Staff Correspondent";
   let standfirst = plan.standfirst || "";
@@ -249,18 +359,28 @@ export function blocksFromPlan(plan, paras, allowed, typeOrder = []) {
   });
 
   ins.filter((o) => (o.after | 0) < 0).forEach(emit);
+  const mapped = paraBlocks(paras, { allowed, numbered, images });
   let ledeDone = false;
   for (let i = 0; i < paras.length; i++) {
-    if (consumed[i]) { emitAfter(i); continue; }
-    const k = normalize(paras[i]);
+    const blk = mapped[i];
+    if (consumed[i] || !blk) { emitAfter(i); continue; }
+    const textual = ["body", "h2", "h3"].includes(blk.type);
+    const k = textual ? normalize(paras[i]) : "";
     // Drop the source's own headline / byline / standfirst lines, and any
     // sub-heading the plan already lifted verbatim out of the body.
-    if (k && !skip[k]) {
-      skip[k] = true;
-      const lede = !ledeDone && allowed.includes("dropcap");
-      blocks.push({ id: nid(), type: lede ? "dropcap" : "body", html: paras[i] });
-      ledeDone = true;
+    // Repeated headings ("Exercises" in every chapter) are kept; repeated paragraphs are not.
+    if (!textual) blocks.push(blk);
+    else if (k && !skip[k]) {
+      if (blk.type === "body") {
+        skip[k] = true;
+        blocks.push(!ledeDone && allowed.includes("dropcap") ? { ...blk, type: "dropcap" } : blk);
+        ledeDone = true;
+      } else {
+        blocks.push(blk);
+        if (blk.type === "h2") counts.h2++;
+      }
     }
+    if (IMAGE_TYPES.includes(blk.type)) counts.img++;
     emitAfter(i);
   }
   ins.filter((o) => (o.after | 0) >= paras.length).forEach(emit);

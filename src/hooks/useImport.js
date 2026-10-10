@@ -1,17 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { STORAGE_KEYS, TEMPLATES } from "../data/index.js";
 import { readStorage, writeStorage } from "../utils/storage.js";
-import { nid, plainParas, parseJsonReply, blocksFromPlan } from "../utils/blocks.js";
+import { nid, plainParas, parseJsonReply, blocksFromPlan, paraBlocks, splitHeadline, promptPara } from "../utils/blocks.js";
 import { readDocx, readPdf, pickFile } from "../utils/fileReaders.js";
 import { callAi, transcribePdf } from "../utils/ai.js";
 import { importPrompt } from "../utils/prompts.js";
 
 const DOC_ACCEPT = ".txt,.md,.docx,.pdf,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-const IMPORT_TIMEOUT = 180000;
+const IMPORT_TIMEOUT = 300000;
+// The plan for a long document (a 50-page manual) lists hundreds of insertions.
+const IMPORT_MAX_TOKENS = 16000;
 
 function importErrorMessage(e) {
   const m = String((e && e.message) || e);
-  if (/TIMED_OUT/.test(m)) return "THE MODEL DIDN’T ANSWER IN 3 MINUTES — TRY A SHORTER ARTICLE OR A FASTER MODEL.";
+  if (/TIMED_OUT/.test(m)) return "THE MODEL DIDN’T ANSWER IN 5 MINUTES — TRY A SHORTER ARTICLE OR A FASTER MODEL.";
+  if (e instanceof SyntaxError) return "THE MODEL’S PLAN WAS CUT OFF OR MALFORMED — TRY AGAIN, OR USE IMPORT AS PLAIN TEXT.";
   if (/rate|429/i.test(m)) return "RATE LIMITED — WAIT, THEN RETRY.";
   if (/api key|401|403|Settings/i.test(m)) return m.toUpperCase().slice(0, 90);
   if (/failed to fetch|networkerror/i.test(m)) return "CAN’T REACH THE MODEL — CHECK KEY, MODEL NAME AND CONNECTION.";
@@ -27,7 +30,10 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
   const [importOpen, setImportOpen] = useState(false);
   const [importNote, setImportNote] = useState("");
   const [fileNote, setFileNote] = useState("");
+  // Pictures cut out of an imported PDF, for its [[image N]] markers. Not autosaved with the text.
+  const [images, setImages] = useState([]);
   const timerRef = useRef(null);
+  const numbered = !!template.theme.numbering;
 
   useEffect(() => () => clearInterval(timerRef.current), []);
 
@@ -54,10 +60,11 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
     setNoteErr(false);
     try {
       let text = "";
+      let pictures = [];
       if (/\.docx$/i.test(name)) text = await readDocx(file);
       else if (/\.pdf$/i.test(name)) {
         try {
-          text = await readPdf(file);
+          ({ text, images: pictures } = await readPdf(file, (done, total) => setFileNote("Reading " + name + " — page " + done + " of " + total + "…")));
         } catch (e) {
           if (!e || !e.noTextLayer) throw e;
           setFileNote("No text layer in " + name + " — reading the pages with AI, this can take a minute…");
@@ -72,7 +79,9 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
       if (!words) throw new Error("That file had no readable text");
       keepSource(text);
       setRaw(text);
-      setFileNote(name + " — " + words.toLocaleString() + " words loaded");
+      setImages(pictures);
+      const found = pictures.filter(Boolean).length;
+      setFileNote(name + " — " + words.toLocaleString() + " words" + (found ? ", " + found + " pictures" : "") + " loaded");
     } catch (e) {
       setFileNote(String((e && e.message) || e));
       setNoteErr(true);
@@ -81,6 +90,7 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
 
   function restoreRecovered() {
     setRaw(recovered);
+    setImages([]);
     setFileNote("Last imported article restored — press Format with AI to rebuild it.");
   }
 
@@ -88,8 +98,7 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
     keepSource(raw);
     const paras = plainParas(raw);
     if (paras.length < 2) { failEmpty(); return; }
-    const body = paras.slice(1);
-    const lede = template.blocks.includes("dropcap") ? "dropcap" : "body";
+    const { headline, rest: body } = splitHeadline(paras);
     // A leading "By …" line is the byline, not the opening paragraph.
     let author = "Staff Correspondent";
     const first = body.length ? String(body[0]).trim() : "";
@@ -97,11 +106,14 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
       author = first.replace(/^by\s+/i, "").trim();
       body.shift();
     }
+    const blocks = paraBlocks(body, { allowed: template.blocks, numbered, images, lists: true }).filter(Boolean);
+    const lede = blocks.find((b) => b.type === "body");
+    if (lede && template.blocks.includes("dropcap")) lede.type = "dropcap";
     save([
-      { id: nid(), type: "h1", html: paras[0] },
+      { id: nid(), type: "h1", html: headline },
       { id: nid(), type: "standfirst", html: "" },
       { id: nid(), type: "byline", a: author, b: "Nutshell Today" },
-      ...body.map((p, i) => ({ id: nid(), type: i === 0 ? lede : "body", html: p })),
+      ...blocks,
     ]);
     setImportOpen(false);
     setImportNote("");
@@ -133,10 +145,11 @@ export function useImport({ busy, setBusy, save, flash, setNoteErr, aiConfig, te
     }, 1000);
 
     try {
-      const call = callAi(aiConfig, importPrompt(template), paras.map((p, i) => "[" + i + "] " + p).join("\n\n"), 4000);
+      const call = callAi(aiConfig, importPrompt(template), paras.map((p, i) => "[" + i + "] " + promptPara(p)).join("\n\n"), IMPORT_MAX_TOKENS);
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("TIMED_OUT")), IMPORT_TIMEOUT));
       const plan = parseJsonReply(await Promise.race([call, timeout]));
-      const { blocks, counts } = blocksFromPlan(plan, paras, template.blocks, (template.starter || []).map((b) => b.type));
+      const typeOrder = (template.starter || []).map((b) => b.type);
+      const { blocks, counts } = blocksFromPlan(plan, paras, template.blocks, { numbered, images, typeOrder });
       // The template stays fixed; a different suggestion is only mentioned.
       const suggested = TEMPLATES[plan.suggestedTemplate];
       const hint = suggested && suggested.key !== template.key ? " · READS LIKE " + suggested.label.toUpperCase() + " — TRY IT IN A NEW TAB" : "";
